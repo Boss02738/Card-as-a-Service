@@ -38,6 +38,8 @@ dependencies:
   get: ^4.7.3
   image_picker: ^1.2.1
   date_format_field: ^0.1.0
+  device_info_plus: ^12.3.0
+  flutter_secure_storage: ^10.0.0
 dev_dependencies:
   flutter_test:
     sdk: flutter

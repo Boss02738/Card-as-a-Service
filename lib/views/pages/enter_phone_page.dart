@@ -59,11 +59,10 @@ final HeaderTextController headerTextController = Get.put(
     bool success = await phonenumberController.submitPhone();
 
     if (success) {
-      // เมื่อย้อนกลับมาจากหน้า OTP โค้ดในปีกกา .then จะทำงาน
       Get.to(() => const Confirm_otp())?.then((value) {
         // ล้างค่าเมื่อย้อนกลับมาถึงหน้าเดิม
         _phoneCtrl.clear();
-        phonenumberController.reset();
+        // phonenumberController.reset();
         headerTextController.setHeaderText(
           'เข้าใช้งาน NovaPay',
           'กรุณากรอกข้อมูล\nเบอร์มือถือ',

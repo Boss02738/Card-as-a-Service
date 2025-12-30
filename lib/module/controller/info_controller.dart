@@ -51,10 +51,18 @@ Map<String, dynamic> toJson() {
 
 
 // เพิ่มฟังก์ชันแปลงวันที่จาก 26/12/2025 เป็น 2025-12-26 ตามที่ DB ต้องการ
+// String formatBirthDate(String date) {
+//   try {
+//     List<String> parts = date.split('/');
+//     return "${parts[2]}-${parts[1].padLeft(2, '0')}-${parts[0].padLeft(2, '0')}";
+//   } catch (e) {
+//     return date; 
+//   }
+// }
 String formatBirthDate(String date) {
   try {
-    List<String> parts = date.split('/');
-    return "${parts[2]}-${parts[1].padLeft(2, '0')}-${parts[0].padLeft(2, '0')}";
+    // ถ้าผู้ใช้กรอก 01/12/1997 ให้เปลี่ยนเป็น 01-12-1997 ตามแบบ Postman
+    return date.replaceAll('/', '-'); 
   } catch (e) {
     return date; 
   }
