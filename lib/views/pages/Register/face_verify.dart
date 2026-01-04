@@ -1,11 +1,11 @@
 import 'dart:io';
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
-import 'package:my_app/views/pages/pin_page.dart';
+import 'package:my_app/views/pages/Register/pin_page.dart';
 import 'package:my_app/views/widgets/data_card.dart';
 import 'package:my_app/views/widgets/gradient_header.dart';
 import 'package:my_app/module/services/camera_service.dart';
-import '../widgets/arrow_fab.dart';
+import '../../widgets/arrow_fab.dart';
 
 class FaceVerify extends StatefulWidget {
   const FaceVerify({super.key});

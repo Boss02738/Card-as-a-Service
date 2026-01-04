@@ -3,13 +3,13 @@ import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import 'package:my_app/module/controller/header_text_controller.dart';
 import 'package:my_app/module/services/camera_service.dart';
-import 'package:my_app/views/pages/face_verify.dart';
-import 'package:my_app/views/pages/info.dart';
+import 'package:my_app/views/pages/Register/face_verify.dart';
+import 'package:my_app/views/pages/Register/info.dart';
 import 'package:my_app/views/widgets/brand_logo.dart';
 import 'package:my_app/views/widgets/data_card.dart';
 import 'package:my_app/views/widgets/gradient_header.dart';
 import 'package:my_app/views/widgets/header_texts.dart';
-import '../widgets/arrow_fab.dart';
+import '../../widgets/arrow_fab.dart';
 
 class IdcardVerify extends StatefulWidget {
   const IdcardVerify({super.key});
@@ -127,7 +127,7 @@ class _IdcardVerifyState extends State<IdcardVerify> {
 
                             Center(
                               child: ElevatedButton(
-                                onPressed: () { 
+                                onPressed: () {
                                   _cameraService.takePicture().then((file) {
                                     if (file != null) {
                                       setState(() {

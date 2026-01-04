@@ -2,12 +2,12 @@ import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import 'package:my_app/module/controller/header_text_controller.dart';
 import 'package:my_app/module/controller/phonenumber_controller.dart';
-import 'package:my_app/views/pages/confirm_otp.dart';
+import 'package:my_app/views/pages/Register/confirm_otp.dart';
 import 'package:my_app/views/widgets/data_card.dart';
-import '../widgets/gradient_header.dart';
-import '../widgets/brand_logo.dart';
-import '../widgets/header_texts.dart';
-import '../widgets/arrow_fab.dart';
+import '../../widgets/gradient_header.dart';
+import '../../widgets/brand_logo.dart';
+import '../../widgets/header_texts.dart';
+import '../../widgets/arrow_fab.dart';
 
 class EnterPhonePage extends StatefulWidget {
   const EnterPhonePage({super.key});

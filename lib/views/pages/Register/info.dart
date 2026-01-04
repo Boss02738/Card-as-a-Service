@@ -2,14 +2,14 @@ import 'package:date_format_field/date_format_field.dart';
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import 'package:my_app/module/controller/info_controller.dart';
-import 'package:my_app/views/pages/face_verify.dart';
+import 'package:my_app/views/pages/Register/face_verify.dart';
 import 'package:my_app/views/widgets/arrow_fab.dart';
 import 'package:my_app/views/widgets/brand_logo.dart';
 import 'package:my_app/views/widgets/data_card.dart';
 import 'package:my_app/views/widgets/gradient_header.dart';
 import 'package:my_app/views/widgets/header_texts.dart';
 
-import '../../module/controller/header_text_controller.dart';
+import '../../../module/controller/header_text_controller.dart';
 
 class Info extends StatefulWidget {
   const Info({super.key});

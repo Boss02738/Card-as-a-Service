@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import 'package:my_app/module/controller/pin_controller.dart';
-import '../widgets/brand_logo.dart';
+import '../../widgets/brand_logo.dart';
 
 class PinPage extends StatelessWidget {
   const PinPage({super.key});
