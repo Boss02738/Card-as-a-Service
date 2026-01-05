@@ -129,7 +129,7 @@ Future<void> registerUser() async {
       
       Get.snackbar('สำเร็จ', 'สมัครสมาชิกเรียบร้อยแล้ว');
       await Future.delayed(const Duration(milliseconds: 500));
-      Get.offAllNamed('/home');
+      Get.offAllNamed('/success');
     } else {
         print("Server Error Detail: ${response.body}");
         Get.snackbar('ผิดพลาด', 'การลงทะเบียนไม่สำเร็จ: ${response.body}');

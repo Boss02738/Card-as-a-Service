@@ -1,10 +1,21 @@
 class ApiConstants {
   // ใช้ IP ของเครื่อง Backend
   // static const String baseUrl = "http://192.168.250.35:8080";
-  static const String baseUrl = "http://10.82.241.238:8080";
-  
-  // เพิ่ม endpoint อื่นๆ ไว้ที่นี่ได้เลย
+  // static const String baseUrlCore = "http://10.82.241.156:8080";
+  static const String baseUrl = "http://10.82.241.238:8082";
+
+  //Register 
   static const String refcode = "/api/v1/mobile/auth/request-otp";
   static const String register = "/api/v1/mobile/auth/register";
+
+  //Login & Home
   static const String login = "/api/v1/mobile/auth/login";
+  static const String account = "/api/v1/mobile/feature/home-profile";
+
+  //Card
+  //Create_card
+  static const String typecards = "/api/v1/mobile/feature/card-products";
+  static const String createcard = "/api/v1/mobile/feature/create-virtual-card";
+  // My Cards
+  static const String mycards = "/api/v1/mobile/feature/my-cards";
 }

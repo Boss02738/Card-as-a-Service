@@ -29,27 +29,24 @@ class PinLoginController extends GetxController {
     }
   }
 
-  Future<void> loginWithPin() async {
+Future<void> loginWithPin() async {
     try {
       isLoading.value = true;
 
-      // 1. ดึงข้อมูลที่เคยบันทึกไว้ในเครื่อง
       String? mobile = await storage.read(key: 'userMobile');
       String? deviceId = await getDeviceId();
-      print("DEBUG: Logging in with Mobile: $mobile, DeviceId: $deviceId");
 
       if (mobile == null || mobile.isEmpty) {
-      Get.snackbar('Error', 'ไม่พบข้อมูลผู้ใช้ในเครื่องนี้ กรุณาลงทะเบียนใหม่');
-      return;
-    }
-      // 2. เตรียมข้อมูลส่งไปที่ API Login
+        Get.snackbar('Error', 'ไม่พบข้อมูลผู้ใช้ กรุณาลงทะเบียนใหม่');
+        return;
+      }
+
       Map<String, dynamic> loginData = {
         "mobileNumber": mobile,
         "deviceId": deviceId,
-        "password": enteredPin.value,
+        "pin": enteredPin.value,
       };
 
-      // 3. ยิง API (สมมติว่าใช้ Endpoint login ที่คุณเตรียมไว้)
       final response = await http.post(
         Uri.parse("${ApiConstants.baseUrl}${ApiConstants.login}"),
         headers: {"Content-Type": "application/json"},
@@ -57,10 +54,25 @@ class PinLoginController extends GetxController {
       );
 
       if (response.statusCode == 200) {
-        Get.offAllNamed('/home'); // เข้าหน้าหลักสำเร็จ
+        // --- ส่วนที่ต้องเพิ่ม/แก้ไข ---
+        final responseData = jsonDecode(response.body);
+        
+        // สมมติว่า API ส่งมาในรูปแบบ {"token": "xxxxxx", ...}
+        String? token = responseData['token']; 
+
+        if (token != null) {
+          // บันทึก Token ลงเครื่อง
+          await storage.write(key: 'accessToken', value: token);
+          print("DEBUG: บันทึก Token สำเร็จ");
+          
+          Get.offAllNamed('/home'); // เข้าหน้าหลัก
+        } else {
+          Get.snackbar('Error', 'ไม่ได้รับรหัสยืนยันจากระบบ (Token is null)');
+        }
+        // ---------------------------
       } else {
         Get.snackbar('ผิดพลาด', 'รหัสผ่านไม่ถูกต้อง');
-        enteredPin.value = ''; // ล้างค่าเพื่อให้กรอกใหม่
+        enteredPin.value = '';
       }
     } catch (e) {
       Get.snackbar('Error', 'ไม่สามารถเชื่อมต่อเซิร์ฟเวอร์ได้: $e');

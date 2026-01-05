@@ -1,8 +1,9 @@
 import 'package:flutter/material.dart';
+import 'package:get/get.dart';
 import 'package:my_app/views/widgets/gradient_header.dart';
 
-class SuccessPage extends StatelessWidget {
-  const SuccessPage({super.key});
+class SuccessRegisterPage extends StatelessWidget {
+  const SuccessRegisterPage({super.key});
 
   @override
   Widget build(BuildContext context) {
@@ -68,7 +69,7 @@ class SuccessPage extends StatelessWidget {
                     height: 55,
                     child: ElevatedButton(
                       onPressed: () {
-
+                        Get.offAllNamed('/home');
                       },
                       style: ElevatedButton.styleFrom(
                         backgroundColor: const Color(0xFF17337B),
