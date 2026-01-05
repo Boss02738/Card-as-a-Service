@@ -1,7 +1,8 @@
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import 'package:my_app/module/controller/my_cards_controller.dart';
-import 'package:my_app/views/widgets/brand_logo.dart';
+
+import 'package:my_app/views/widgets/buildHeader.dart';
 import 'package:my_app/views/widgets/custom_bottom_nav_bar.dart';
 import 'package:my_app/views/widgets/gradient_header.dart';
 import 'package:my_app/module/controller/home_controller.dart'; // import controller
@@ -18,8 +19,6 @@ class _HomePageState extends State<HomePage> {
 
   @override
   Widget build(BuildContext context) {
-    // ลงทะเบียนและดึง Controller
-    // final HomeController controller = Get.put(HomeController());
     final HomeController homeController = Get.put(HomeController());
     final MyCardsController cardController = Get.put(MyCardsController());
     return Scaffold(
@@ -41,19 +40,19 @@ class _HomePageState extends State<HomePage> {
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
                     const SizedBox(height: 20),
-                    _buildHeader(),
+                    const Buildheader(),
                     const SizedBox(height: 20),
                     Padding(
                       padding: const EdgeInsets.symmetric(horizontal: 15),
                       child: _buildAccount(homeController),
                     ),
-                    const SizedBox(height: 20),
+                    const SizedBox(height: 10),
                     _buildOffersSection(), // ส่วนข้อเสนอพิเศษ
-                    const SizedBox(height: 20),
+                    const SizedBox(height: 10),
                     _buildMyCardsSection(
                       cardController,
-                    ), // ส่วนบัตรของฉัน (ที่มีกล่องสมัครบัตร)
-                    const SizedBox(height: 20),
+                      homeController, // ส่วนบัตรของฉัน
+                    ),
                   ],
                 ),
               );
@@ -61,25 +60,47 @@ class _HomePageState extends State<HomePage> {
           ),
         ],
       ),
-      bottomNavigationBar: CustomBottomNavBar(currentIndex: 0, onTap: (i) {}),
+      bottomNavigationBar: CustomBottomNavBar(
+        currentIndex: _selectedIndex,
+        onTap: (index) {
+          setState(() {
+            _selectedIndex = index;
+          });
+
+          if (index == 1) {
+            Get.toNamed('/account');
+          } else if (index == 2) {
+            Get.toNamed('/my_cards');
+          }
+        },
+      ),
     );
   }
 
   // account
   Widget _buildAccount(HomeController homeController) {
     return Container(
-      // margin: const EdgeInsets.symmetric(horizontal: 20),
       padding: const EdgeInsets.all(20),
+      height: 200,
+      width: double.infinity,
       decoration: BoxDecoration(
-        gradient: const LinearGradient(
-          colors: [Color(0xFF1E3C72), Color(0xFF2A5298)],
-          begin: Alignment.topLeft,
-          end: Alignment.bottomRight,
-        ),
         borderRadius: BorderRadius.circular(20),
+        image: const DecorationImage(
+          image: AssetImage('assets/images/account_banner.png'),
+          fit: BoxFit.cover, // ให้รูปภาพขยายเต็มพื้นที่ Container
+        ),
+        boxShadow: [
+          BoxShadow(
+            color: Colors.black.withOpacity(0.1),
+            blurRadius: 10,
+            offset: const Offset(0, 5),
+          ),
+        ],
       ),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
+        mainAxisAlignment:
+            MainAxisAlignment.spaceBetween, // กระจายเนื้อหาให้สวยงาม
         children: [
           Row(
             mainAxisAlignment: MainAxisAlignment.spaceBetween,
@@ -94,55 +115,49 @@ class _HomePageState extends State<HomePage> {
               ),
               Text(
                 homeController.accountType.value,
-                style: const TextStyle(color: Colors.white70),
+                style: const TextStyle(
+                  color: Colors.white70,
+                  fontWeight: FontWeight.w600,
+                ),
               ),
             ],
           ),
-          Text(
-            homeController.accountNumber.value,
-            style: const TextStyle(color: Colors.white70),
-          ),
-          const SizedBox(height: 25),
-          const Text(
-            "ยอดเงินคงเหลือ (บาท)",
-            style: TextStyle(color: Colors.white70, fontSize: 14),
-          ),
-          // ยอดเงิน (Format ให้มีคอมม่า)
-          Text(
-            homeController.balance.value
-                .toStringAsFixed(2)
-                .replaceAllMapped(
-                  RegExp(r'(\d{1,3})(?=(\d{3})+(?!\d))'),
-                  (Match m) => '${m[1]},',
+
+          Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              // แสดงเลขบัญชีแบบ Mask
+              Text(
+                homeController.accountNumber.value.length > 4
+                    ? "xxx-x-xx${homeController.accountNumber.value.replaceAll('-', '').substring(homeController.accountNumber.value.replaceAll('-', '').length - 4)}"
+                    : homeController.accountNumber.value,
+                style: const TextStyle(color: Colors.white70, fontSize: 16),
+              ),
+              const SizedBox(height: 15),
+              const Text(
+                "ยอดเงินคงเหลือ (บาท)",
+                style: TextStyle(color: Colors.white70, fontSize: 14),
+              ),
+              // ยอดเงิน (Format ให้มีคอมม่า)
+              Text(
+                homeController.balance.value
+                    .toStringAsFixed(2)
+                    .replaceAllMapped(
+                      RegExp(r'(\d{1,3})(?=(\d{3})+(?!\d))'),
+                      (Match m) => '${m[1]},',
+                    ),
+                style: const TextStyle(
+                  color: Colors.white,
+                  fontSize: 32,
+                  fontWeight: FontWeight.bold,
                 ),
-            style: const TextStyle(
-              color: Colors.white,
-              fontSize: 32,
-              fontWeight: FontWeight.bold,
-            ),
+              ),
+            ],
           ),
         ],
       ),
     );
   }
-}
-
-// Header Widget
-Widget _buildHeader() {
-  return Stack(
-    alignment: Alignment.center,
-    children: [
-      const Center(child: BrandLogo()),
-      Positioned(
-        left: 15,
-        child: CircleAvatar(
-          radius: 20,
-          backgroundColor: Colors.white.withOpacity(0.3),
-          child: const Icon(Icons.person, color: Colors.white),
-        ),
-      ),
-    ],
-  );
 }
 
 // Widget สำหรับปุ่ม "ดูทั้งหมด" แบบ Figma
@@ -245,20 +260,18 @@ Widget _buildOffersSection() {
           children: [
             // ✅ กำหนดให้ promo1 กดแล้วไปหน้า /type_cards
             _buildOfferItem(
-              'assets/images/promo1.png', 
+              'assets/images/promo1.png',
               onTap: () => Get.toNamed('/type_cards'),
             ),
             // รูปอื่นๆ (ถ้ายังไม่มี action ให้ใส่ค่าว่างไว้ก่อน)
-            _buildOfferItem(
-              'assets/images/promo2.png',
-              onTap: () {},
-            ),
+            _buildOfferItem('assets/images/promo2.png', onTap: () {}),
           ],
         ),
       ),
     ],
   );
 }
+
 Widget _buildOfferItem(String imagePath, {required VoidCallback onTap}) {
   return InkWell(
     onTap: onTap, //  รับค่า Action มาทำงาน
@@ -268,10 +281,7 @@ Widget _buildOfferItem(String imagePath, {required VoidCallback onTap}) {
       margin: const EdgeInsets.only(right: 15),
       decoration: BoxDecoration(
         borderRadius: BorderRadius.circular(15),
-        image: DecorationImage(
-          image: AssetImage(imagePath), 
-          fit: BoxFit.cover,
-        ),
+        image: DecorationImage(image: AssetImage(imagePath), fit: BoxFit.cover),
       ),
     ),
   );
@@ -279,7 +289,10 @@ Widget _buildOfferItem(String imagePath, {required VoidCallback onTap}) {
 
 /////////////////////////////////////////////////////////////////////////////////////////
 // เพิ่ม Widget ส่วน 'บัตรของฉัน' โดยรับ controller เข้ามาตรวจสอบ
-Widget _buildMyCardsSection(MyCardsController controller) {
+Widget _buildMyCardsSection(
+  MyCardsController cardController,
+  HomeController homeController,
+) {
   return Column(
     crossAxisAlignment: CrossAxisAlignment.start,
     children: [
@@ -301,23 +314,22 @@ Widget _buildMyCardsSection(MyCardsController controller) {
         ),
       ),
       const SizedBox(height: 12),
-
-      // ✅ ตรวจสอบเงื่อนไขตรงนี้
       Obx(() {
-        // สมมติว่าใน controller มีตัวแปร myCards เป็น List เก็บข้อมูลบัตร
-        if (controller.myCards.isEmpty) {
-          // ถ้าไม่มีบัตร แสดงกล่องสมัคร
+        if (cardController.myCards.isEmpty) {
           return _buildEmptyCardSlot();
         } else {
-          // ถ้ามีบัตร แสดงรายการบัตร (ใช้ ListView แนวนอน)
           return SizedBox(
             height: 180,
             child: ListView.builder(
               scrollDirection: Axis.horizontal,
               padding: const EdgeInsets.symmetric(horizontal: 15),
-              itemCount: controller.myCards.length,
+              itemCount: cardController.myCards.length,
               itemBuilder: (context, index) {
-                return _buildActiveCardItem(controller.myCards[index]);
+                // ส่งชื่อภาษาอังกฤษจาก homeController ไปแสดงบนหน้าบัตร
+                return _buildActiveCardItem(
+                  cardController.myCards[index],
+                  homeController.fullNameEn.value, // ดึงชื่อภาษาอังกฤษ
+                );
               },
             ),
           );
@@ -327,21 +339,27 @@ Widget _buildMyCardsSection(MyCardsController controller) {
   );
 }
 
-// Widget แสดงหน้าตาบัตรที่เรามีแล้ว
-Widget _buildActiveCardItem(dynamic card) {
+Widget _buildActiveCardItem(dynamic card, String ownerName) {
   return Container(
-    width: 280,
+    width: 300,
     margin: const EdgeInsets.only(right: 15),
     padding: const EdgeInsets.all(20),
     decoration: BoxDecoration(
       borderRadius: BorderRadius.circular(20),
       gradient: const LinearGradient(
-        colors: [Color(0xFF0F2027), Color(0xFF203A43)], // สีโทนบัตรเข้มๆ
+        colors: [
+          Color(0xFF264FAD),
+          Color(0xFF162E7A),
+        ], // ใช้โทนสีน้ำเงินตามรูปบัตร
         begin: Alignment.topLeft,
         end: Alignment.bottomRight,
       ),
       boxShadow: [
-        BoxShadow(color: Colors.black26, blurRadius: 10, offset: Offset(0, 5)),
+        BoxShadow(
+          color: Colors.black38,
+          blurRadius: 8,
+          offset: const Offset(0, 4),
+        ),
       ],
     ),
     child: Column(
@@ -352,23 +370,45 @@ Widget _buildActiveCardItem(dynamic card) {
           mainAxisAlignment: MainAxisAlignment.spaceBetween,
           children: [
             Text(
-              card['type_debit_name'] ?? 'Debit Card',
+              card['type_debit_name'] ?? 'Virtual Card',
               style: const TextStyle(
                 color: Colors.white,
                 fontWeight: FontWeight.bold,
+                fontSize: 16,
               ),
             ),
-            const Icon(Icons.contactless, color: Colors.white70, size: 20),
+            const Icon(Icons.contactless, color: Colors.white, size: 24),
           ],
         ),
+        const Spacer(),
         Text(
-          // ✅ แก้ไข: ดึงเลข 4 หลักสุดท้ายจาก API
+          ownerName.toUpperCase(),
+          style: const TextStyle(
+            color: Colors.white,
+            fontSize: 16,
+            fontWeight: FontWeight.w500,
+          ),
+        ),
+        const SizedBox(height: 5),
+        // ✅ แสดงเลขบัตรที่ Mask ไว้ (ดึง last_digits จาก API)
+        Text(
           '**** **** **** ${card['last_digits'] ?? '****'}',
           style: const TextStyle(
             color: Colors.white,
-            fontSize: 18,
+            fontSize: 20,
             letterSpacing: 2,
+            fontWeight: FontWeight.bold,
           ),
+        ),
+        const SizedBox(height: 10),
+        Row(
+          mainAxisAlignment: MainAxisAlignment.spaceBetween,
+          children: [
+            const Text(
+              'Virtual Card',
+              style: TextStyle(color: Colors.white70, fontSize: 12),
+            ),
+          ],
         ),
       ],
     ),
