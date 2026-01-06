@@ -11,12 +11,12 @@ import 'package:my_app/views/pages/home_page.dart';
 import 'package:my_app/views/pages/Register/idcard_verify.dart';
 import 'package:my_app/views/pages/Register/info.dart';
 import 'package:my_app/views/pages/Register/success_register_page.dart';
+import 'package:my_app/views/pages/my_card_detail.dart';
 import 'package:my_app/views/pages/my_card_page.dart';
 import 'package:my_app/views/pages/pin_login_page.dart';
 import 'package:my_app/views/pages/Register/welcome_page.dart';
 import 'package:my_app/views/pages/Register/confirm_otp.dart';
 import 'package:my_app/views/pages/Create_cards/pin_verify_page.dart';
-import 'package:my_app/views/pages/splash_page.dart';
 import 'package:my_app/views/pages/Create_cards/success_createcard_page.dart';
 import 'package:my_app/views/pages/Create_cards/type_cards.dart';
 import 'package:my_app/views/pages/Create_cards/card_confirm_page.dart';
@@ -47,7 +47,6 @@ class _NovaPayAppState extends State<NovaPayApp> {
   Widget build(BuildContext context) {
     return GetMaterialApp(
       debugShowCheckedModeBanner: false,
-      // เปลี่ยนหน้าแรกให้เป็นหน้า Welcome_Page เพื่อเช็คสถานะจาก Storage
       initialRoute: '/',
       getPages: [
         //Register
@@ -61,6 +60,7 @@ class _NovaPayAppState extends State<NovaPayApp> {
         GetPage(name: "/account", page: () => const AccountPage()),
         //Card
         GetPage(name: "/my_cards", page: () => const MyCardPage()),
+        GetPage(name: "/my_card_detail", page: () =>  MyCardDetail()),
         //creaate_card
         GetPage(name: "/type_cards", page: () => const Type_Cards()),
         GetPage(name: "/card_detail", page: () => const Card_Detail()),

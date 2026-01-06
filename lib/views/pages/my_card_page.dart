@@ -34,7 +34,7 @@ class _MyCardPageState extends State<MyCardPage> {
                   const SizedBox(height: 20),
                   const Buildheader(),
                   const SizedBox(height: 20),
-                  
+
                   // ส่วนของ TabBar และรายการบัตร
                   Expanded(
                     child: Container(
@@ -46,7 +46,7 @@ class _MyCardPageState extends State<MyCardPage> {
                       ),
                       child: Column(
                         children: [
-                          // TabBar ตามดีไซน์
+                          // TabBar
                           const TabBar(
                             indicatorColor: Color(0xFF264FAD),
                             labelColor: Color(0xFF264FAD),
@@ -55,31 +55,53 @@ class _MyCardPageState extends State<MyCardPage> {
                             tabs: [
                               Tab(text: 'ทั้งหมด'),
                               Tab(text: 'เปิดใช้งาน'),
-                              Tab(text: 'ระงับชั่วคราว'),                              
+                              Tab(text: 'ระงับชั่วคราว'),
                             ],
                           ),
                           const SizedBox(height: 15),
-                          
+
                           // แสดงรายการบัตรตามสถานะ
                           Expanded(
                             child: TabBarView(
                               children: [
                                 // Tab: ทั้งหมด
-                                Obx(() => _buildCardList(cardController.myCards, homeController.fullNameEn.value)),
+                                Obx(
+                                  () => _buildCardList(
+                                    cardController.myCards,
+                                    homeController.fullNameEn.value,
+                                  ),
+                                ),
+                                //   InkWell(
+                                //   () => _buildCardList(
+                                //     cardController.myCards,
+                                //     homeController.fullNameEn.value,
+                                //   ),
+                                // ), onTap: () {
+                                //   Get.toNamed('/my_card_detail');
+                                // },
+
                                 // Tab: เปิดใช้งาน
-                                Obx(() => _buildCardList(
-                                  cardController.myCards.where((c) => c['status'] == 'active').toList(), 
-                                  homeController.fullNameEn.value
-                                )),
+                                Obx(
+                                  () => _buildCardList(
+                                    cardController.myCards
+                                        .where((c) => c['status'] == 'active')
+                                        .toList(),
+                                    homeController.fullNameEn.value,
+                                  ),
+                                ),
                                 // Tab: ระงับชั่วคราว (สมมติ status คือ 'inactive' หรือ 'hold')
-                                Obx(() => _buildCardList(
-                                  cardController.myCards.where((c) => c['status'] != 'active').toList(), 
-                                  homeController.fullNameEn.value
-                                )),
+                                Obx(
+                                  () => _buildCardList(
+                                    cardController.myCards
+                                        .where((c) => c['status'] != 'active')
+                                        .toList(),
+                                    homeController.fullNameEn.value,
+                                  ),
+                                ),
                               ],
                             ),
                           ),
-                          
+
                           // ปุ่มสมัครบัตรด้านล่าง
                           Padding(
                             padding: const EdgeInsets.symmetric(vertical: 10),
@@ -90,9 +112,17 @@ class _MyCardPageState extends State<MyCardPage> {
                                 onPressed: () => Get.toNamed('/type_cards'),
                                 style: ElevatedButton.styleFrom(
                                   backgroundColor: const Color(0xFF264FAD),
-                                  shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(10)),
+                                  shape: RoundedRectangleBorder(
+                                    borderRadius: BorderRadius.circular(10),
+                                  ),
                                 ),
-                                child: const Text('สมัครบัตรเดบิต', style: TextStyle(color: Colors.white, fontSize: 18)),
+                                child: const Text(
+                                  'สมัครบัตรเดบิต',
+                                  style: TextStyle(
+                                    color: Colors.white,
+                                    fontSize: 18,
+                                  ),
+                                ),
                               ),
                             ),
                           ),
@@ -104,7 +134,7 @@ class _MyCardPageState extends State<MyCardPage> {
                 ],
               ),
             ),
-            
+
             // NavBar อยู่ด้านล่างสุด
             Align(
               alignment: Alignment.bottomCenter,
@@ -131,9 +161,17 @@ class _MyCardPageState extends State<MyCardPage> {
       itemCount: cards.length,
       itemBuilder: (context, index) {
         final card = cards[index];
-        return Padding(
-          padding: const EdgeInsets.only(bottom: 15),
-          child: _buildVerticalCardItem(card, ownerName),
+        return InkWell(
+          onTap: () {
+            Get.toNamed(
+              '/my_card_detail',
+              arguments: {'card': card, 'ownerName': ownerName},
+            );
+          },
+          child: Padding(
+            padding: const EdgeInsets.only(bottom: 15),
+            child: _buildVerticalCardItem(card, ownerName),
+          ),
         );
       },
     );
@@ -158,27 +196,44 @@ class _MyCardPageState extends State<MyCardPage> {
           Row(
             mainAxisAlignment: MainAxisAlignment.spaceBetween,
             children: [
-              const Text("NovaPay", style: TextStyle(color: Colors.white, fontSize: 18)),
+              const Text(
+                "NovaPay",
+                style: TextStyle(color: Colors.white, fontSize: 18),
+              ),
               // ป้ายสถานะ (Badge)
               Container(
-                padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 4),
+                padding: const EdgeInsets.symmetric(
+                  horizontal: 10,
+                  vertical: 4,
+                ),
                 decoration: BoxDecoration(
                   color: Colors.white,
                   borderRadius: BorderRadius.circular(15),
                 ),
                 child: Text(
                   isActive ? "เปิดใช้งาน" : "ระงับชั่วคราว",
-                  style: TextStyle(color: isActive ? Colors.green : Colors.red, fontWeight: FontWeight.bold, fontSize: 12),
+                  style: TextStyle(
+                    color: isActive ? Colors.green : Colors.red,
+                    fontWeight: FontWeight.bold,
+                    fontSize: 12,
+                  ),
                 ),
               ),
             ],
           ),
           const SizedBox(height: 40),
-          Text(ownerName.toUpperCase(), style: const TextStyle(color: Colors.white, fontSize: 14)),
+          Text(
+            ownerName.toUpperCase(),
+            style: const TextStyle(color: Colors.white, fontSize: 14),
+          ),
           const SizedBox(height: 5),
           Text(
             '**** **** **** ${card['last_digits'] ?? '****'}', // ดึงเลขท้ายจาก API
-            style: const TextStyle(color: Colors.white, fontSize: 18, letterSpacing: 2),
+            style: const TextStyle(
+              color: Colors.white,
+              fontSize: 18,
+              letterSpacing: 2,
+            ),
           ),
           const SizedBox(height: 10),
           Row(

@@ -8,6 +8,9 @@ class MyCardsController extends GetxController {
   var isLoading = true.obs;
   var myCards = [].obs;
 
+  get selectedCard => null;
+
+
   @override
   void onInit() {
     super.onInit();

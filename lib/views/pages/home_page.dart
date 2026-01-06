@@ -385,80 +385,88 @@ Widget _buildMyCardsSection(
 }
 
 Widget _buildActiveCardItem(dynamic card, String ownerName) {
-  return Container(
-    width: 300,
-    margin: const EdgeInsets.only(right: 15),
-    padding: const EdgeInsets.all(20),
-    decoration: BoxDecoration(
-      borderRadius: BorderRadius.circular(20),
-      gradient: const LinearGradient(
-        colors: [
-          Color(0xFF264FAD),
-          Color(0xFF162E7A),
-        ], // ใช้โทนสีน้ำเงินตามรูปบัตร
-        begin: Alignment.topLeft,
-        end: Alignment.bottomRight,
+  return InkWell(
+    onTap: () {
+      Get.toNamed(
+        '/my_card_detail',
+        arguments: {'card': card, 'ownerName': ownerName},
+      );
+    },
+    child: Container(
+      width: 300,
+      margin: const EdgeInsets.only(right: 15),
+      padding: const EdgeInsets.all(20),
+      decoration: BoxDecoration(
+        borderRadius: BorderRadius.circular(20),
+        gradient: const LinearGradient(
+          colors: [
+            Color(0xFF264FAD),
+            Color(0xFF162E7A),
+          ],
+          begin: Alignment.topLeft,
+          end: Alignment.bottomRight,
+        ),
+        boxShadow: [
+          BoxShadow(
+            color: Colors.black38,
+            blurRadius: 8,
+            offset: const Offset(0, 4),
+          ),
+        ],
       ),
-      boxShadow: [
-        BoxShadow(
-          color: Colors.black38,
-          blurRadius: 8,
-          offset: const Offset(0, 4),
-        ),
-      ],
-    ),
-    child: Column(
-      crossAxisAlignment: CrossAxisAlignment.start,
-      mainAxisAlignment: MainAxisAlignment.spaceBetween,
-      children: [
-        Row(
-          mainAxisAlignment: MainAxisAlignment.spaceBetween,
-          children: [
-            Text(
-              card['type_debit_name'] ?? 'Virtual Card',
-              style: const TextStyle(
-                color: Colors.white,
-                fontWeight: FontWeight.bold,
-                fontSize: 16,
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        mainAxisAlignment: MainAxisAlignment.spaceBetween,
+        children: [
+          Row(
+            mainAxisAlignment: MainAxisAlignment.spaceBetween,
+            children: [
+              Text(
+                card['type_debit_name'] ?? 'Virtual Card',
+                style: const TextStyle(
+                  color: Colors.white,
+                  fontWeight: FontWeight.bold,
+                  fontSize: 16,
+                ),
               ),
-            ),
-          ],
-        ),
-        const Spacer(),
-        Text(
-          ownerName.toUpperCase(),
-          style: const TextStyle(
-            color: Colors.white,
-            fontSize: 14,
-            fontWeight: FontWeight.w500,
+            ],
           ),
-        ),
-        const SizedBox(height: 5),
-        // ✅ แสดงเลขบัตรที่ Mask ไว้ (ดึง last_digits จาก API)
-        Text(
-          '**** **** **** ${card['last_digits'] ?? '****'}',
-          style: const TextStyle(
-            color: Colors.white,
-            fontSize: 18,
-            letterSpacing: 2,
-            fontWeight: FontWeight.bold,
-          ),
-        ),
-        const SizedBox(height: 10),
-        Row(
-          mainAxisAlignment: MainAxisAlignment.spaceBetween,
-          children: [
-            const Text(
-              'Virtual Card',
-              style: TextStyle(color: Colors.white70, fontSize: 12),
+          const Spacer(),
+          Text(
+            ownerName.toUpperCase(),
+            style: const TextStyle(
+              color: Colors.white,
+              fontSize: 14,
+              fontWeight: FontWeight.w500,
             ),
-                          Image.network(
-                'https://upload.wikimedia.org/wikipedia/commons/thumb/2/2a/Mastercard-logo.svg/1280px-Mastercard-logo.svg.png',
-                width: 30,
+          ),
+          const SizedBox(height: 5),
+          // ✅ แสดงเลขบัตรที่ Mask ไว้ (ดึง last_digits จาก API)
+          Text(
+            '**** **** **** ${card['last_digits'] ?? '****'}',
+            style: const TextStyle(
+              color: Colors.white,
+              fontSize: 18,
+              letterSpacing: 2,
+              fontWeight: FontWeight.bold,
+            ),
+          ),
+          const SizedBox(height: 10),
+          Row(
+            mainAxisAlignment: MainAxisAlignment.spaceBetween,
+            children: [
+               Text(
+                card['Virtual'] == 'true' ? 'Virtual Card' : "Physical Card",
+                style: TextStyle(color: Colors.white70, fontSize: 12),
               ),
-          ],
-        ),
-      ],
+                            Image.network(
+                  'https://upload.wikimedia.org/wikipedia/commons/thumb/2/2a/Mastercard-logo.svg/1280px-Mastercard-logo.svg.png',
+                  width: 30,
+                ),
+            ],
+          ),
+        ],
+      ),
     ),
   );
 }

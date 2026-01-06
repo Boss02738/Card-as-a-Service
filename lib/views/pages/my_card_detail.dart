@@ -1,0 +1,265 @@
+import 'package:flutter/material.dart';
+import 'package:get/get.dart';
+import 'package:my_app/module/controller/home_controller.dart';
+
+class MyCardDetail extends StatelessWidget {
+  const MyCardDetail({super.key});
+
+  @override
+  Widget build(BuildContext context) {
+    final dynamic data = Get.arguments;
+    final dynamic card = data['card'];
+    final String ownerEn = data['ownerName'];
+    final HomeController homeController = Get.find<HomeController>();
+
+    bool isActive = card['status'] == 'active';
+    // bool isPhysical = card['Virtual'] == 'false';
+
+    return Scaffold(
+      backgroundColor: const Color(0xFFF5F7FA),
+      appBar: AppBar(
+        title: const Text(
+          'รายละเอียดบัตร',
+          style: TextStyle(color: Colors.white),
+        ),
+        centerTitle: true,
+        backgroundColor: const Color(0xFF264FAD),
+        elevation: 0,
+        leading: IconButton(
+          icon: const Icon(Icons.arrow_back_ios, color: Colors.white),
+          onPressed: () => Get.back(),
+        ),
+      ),
+      body: SingleChildScrollView(
+        child: Column(
+          children: [
+            Container(
+              padding: const EdgeInsets.symmetric(vertical: 20, horizontal: 20),
+
+              child: _buildCard(card, ownerEn),
+            ),
+
+            const SizedBox(height: 20),
+
+            // 2. Card Information Section
+            Column(
+              children: [
+                Center(
+                  child: const Text(
+                    "รายละเอียดบัตร",
+                    style: TextStyle(fontWeight: FontWeight.bold),
+                  ),
+                ),
+              ],
+            ),
+            _buildDetailSection([
+              _buildRow("ชื่อ นามสกุล", ownerEn),
+              _buildRow(
+                "สถานะบัตร",
+                isActive ? "เปิดใช้งาน" : "ปิดใช้งาน",
+                valueColor: isActive ? Colors.green : Colors.red,
+              ),
+              _buildRow("ผูกกับบัญชี", homeController.accountNumber.value),
+              _buildRow("ดูเลขบัตร", "", showArrow: true),
+            ]),
+
+            // 3. Limit Section
+            _buildSectionHeader("วงเงิน"),
+            _buildDetailSection([
+              _buildRow(
+                "วงเงินปัจจุบัน",
+                "${card['current_spending_limit']} บาท",
+                isBoldValue: true,
+              ),
+              _buildRow("ปรับวงเงิน", "", showArrow: true),
+            ]),
+
+            // 4. Security Section
+            _buildSectionHeader("ความปลอดภัย"),
+            _buildDetailSection([
+              Padding(
+                padding: const EdgeInsets.symmetric(
+                  vertical: 10,
+                  horizontal: 15,
+                ),
+                child: Row(
+                  mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                  children: [
+                    const Text(
+                      "เปิดใช้งานบัตร",
+                      style: TextStyle(fontSize: 16),
+                    ),
+                    Switch(
+                      value: isActive,
+                      onChanged: (val) {
+                        // Logic to toggle status via API
+                      },
+                      activeColor: const Color(0xFF264FAD),
+                    ),
+                  ],
+                ),
+              ),
+            ]),
+
+            // 5. Physical Card Section
+            _buildSectionHeader("บัตร Physical"),
+            _buildDetailSection([
+              _buildRow("ขอบัตร Physical", "", showArrow: true),
+              _buildRow("เปิดใช้งานบัตร Physical", "", showArrow: true),
+            ]),
+
+            const SizedBox(height: 30),
+          ],
+        ),
+      ),
+    );
+  }
+
+  // Card Component
+  Widget _buildCard(dynamic card, String name) {
+    return Container(
+      height: 190,
+      width: double.infinity,
+      padding: const EdgeInsets.all(20),
+      decoration: BoxDecoration(
+        borderRadius: BorderRadius.circular(20),
+        gradient: const LinearGradient(
+          colors: [Color(0xFF3B5BDB), Color(0xFF162E7A)],
+          begin: Alignment.topLeft,
+          end: Alignment.bottomRight,
+        ),
+        boxShadow: [
+          BoxShadow(
+            color: Colors.black.withOpacity(0.2),
+            blurRadius: 10,
+            offset: const Offset(0, 5),
+          ),
+        ],
+      ),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        mainAxisAlignment: MainAxisAlignment.spaceBetween,
+        children: [
+          Row(
+            mainAxisAlignment: MainAxisAlignment.spaceBetween,
+            children: [
+              const Text(
+                "Virtual Card",
+                style: TextStyle(
+                  color: Colors.white,
+                  fontSize: 18,
+                  fontWeight: FontWeight.bold,
+                ),
+              ),
+            ],
+          ),
+          Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              Text(
+                name.toUpperCase(),
+                style: const TextStyle(color: Colors.white, fontSize: 16),
+              ),
+              const SizedBox(height: 5),
+              Text(
+                "**** **** **** ${card['last_digits']}",
+                style: const TextStyle(
+                  color: Colors.white,
+                  fontSize: 20,
+                  letterSpacing: 2,
+                ),
+              ),
+            ],
+          ),
+          Row(
+            mainAxisAlignment: MainAxisAlignment.spaceBetween,
+            children: [
+              Text(
+                card['virtual'] == "true" ? "Virtual Card" : "Physical Card",
+                style: TextStyle(color: Colors.white70, fontSize: 12),
+              ),
+              Image.network(
+                'https://upload.wikimedia.org/wikipedia/commons/thumb/2/2a/Mastercard-logo.svg/1280px-Mastercard-logo.svg.png',
+                width: 40,
+              ),
+            ],
+          ),
+        ],
+      ),
+    );
+  }
+
+  Widget _buildSectionHeader(String title) {
+    return Padding(
+      padding: const EdgeInsets.only(left: 20, top: 15, bottom: 8),
+      child: Align(
+        alignment: Alignment.centerLeft,
+        child: Text(
+          title,
+          style: const TextStyle(
+            fontSize: 14,
+            fontWeight: FontWeight.bold,
+            color: Colors.black,
+          ),
+        ),
+      ),
+    );
+  }
+
+  Widget _buildDetailSection(List<Widget> children) {
+    return Container(
+      margin: const EdgeInsets.symmetric(horizontal: 15),
+      decoration: BoxDecoration(
+        color: Colors.white,
+        borderRadius: BorderRadius.circular(12),
+        boxShadow: [
+          BoxShadow(
+            color: Colors.black.withOpacity(0.05),
+            blurRadius: 5,
+            offset: const Offset(0, 2),
+          ),
+        ],
+      ),
+      child: Column(children: children),
+    );
+  }
+
+  Widget _buildRow(
+    String label,
+    String value, {
+    Color? valueColor,
+    bool showArrow = false,
+    bool isBoldValue = false,
+  }) {
+    return Container(
+      padding: const EdgeInsets.symmetric(vertical: 15, horizontal: 15),
+      decoration: const BoxDecoration(
+        border: Border(bottom: BorderSide(color: Color(0xFFF0F0F0), width: 1)),
+      ),
+      child: Row(
+        mainAxisAlignment: MainAxisAlignment.spaceBetween,
+        children: [
+          Text(label, style: const TextStyle(color: Colors.grey, fontSize: 14)),
+          Row(
+            children: [
+              Text(
+                value,
+                style: TextStyle(
+                  fontSize: 14,
+                  fontWeight: isBoldValue ? FontWeight.bold : FontWeight.normal,
+                  color: valueColor ?? Colors.black87,
+                ),
+              ),
+              if (showArrow)
+                const Icon(
+                  Icons.arrow_forward_ios,
+                  size: 14,
+                  color: Colors.grey,
+                ),
+            ],
+          ),
+        ],
+      ),
+    );
+  }
+}
