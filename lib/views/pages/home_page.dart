@@ -51,7 +51,7 @@ class _HomePageState extends State<HomePage> {
                     const SizedBox(height: 10),
                     _buildMyCardsSection(
                       cardController,
-                      homeController, // ส่วนบัตรของฉัน
+                      homeController, // ส่วนบัตรของฉัน0.
                     ),
                   ],
                 ),
@@ -160,27 +160,6 @@ class _HomePageState extends State<HomePage> {
   }
 }
 
-// Widget สำหรับปุ่ม "ดูทั้งหมด" แบบ Figma
-Widget _buildViewAllButton() {
-  return TextButton(
-    onPressed: () {},
-    style: TextButton.styleFrom(
-      backgroundColor: Colors.white.withOpacity(0.1),
-      shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(20)),
-      padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 0),
-    ),
-    child: Row(
-      children: const [
-        Text(
-          'ดูทั้งหมด',
-          style: TextStyle(color: Colors.white70, fontSize: 12),
-        ),
-        Icon(Icons.chevron_right, color: Colors.white70, size: 16),
-      ],
-    ),
-  );
-}
-
 // กล่องแสดงผลเมื่อยังไม่มีบัตร (Empty State)
 Widget _buildEmptyCardSlot() {
   return Container(
@@ -247,7 +226,40 @@ Widget _buildOffersSection() {
                 fontWeight: FontWeight.bold,
               ),
             ),
-            _buildViewAllButton(),
+            ElevatedButton(
+              onPressed: () => Get.toNamed('/my_cards'),
+              style: ElevatedButton.styleFrom(
+                backgroundColor: const Color.fromARGB(255, 169, 169, 169).withOpacity(0.1),
+                shape: RoundedRectangleBorder(
+                  borderRadius: BorderRadius.circular(20),
+                ),
+                padding: const EdgeInsets.symmetric(
+                  horizontal: 12,
+                  vertical: 0,
+                ),
+              ),
+              child: Row(
+                children: [
+                  Text(
+                    'ดูทั้งหมด',
+                    style: TextStyle(
+                      color: const Color.fromARGB(255, 255, 255, 255),
+                      fontSize: 14,
+                    ),
+                  ),
+                  Icon(
+                    Icons.arrow_forward_ios,
+                    size: 12,
+                    color: const Color.fromARGB(
+                      255,
+                      255,
+                      255,
+                      255,
+                    ).withOpacity(0.7),
+                  ),
+                ],
+              ),
+            ),
           ],
         ),
       ),
@@ -309,7 +321,40 @@ Widget _buildMyCardsSection(
                 fontWeight: FontWeight.bold,
               ),
             ),
-            _buildViewAllButton(),
+            ElevatedButton(
+              onPressed: () => Get.toNamed('/my_cards'),
+              style: ElevatedButton.styleFrom(
+                backgroundColor: const Color.fromARGB(255, 169, 169, 169).withOpacity(0.1),
+                shape: RoundedRectangleBorder(
+                  borderRadius: BorderRadius.circular(20),
+                ),
+                padding: const EdgeInsets.symmetric(
+                  horizontal: 12,
+                  vertical: 0,
+                ),
+              ),
+              child: Row(
+                children: [
+                  Text(
+                    'ดูทั้งหมด',
+                    style: TextStyle(
+                      color: const Color.fromARGB(255, 255, 255, 255),
+                      fontSize: 14,
+                    ),
+                  ),
+                  Icon(
+                    Icons.arrow_forward_ios,
+                    size: 12,
+                    color: const Color.fromARGB(
+                      255,
+                      255,
+                      255,
+                      255,
+                    ).withOpacity(0.7),
+                  ),
+                ],
+              ),
+            ),
           ],
         ),
       ),
@@ -377,7 +422,6 @@ Widget _buildActiveCardItem(dynamic card, String ownerName) {
                 fontSize: 16,
               ),
             ),
-            const Icon(Icons.contactless, color: Colors.white, size: 24),
           ],
         ),
         const Spacer(),
@@ -385,7 +429,7 @@ Widget _buildActiveCardItem(dynamic card, String ownerName) {
           ownerName.toUpperCase(),
           style: const TextStyle(
             color: Colors.white,
-            fontSize: 16,
+            fontSize: 14,
             fontWeight: FontWeight.w500,
           ),
         ),
@@ -395,7 +439,7 @@ Widget _buildActiveCardItem(dynamic card, String ownerName) {
           '**** **** **** ${card['last_digits'] ?? '****'}',
           style: const TextStyle(
             color: Colors.white,
-            fontSize: 20,
+            fontSize: 18,
             letterSpacing: 2,
             fontWeight: FontWeight.bold,
           ),
@@ -408,6 +452,10 @@ Widget _buildActiveCardItem(dynamic card, String ownerName) {
               'Virtual Card',
               style: TextStyle(color: Colors.white70, fontSize: 12),
             ),
+                          Image.network(
+                'https://upload.wikimedia.org/wikipedia/commons/thumb/2/2a/Mastercard-logo.svg/1280px-Mastercard-logo.svg.png',
+                width: 30,
+              ),
           ],
         ),
       ],

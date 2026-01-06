@@ -55,7 +55,7 @@ class _MyCardPageState extends State<MyCardPage> {
                             tabs: [
                               Tab(text: 'ทั้งหมด'),
                               Tab(text: 'เปิดใช้งาน'),
-                              Tab(text: 'ระงับชั่วคราว'),
+                              Tab(text: 'ระงับชั่วคราว'),                              
                             ],
                           ),
                           const SizedBox(height: 15),
@@ -82,7 +82,7 @@ class _MyCardPageState extends State<MyCardPage> {
                           
                           // ปุ่มสมัครบัตรด้านล่าง
                           Padding(
-                            padding: const EdgeInsets.symmetric(vertical: 20),
+                            padding: const EdgeInsets.symmetric(vertical: 10),
                             child: SizedBox(
                               width: double.infinity,
                               height: 50,
@@ -100,7 +100,7 @@ class _MyCardPageState extends State<MyCardPage> {
                       ),
                     ),
                   ),
-                  const SizedBox(height: 80), // เว้นที่ให้ NavBar
+                  const SizedBox(height: 70), // เว้นที่ให้ NavBar
                 ],
               ),
             ),
