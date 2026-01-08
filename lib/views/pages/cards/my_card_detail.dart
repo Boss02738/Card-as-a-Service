@@ -80,7 +80,11 @@ class MyCardDetail extends StatelessWidget {
                     Get.toNamed(
                       '/pin_verify_page',
                       // ส่ง latestCard ไปเพื่อให้หน้าปรับวงเงินเห็นยอดล่าสุดด้วย
-                      arguments: {'card': latestCard, 'ownerName': ownerEn},
+                      arguments: {
+                        'action': 'view_sensitive',
+                        'card': latestCard,
+                        'ownerName': ownerEn,
+                      },
                     );
                   },
                   child: _buildRow("ดูเลขบัตร", "", showArrow: true),

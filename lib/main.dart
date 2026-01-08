@@ -8,6 +8,7 @@ import 'package:my_app/views/pages/Register/face_verify.dart';
 import 'package:my_app/views/pages/Create_cards/card_details.dart';
 import 'package:my_app/views/pages/account_page.dart';
 import 'package:my_app/views/pages/cards/change_limit_card.dart';
+import 'package:my_app/views/pages/cards/sensitivedata.dart';
 import 'package:my_app/views/pages/home_page.dart';
 import 'package:my_app/views/pages/Register/idcard_verify.dart';
 import 'package:my_app/views/pages/Register/info.dart';
@@ -64,6 +65,7 @@ class _NovaPayAppState extends State<NovaPayApp> {
         GetPage(name: "/my_card_detail", page: () =>  MyCardDetail()),
         GetPage(name: "/success_change_limit", page: () => const SuccessChangeLimitPaga()),
         GetPage(name: "/change_limit_card", page: () => const ChangeLimitCard()),
+        GetPage(name: "/sensitive", page: () => const SensitiveDataPage()),
         //creaate_card
         GetPage(name: "/type_cards", page: () => const Type_Cards()),
         GetPage(name: "/card_detail", page: () => const Card_Detail()),

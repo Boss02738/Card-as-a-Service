@@ -20,7 +20,9 @@ class PinVerifyController extends GetxController {
     }
     if (enteredPin.value.length == 6) {
       // เมื่อครบ 6 หลัก ให้ยิง API ทันที
-      if (args['action'] == 'change_limit') {
+      if (args['action'] == 'view_sensitive') {
+        processViewSensitiveData();
+      } else if (args['action'] == 'change_limit') {
         processChangeLimit();
       } else {
         createVirtualCard();
@@ -36,7 +38,8 @@ class PinVerifyController extends GetxController {
       );
     }
   }
-//สร้างบัตรเดบิต
+
+  //สร้างบัตรเดบิต
   Future<void> createVirtualCard() async {
     try {
       isLoading.value = true;
@@ -86,28 +89,75 @@ class PinVerifyController extends GetxController {
     try {
       isLoading.value = true;
       String? deviceId = await getDeviceId();
-      final ChangelimitController limitController = Get.put(ChangelimitController());
-      
+      final ChangelimitController limitController = Get.put(
+        ChangelimitController(),
+      );
+
       // เรียกใช้ฟังก์ชัน updateSpendingLimit ใน ChangelimitController
       bool success = await limitController.updateSpendingLimit(
-        args['card_id'], 
+        args['card_id'],
         args['amount'],
         enteredPin.value,
         deviceId ?? '',
-      );  
+      );
 
       if (success) {
         // Get.offAllNamed('/success_createcard', arguments: {
         //   "title": "ปรับวงเงินสำเร็จ!",
         //   "subtitle": "ระบบได้ทำการปรับเปลี่ยนวงเงินการใช้จ่ายของคุณแล้ว"
         // });
-        Get.offAllNamed('/success_change_limit', );
+        Get.offAllNamed('/success_change_limit');
       } else {
-        Get.snackbar('ผิดพลาด', 'รหัสผ่านไม่ถูกต้อง หรือไม่สามารถเปลี่ยนวงเงินได้');
+        Get.snackbar(
+          'ผิดพลาด',
+          'รหัสผ่านไม่ถูกต้อง หรือไม่สามารถเปลี่ยนวงเงินได้',
+        );
         enteredPin.value = '';
       }
     } finally {
       isLoading.value = false;
     }
   }
+
+  Future<void> processViewSensitiveData() async {
+    try {
+      isLoading.value = true;
+      String? token = await storage.read(key: 'accessToken');
+      String? deviceId = await getDeviceId();
+
+      final response = await http.post(
+        Uri.parse(
+          "${ApiConstants.baseUrl}${ApiConstants.sensitive.replaceFirst('{card_id}', args['card']['card_id'])}",
+        ),
+        headers: {
+          "Content-Type": "application/json",
+          "Authorization": "Bearer $token",
+        },
+        body: jsonEncode({"pin": enteredPin.value, "deviceId": deviceId}),
+      );
+
+      if (response.statusCode == 200) {
+        final sensitiveData = jsonDecode(utf8.decode(response.bodyBytes));
+        // ✅ ส่งข้อมูลที่ได้จาก API ไปแสดงที่หน้า SensitiveDataPage
+        Get.offNamed(
+          '/sensitive',
+          arguments: {
+            'card': args['card'],
+            'ownerName': args['ownerName'],
+            'sensitive':
+                sensitiveData, // ข้อมูลจาก API: expiry, encrypted_pan, encrypted_cvv
+          },
+        );
+      } else {
+        Get.snackbar('ผิดพลาด', 'รหัสผ่านไม่ถูกต้อง');
+        enteredPin.value = '';
+      }
+    } catch (e) {
+      Get.snackbar('Error', 'เกิดข้อผิดพลาดในการเชื่อมต่อ');
+    } finally {
+      isLoading.value = false;
+    }
+  }
+
+  // ในส่วน addNumber อย่าลืมเช็คเงื่อนไข
 }

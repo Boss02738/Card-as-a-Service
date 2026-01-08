@@ -21,4 +21,5 @@ class ApiConstants {
   static const String freeze = "/api/v1/mobile/feature/card/{card_id}/freeze";
   static const String unfreeze = "/api/v1/mobile/feature/card/{card_id}/unfreeze";
   static const String limitcard = "/api/v1/mobile/feature/card/{card_id}/limit";
+  static const String sensitive = "/api/v1/mobile/feature/card/{card_id}/sensitive";
 }
