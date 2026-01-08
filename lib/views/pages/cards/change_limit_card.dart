@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
+import 'package:my_app/module/controller/changelimit_controller.dart';
 
 class ChangeLimitCard extends StatefulWidget {
   const ChangeLimitCard({super.key});
@@ -13,18 +14,54 @@ class _ChangeLimitCardState extends State<ChangeLimitCard> {
   final dynamic data = Get.arguments;
   late dynamic card;
   late String ownerName;
+  late double originalLimit; // วงเงินเดิมไว้เทียบ
+  final ChangelimitController limitController = Get.put(
+    ChangelimitController(),
+  );
 
   // ตัวแปรสำหรับเก็บค่าวงเงินที่เลือก
   String? selectedLimit;
+  void _handleSave() async {
+    double newLimit = double.parse(selectedLimit!);
+    String cardId = card['card_id'];
+
+    if (newLimit > originalLimit) {
+      // ✅ กรณีเพิ่มวงเงิน: ไปหน้าใส่ PIN ก่อน
+      // ส่งข้อมูล card และ newLimit ไปด้วยเพื่อให้หน้า PIN รู้ว่าต้องทำอะไรเมื่อใส่ถูก
+      Get.toNamed(
+        '/pin_verify_page',
+        arguments: {
+          'action': 'change_limit',
+          'card_id': cardId,
+          'amount': newLimit,
+        },
+      );
+    } else if (newLimit < originalLimit) {
+      // ✅ กรณีลดวงเงิน: บันทึกได้เลยไม่ต้องใส่ PIN
+      bool success = await limitController.updateSpendingLimit(
+        cardId,
+        newLimit,
+        '', // ไม่ต้องใช้ PIN เมื่อลดวงเงิน
+        '', // ไม่ต้องใช้ deviceId เมื่อลดวงเงิน
+      );
+      if (success) {
+        Get.back();
+        Get.snackbar("สำเร็จ", "ปรับลดวงเงินเรียบร้อยแล้ว");
+      } else {
+        Get.snackbar("ผิดพลาด", "ไม่สามารถเปลี่ยนวงเงินได้");
+      }
+    } else {
+      Get.back();
+    }
+  }
 
   @override
   void initState() {
     super.initState();
     card = data['card'];
     ownerName = data['ownerName'];
-    // กำหนดค่าเริ่มต้นตามวงเงินปัจจุบันจาก API
-    double currentLimit = (card['current_spending_limit'] as num).toDouble();
-    selectedLimit = currentLimit.toInt().toString();
+    originalLimit = (card['current_spending_limit'] as num).toDouble();
+    selectedLimit = originalLimit.toInt().toString();
   }
 
   @override
@@ -46,7 +83,6 @@ class _ChangeLimitCardState extends State<ChangeLimitCard> {
       ),
       body: Column(
         children: [
-          // 2. ส่วนแสดงรูปบัตร (ใช้ดีไซน์เดียวกับหน้า Detail)
           Container(
             padding: const EdgeInsets.symmetric(vertical: 20, horizontal: 20),
             // decoration: const BoxDecoration(
@@ -117,39 +153,38 @@ class _ChangeLimitCardState extends State<ChangeLimitCard> {
                     style: TextStyle(color: Colors.grey, fontSize: 12),
                   ),
 
-                  const Spacer(),
 
-                  // 4. ปุ่มบันทึกด้านล่าง
-                  SizedBox(
-                    width: double.infinity,
-                    height: 50,
-                    child: ElevatedButton(
-                      onPressed: () {
-
-                        Get.back();
-                        Get.snackbar(
-                          "สำเร็จ",
-                          "ปรับเปลี่ยนวงเงินเรียบร้อยแล้ว",
-                        );
-                      },
-                      style: ElevatedButton.styleFrom(
-                        backgroundColor: const Color(0xFF264FAD),
-                        shape: RoundedRectangleBorder(
-                          borderRadius: BorderRadius.circular(10),
-                        ),
-                      ),
-                      child: const Text(
-                        "บันทึก",
-                        style: TextStyle(color: Colors.white, fontSize: 18),
-                      ),
-                    ),
-                  ),
-                  const SizedBox(height: 20),
                 ],
               ),
             ),
           ),
         ],
+      ),
+      bottomNavigationBar: SafeArea(
+        child: Padding(
+          padding: const EdgeInsets.all(20.0),
+          child: Obx(
+            () => SizedBox(
+              width: double.infinity,
+              height: 50,
+              child: ElevatedButton(
+                onPressed: limitController.isLoading.value ? null : _handleSave,
+                style: ElevatedButton.styleFrom(
+                  backgroundColor: const Color(0xFF264FAD),
+                  shape: RoundedRectangleBorder(
+                    borderRadius: BorderRadius.circular(10),
+                  ),
+                ),
+                child: limitController.isLoading.value
+                    ? const CircularProgressIndicator(color: Colors.white)
+                    : const Text(
+                        "บันทึก",
+                        style: TextStyle(color: Colors.white, fontSize: 18),
+                      ),
+              ),
+            ),
+          ),
+        ),
       ),
     );
   }

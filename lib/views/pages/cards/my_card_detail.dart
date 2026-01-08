@@ -56,48 +56,60 @@ class MyCardDetail extends StatelessWidget {
               ],
             ),
             Obx(() {
-                  // ✅ ดึงข้อมูลบัตรใบนี้จาก Controller หลักที่อัปเดตแล้ว
-                  final latestCard = Get.find<MyCardsController>().myCards.firstWhere(
+              // ✅ ดึงข้อมูลบัตรใบนี้จาก Controller หลักที่อัปเดตแล้ว
+              final latestCard = Get.find<MyCardsController>().myCards
+                  .firstWhere(
                     (c) => c['card_id'] == currentCardId,
                     orElse: () => card,
                   );
-                  
-                  bool isCurrentlyFrozen = latestCard['status'] != 'active';
-                  // อัปเดตค่าใน status controller ให้ตรงกับความจริงล่าสุด
-                  statusCardController.isCardFrozen.value = isCurrentlyFrozen;
 
-                  return _buildDetailSection([
-                    _buildRow("ชื่อ นามสกุล", ownerEn),
-                    _buildRow(
-                      "สถานะบัตร",
-                      isCurrentlyFrozen ? "ปิดใช้งาน" : "เปิดใช้งาน",
-                      valueColor: isCurrentlyFrozen ? Colors.red : Colors.green,
-                    ),
-                    _buildRow("ผูกกับบัญชี", homeController.accountNumber.value),
-                    _buildRow("ดูเลขบัตร", "", showArrow: true),
-                  ]);
-                }),
+              bool isCurrentlyFrozen = latestCard['status'] != 'active';
+              // อัปเดตค่าใน status controller ให้ตรงกับความจริงล่าสุด
+              statusCardController.isCardFrozen.value = isCurrentlyFrozen;
+
+              return _buildDetailSection([
+                _buildRow("ชื่อ นามสกุล", ownerEn),
+                _buildRow(
+                  "สถานะบัตร",
+                  isCurrentlyFrozen ? "ปิดใช้งาน" : "เปิดใช้งาน",
+                  valueColor: isCurrentlyFrozen ? Colors.red : Colors.green,
+                ),
+                _buildRow("ผูกกับบัญชี", homeController.accountNumber.value),
+                _buildRow("ดูเลขบัตร", "", showArrow: true),
+              ]);
+            }),
 
             // 3. Limit Section
+            // 3. Limit Section
             _buildSectionHeader("วงเงิน"),
-            _buildDetailSection([
-              _buildRow(
-                "วงเงินปัจจุบัน",
-                "${card['current_spending_limit']} บาท",
-                isBoldValue: true,
-              ),
-              InkWell(
-                onTap: () {
-                  Get.toNamed(
-                    '/change_limit_card',
-                    arguments: {'card': card, 'ownerName': ownerEn},
+            Obx(() {
+              // ✅ ดึงข้อมูลล่าสุดจาก Controller เพื่อให้ยอดวงเงินอัปเดตทันที
+              final latestCard = Get.find<MyCardsController>().myCards
+                  .firstWhere(
+                    (c) => c['card_id'] == currentCardId,
+                    orElse: () => card,
                   );
-                },
-                child: _buildRow("ปรับวงเงิน", "", showArrow: true),
-              ),
-            ]),
 
-            // 4. Security Section
+              return _buildDetailSection([
+                _buildRow(
+                  "วงเงินปัจจุบัน",
+                  // ✅ ใช้ข้อมูลจาก latestCard แทน card ปกติ
+                  "${latestCard['current_spending_limit'].toString().replaceAllMapped(RegExp(r'(\d{1,3})(?=(\d{3})+(?!\d))'), (Match m) => '${m[1]},')}.00 บาท",
+                  isBoldValue: true,
+                ),
+                InkWell(
+                  onTap: () {
+                    Get.toNamed(
+                      '/change_limit_card',
+                      // ส่ง latestCard ไปเพื่อให้หน้าปรับวงเงินเห็นยอดล่าสุดด้วย
+                      arguments: {'card': latestCard, 'ownerName': ownerEn},
+                    );
+                  },
+                  child: _buildRow("ปรับวงเงิน", "", showArrow: true),
+                ),
+              ]);
+            }),
+
             _buildSectionHeader("ความปลอดภัย"),
             _buildDetailSection([
               Padding(

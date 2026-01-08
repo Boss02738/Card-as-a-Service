@@ -13,13 +13,11 @@ class Card_Detail extends StatefulWidget {
 
 class _Card_DetailState extends State<Card_Detail> {
   final dynamic cardData = Get.arguments;
-
-  // 1. เพิ่ม ValueNotifier เพื่อควบคุมปุ่ม "ต่อไป" โดยไม่ใช้ setState ทั้งหน้า
   final ValueNotifier<bool> isButtonEnabled = ValueNotifier(false);
 
   @override
   Widget build(BuildContext context) {
-    // 2. Decode รูปภาพครั้งเดียวใน build
+    // Decode รูปภาพครั้งเดียวใน build
     Uint8List? imageBytes;
     if (cardData['type_debit_image'] != null) {
       String base64String = cardData['type_debit_image'].split(',').last;

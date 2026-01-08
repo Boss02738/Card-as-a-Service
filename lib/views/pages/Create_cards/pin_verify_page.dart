@@ -21,10 +21,17 @@ class PinVerifyPage extends StatelessWidget {
                 const SizedBox(height: 60),
                 const BrandLogo(),
                 const SizedBox(height: 40),
-                const Text(
-                  'ยืนยันรหัสผ่านเพื่อสร้างบัตร',
-                  style: TextStyle(fontSize: 20, fontWeight: FontWeight.bold),
+                Text(
+                  // ✅ เปลี่ยนข้อความตาม Action
+                  controller.args['action'] == 'change_limit'
+                      ? 'ยืนยันรหัสผ่านเพื่อเปลี่ยนวงเงิน'
+                      : 'ยืนยันรหัสผ่านเพื่อสร้างบัตร',
+                  style: const TextStyle(
+                    fontSize: 20,
+                    fontWeight: FontWeight.bold,
+                  ),
                 ),
+
                 const SizedBox(height: 30),
 
                 // แสดงจุด PIN

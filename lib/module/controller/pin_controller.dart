@@ -37,23 +37,6 @@ class PinController extends GetxController {
       );
     }
   }
-
-  // void handlePinComplete() {
-  //   if (!isConfirmMode.value) {
-  //     // รอบแรกสำเร็จ
-  //     firstPin.value = enteredPin.value;
-  //     enteredPin.value = '';
-  //     isConfirmMode.value = true;
-  //   } else {
-  //     if (enteredPin.value == firstPin.value) {
-  //       // เมื่อยืนยัน PIN สำเร็จ ให้เริ่มขั้นตอนยิง API
-  //       registerUser();
-  //     } else {
-  //       Get.snackbar('ผิดพลาด', 'รหัสไม่ตรงกัน กรุณาลองใหม่');
-  //       enteredPin.value = '';
-  //     }
-  //   }
-  // }
   void handlePinComplete() {
   if (!isConfirmMode.value) {
     // จังหวะที่ PIN รอบแรกเสร็จ ให้ดึงเบอร์จาก Controller มาเก็บไว้ใน lockedMobile ทันที
@@ -80,23 +63,6 @@ class PinController extends GetxController {
     firstPin.value = '';
   }
 
-  // Future<void> registerUser() async {
-  //   // ดึง Controller ทั้งหมดที่เก็บข้อมูลไว้
-  //   final phoneCtrl = Get.find<PhonenumberController>();
-  //   final infoCtrl = Get.find<InfoController>();
-
-  //   // รวมร่างข้อมูลเป็น JSON ก้อนเดียว
-  //   Map<String, dynamic> finalRegistrationData = {
-  //     "phoneNumber": phoneCtrl.phoneNumber.value, // จากหน้าแรก
-  //     ...infoCtrl.toJson(), // จากหน้าข้อมูลส่วนตัว (ID Card, ชื่อ, อีเมล)
-  //     "pin": enteredPin.value, // จากหน้าตั้งรหัส PIN
-  //   };
-
-  //   print("ข้อมูลที่จะส่งไป Spring Boot: $finalRegistrationData");
-
-  //   // ยิง API
-  //   // await sendToSpringBoot(finalRegistrationData);
-  // }
 Future<void> registerUser() async {
   final infoCtrl = Get.find<InfoController>();
   try {

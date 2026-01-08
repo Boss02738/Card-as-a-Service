@@ -2,15 +2,17 @@ import 'dart:convert';
 import 'package:get/get.dart';
 import 'package:http/http.dart' as http;
 import 'package:my_app/core/api_constants.dart';
+import 'package:my_app/module/controller/changelimit_controller.dart';
 import 'package:my_app/module/services/device_id.dart';
 import 'package:my_app/module/services/secure_storage.dart';
 
 class PinVerifyController extends GetxController {
   var enteredPin = ''.obs;
   var isLoading = false.obs;
-  
+
   // รับข้อมูลบัตรที่ส่งมาจากหน้า Confirm
   final dynamic cardData = Get.arguments;
+  final dynamic args = Get.arguments;
 
   void addNumber(int number) {
     if (enteredPin.value.length < 6) {
@@ -18,16 +20,23 @@ class PinVerifyController extends GetxController {
     }
     if (enteredPin.value.length == 6) {
       // เมื่อครบ 6 หลัก ให้ยิง API ทันที
-      createVirtualCard();
+      if (args['action'] == 'change_limit') {
+        processChangeLimit();
+      } else {
+        createVirtualCard();
+      }
     }
   }
 
   void deleteNumber() {
     if (enteredPin.value.isNotEmpty) {
-      enteredPin.value = enteredPin.value.substring(0, enteredPin.value.length - 1);
+      enteredPin.value = enteredPin.value.substring(
+        0,
+        enteredPin.value.length - 1,
+      );
     }
   }
-
+//สร้างบัตรเดบิต
   Future<void> createVirtualCard() async {
     try {
       isLoading.value = true;
@@ -52,10 +61,13 @@ class PinVerifyController extends GetxController {
 
       if (response.statusCode == 200) {
         // สร้างสำเร็จ ไปหน้า Success
-        Get.offAllNamed('/success_createcard', arguments: {
-          "title": "สร้างบัตรสำเร็จ!",
-          "subtitle": "ระบบกำลังดำเนินการเปิดใช้งานบัตรของคุณ"
-        });
+        Get.offAllNamed(
+          '/success_createcard',
+          arguments: {
+            "title": "สร้างบัตรสำเร็จ!",
+            "subtitle": "ระบบกำลังดำเนินการเปิดใช้งานบัตรของคุณ",
+          },
+        );
       } else {
         final errorData = jsonDecode(utf8.decode(response.bodyBytes));
         Get.snackbar('ผิดพลาด', errorData['message'] ?? 'รหัสผ่านไม่ถูกต้อง');
@@ -64,6 +76,35 @@ class PinVerifyController extends GetxController {
     } catch (e) {
       Get.snackbar('Error', 'ไม่สามารถเชื่อมต่อเซิร์ฟเวอร์ได้');
       enteredPin.value = '';
+    } finally {
+      isLoading.value = false;
+    }
+  }
+
+  //เปลี่ยนวงเงิน
+  Future<void> processChangeLimit() async {
+    try {
+      isLoading.value = true;
+      String? deviceId = await getDeviceId();
+      final ChangelimitController limitController = Get.put(ChangelimitController());
+      
+      // เรียกใช้ฟังก์ชัน updateSpendingLimit ใน ChangelimitController
+      bool success = await limitController.updateSpendingLimit(
+        args['card_id'], 
+        args['amount'],
+        enteredPin.value,
+        deviceId ?? '',
+      );  
+
+      if (success) {
+        Get.offAllNamed('/success_createcard', arguments: {
+          "title": "ปรับวงเงินสำเร็จ!",
+          "subtitle": "ระบบได้ทำการปรับเปลี่ยนวงเงินการใช้จ่ายของคุณแล้ว"
+        });
+      } else {
+        Get.snackbar('ผิดพลาด', 'รหัสผ่านไม่ถูกต้อง หรือไม่สามารถเปลี่ยนวงเงินได้');
+        enteredPin.value = '';
+      }
     } finally {
       isLoading.value = false;
     }
