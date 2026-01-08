@@ -75,12 +75,19 @@ class MyCardDetail extends StatelessWidget {
                   valueColor: isCurrentlyFrozen ? Colors.red : Colors.green,
                 ),
                 _buildRow("ผูกกับบัญชี", homeController.accountNumber.value),
-                _buildRow("ดูเลขบัตร", "", showArrow: true),
+                InkWell(
+                  onTap: () {
+                    Get.toNamed(
+                      '/pin_verify_page',
+                      // ส่ง latestCard ไปเพื่อให้หน้าปรับวงเงินเห็นยอดล่าสุดด้วย
+                      arguments: {'card': latestCard, 'ownerName': ownerEn},
+                    );
+                  },
+                  child: _buildRow("ดูเลขบัตร", "", showArrow: true),
+                ),
               ]);
             }),
 
-            // 3. Limit Section
-            // 3. Limit Section
             _buildSectionHeader("วงเงิน"),
             Obx(() {
               // ✅ ดึงข้อมูลล่าสุดจาก Controller เพื่อให้ยอดวงเงินอัปเดตทันที
@@ -94,7 +101,7 @@ class MyCardDetail extends StatelessWidget {
                 _buildRow(
                   "วงเงินปัจจุบัน",
                   // ✅ ใช้ข้อมูลจาก latestCard แทน card ปกติ
-                  "${latestCard['current_spending_limit'].toString().replaceAllMapped(RegExp(r'(\d{1,3})(?=(\d{3})+(?!\d))'), (Match m) => '${m[1]},')}.00 บาท",
+                  "${latestCard['current_spending_limit'].toString().replaceAllMapped(RegExp(r'(\d{1,3})(?=(\d{3})+(?!\d))'), (Match m) => '${m[1]},')}0 บาท",
                   isBoldValue: true,
                 ),
                 InkWell(

@@ -97,10 +97,11 @@ class PinVerifyController extends GetxController {
       );  
 
       if (success) {
-        Get.offAllNamed('/success_createcard', arguments: {
-          "title": "ปรับวงเงินสำเร็จ!",
-          "subtitle": "ระบบได้ทำการปรับเปลี่ยนวงเงินการใช้จ่ายของคุณแล้ว"
-        });
+        // Get.offAllNamed('/success_createcard', arguments: {
+        //   "title": "ปรับวงเงินสำเร็จ!",
+        //   "subtitle": "ระบบได้ทำการปรับเปลี่ยนวงเงินการใช้จ่ายของคุณแล้ว"
+        // });
+        Get.offAllNamed('/success_change_limit', );
       } else {
         Get.snackbar('ผิดพลาด', 'รหัสผ่านไม่ถูกต้อง หรือไม่สามารถเปลี่ยนวงเงินได้');
         enteredPin.value = '';
