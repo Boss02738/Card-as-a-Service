@@ -71,15 +71,6 @@ class _MyCardPageState extends State<MyCardPage> {
                                     homeController.fullNameEn.value,
                                   ),
                                 ),
-                                //   InkWell(
-                                //   () => _buildCardList(
-                                //     cardController.myCards,
-                                //     homeController.fullNameEn.value,
-                                //   ),
-                                // ), onTap: () {
-                                //   Get.toNamed('/my_card_detail');
-                                // },
-
                                 // Tab: เปิดใช้งาน
                                 Obx(
                                   () => _buildCardList(

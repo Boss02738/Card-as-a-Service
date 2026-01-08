@@ -7,12 +7,13 @@ import 'package:my_app/views/pages/Register/enter_phone_page.dart';
 import 'package:my_app/views/pages/Register/face_verify.dart';
 import 'package:my_app/views/pages/Create_cards/card_details.dart';
 import 'package:my_app/views/pages/account_page.dart';
+import 'package:my_app/views/pages/cards/change_limit_card.dart';
 import 'package:my_app/views/pages/home_page.dart';
 import 'package:my_app/views/pages/Register/idcard_verify.dart';
 import 'package:my_app/views/pages/Register/info.dart';
 import 'package:my_app/views/pages/Register/success_register_page.dart';
-import 'package:my_app/views/pages/my_card_detail.dart';
-import 'package:my_app/views/pages/my_card_page.dart';
+import 'package:my_app/views/pages/cards/my_card_detail.dart';
+import 'package:my_app/views/pages/cards/my_card_page.dart';
 import 'package:my_app/views/pages/pin_login_page.dart';
 import 'package:my_app/views/pages/Register/welcome_page.dart';
 import 'package:my_app/views/pages/Register/confirm_otp.dart';
@@ -20,9 +21,9 @@ import 'package:my_app/views/pages/Create_cards/pin_verify_page.dart';
 import 'package:my_app/views/pages/Create_cards/success_createcard_page.dart';
 import 'package:my_app/views/pages/Create_cards/type_cards.dart';
 import 'package:my_app/views/pages/Create_cards/card_confirm_page.dart';
+import 'package:my_app/views/pages/cards/success_change_limit.dart';
 
 void main() {
-  // ต้องมีบรรทัดนี้เพื่อให้ Plugin ต่างๆ (เช่น Secure Storage) ทำงานได้ถูกต้อง
   WidgetsFlutterBinding.ensureInitialized();
   runApp(const NovaPayApp());
 }
@@ -61,6 +62,8 @@ class _NovaPayAppState extends State<NovaPayApp> {
         //Card
         GetPage(name: "/my_cards", page: () => const MyCardPage()),
         GetPage(name: "/my_card_detail", page: () =>  MyCardDetail()),
+        GetPage(name: "/success_change_limit", page: () => const SuccessChangeLimitPaga()),
+        GetPage(name: "/change_limit_card", page: () => const ChangeLimitCard()),
         //creaate_card
         GetPage(name: "/type_cards", page: () => const Type_Cards()),
         GetPage(name: "/card_detail", page: () => const Card_Detail()),

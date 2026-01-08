@@ -44,4 +44,8 @@ class MyCardsController extends GetxController {
       isLoading.value = false;
     }
   }
+
+  void fetchUserCards () async {
+    await fetchMyCards();
+  }
 }

@@ -1,6 +1,6 @@
 class ApiConstants {
   // ใช้ IP ของเครื่อง Backend
-  // static const String baseUrl = "http://192.168.250.35:8080";
+  // static const String baseUrl = "http://192.168.250.35:8082";
   // static const String baseUrlCore = "http://10.82.241.156:8080";
   static const String baseUrl = "http://10.82.241.238:8082";
 
@@ -18,4 +18,7 @@ class ApiConstants {
   static const String createcard = "/api/v1/mobile/feature/create-virtual-card";
   // My Cards
   static const String mycards = "/api/v1/mobile/feature/my-cards";
+  static const String freeze = "/api/v1/mobile/feature/card/{card_id}/freeze";
+  static const String unfreeze = "/api/v1/mobile/feature/card/{card_id}/unfreeze";
+  static const String limitcard = "/api/v1/mobile/feature/card/{card_id}/limit";
 }

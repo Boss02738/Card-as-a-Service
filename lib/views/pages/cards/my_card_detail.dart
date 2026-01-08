@@ -1,6 +1,8 @@
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import 'package:my_app/module/controller/home_controller.dart';
+import 'package:my_app/module/controller/my_cards_controller.dart';
+import 'package:my_app/module/controller/status_card_controller.dart';
 
 class MyCardDetail extends StatelessWidget {
   const MyCardDetail({super.key});
@@ -11,9 +13,10 @@ class MyCardDetail extends StatelessWidget {
     final dynamic card = data['card'];
     final String ownerEn = data['ownerName'];
     final HomeController homeController = Get.find<HomeController>();
-
-    bool isActive = card['status'] == 'active';
-    // bool isPhysical = card['Virtual'] == 'false';
+    final StatusCardController statusCardController = Get.put(
+      StatusCardController(),
+    );
+    final String currentCardId = card['card_id'];
 
     return Scaffold(
       backgroundColor: const Color(0xFFF5F7FA),
@@ -52,16 +55,28 @@ class MyCardDetail extends StatelessWidget {
                 ),
               ],
             ),
-            _buildDetailSection([
-              _buildRow("ชื่อ นามสกุล", ownerEn),
-              _buildRow(
-                "สถานะบัตร",
-                isActive ? "เปิดใช้งาน" : "ปิดใช้งาน",
-                valueColor: isActive ? Colors.green : Colors.red,
-              ),
-              _buildRow("ผูกกับบัญชี", homeController.accountNumber.value),
-              _buildRow("ดูเลขบัตร", "", showArrow: true),
-            ]),
+            Obx(() {
+                  // ✅ ดึงข้อมูลบัตรใบนี้จาก Controller หลักที่อัปเดตแล้ว
+                  final latestCard = Get.find<MyCardsController>().myCards.firstWhere(
+                    (c) => c['card_id'] == currentCardId,
+                    orElse: () => card,
+                  );
+                  
+                  bool isCurrentlyFrozen = latestCard['status'] != 'active';
+                  // อัปเดตค่าใน status controller ให้ตรงกับความจริงล่าสุด
+                  statusCardController.isCardFrozen.value = isCurrentlyFrozen;
+
+                  return _buildDetailSection([
+                    _buildRow("ชื่อ นามสกุล", ownerEn),
+                    _buildRow(
+                      "สถานะบัตร",
+                      isCurrentlyFrozen ? "ปิดใช้งาน" : "เปิดใช้งาน",
+                      valueColor: isCurrentlyFrozen ? Colors.red : Colors.green,
+                    ),
+                    _buildRow("ผูกกับบัญชี", homeController.accountNumber.value),
+                    _buildRow("ดูเลขบัตร", "", showArrow: true),
+                  ]);
+                }),
 
             // 3. Limit Section
             _buildSectionHeader("วงเงิน"),
@@ -71,7 +86,15 @@ class MyCardDetail extends StatelessWidget {
                 "${card['current_spending_limit']} บาท",
                 isBoldValue: true,
               ),
-              _buildRow("ปรับวงเงิน", "", showArrow: true),
+              InkWell(
+                onTap: () {
+                  Get.toNamed(
+                    '/change_limit_card',
+                    arguments: {'card': card, 'ownerName': ownerEn},
+                  );
+                },
+                child: _buildRow("ปรับวงเงิน", "", showArrow: true),
+              ),
             ]),
 
             // 4. Security Section
@@ -89,12 +112,20 @@ class MyCardDetail extends StatelessWidget {
                       "เปิดใช้งานบัตร",
                       style: TextStyle(fontSize: 16),
                     ),
-                    Switch(
-                      value: isActive,
-                      onChanged: (val) {
-                        // Logic to toggle status via API
-                      },
-                      activeColor: const Color(0xFF264FAD),
+                    Obx(
+                      () => Switch(
+                        value: !statusCardController
+                            .isCardFrozen
+                            .value, // active = !frozen
+                        onChanged: (val) {
+                          if (val) {
+                            statusCardController.unfreezeCard(card['card_id']);
+                          } else {
+                            statusCardController.freezeCard(card['card_id']);
+                          }
+                        },
+                        activeColor: const Color(0xFF264FAD),
+                      ),
                     ),
                   ],
                 ),
@@ -108,7 +139,14 @@ class MyCardDetail extends StatelessWidget {
               _buildRow("เปิดใช้งานบัตร Physical", "", showArrow: true),
             ]),
 
-            const SizedBox(height: 30),
+            Obx(
+              () => statusCardController.isLoading.value
+                  ? Container(
+                      color: Colors.black26,
+                      child: const Center(child: CircularProgressIndicator()),
+                    )
+                  : const SizedBox.shrink(),
+            ),
           ],
         ),
       ),
@@ -144,7 +182,7 @@ class MyCardDetail extends StatelessWidget {
             mainAxisAlignment: MainAxisAlignment.spaceBetween,
             children: [
               const Text(
-                "Virtual Card",
+                "Novapay",
                 style: TextStyle(
                   color: Colors.white,
                   fontSize: 18,
@@ -239,7 +277,13 @@ class MyCardDetail extends StatelessWidget {
       child: Row(
         mainAxisAlignment: MainAxisAlignment.spaceBetween,
         children: [
-          Text(label, style: const TextStyle(color: Colors.grey, fontSize: 14)),
+          Text(
+            label,
+            style: const TextStyle(
+              color: Color.fromARGB(255, 89, 88, 88),
+              fontSize: 14,
+            ),
+          ),
           Row(
             children: [
               Text(

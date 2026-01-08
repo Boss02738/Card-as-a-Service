@@ -22,7 +22,7 @@ class SuccessRegisterPage extends StatelessWidget {
                   decoration: BoxDecoration(
                     color: Colors.white.withOpacity(
                       0.1,
-                    ), // พื้นหลังโปร่งแสงแบบในรูป
+                    ), 
                     borderRadius: BorderRadius.circular(12),
                   ),
                   child: Column(

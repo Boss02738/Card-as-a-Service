@@ -1,11 +1,10 @@
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
-import 'package:my_app/module/controller/my_cards_controller.dart';
-
 import 'package:my_app/views/widgets/buildHeader.dart';
 import 'package:my_app/views/widgets/custom_bottom_nav_bar.dart';
 import 'package:my_app/views/widgets/gradient_header.dart';
-import 'package:my_app/module/controller/home_controller.dart'; // import controller
+import 'package:my_app/module/controller/home_controller.dart'; 
+import 'package:my_app/module/controller/my_cards_controller.dart';
 
 class HomePage extends StatefulWidget {
   const HomePage({super.key});
@@ -422,7 +421,7 @@ Widget _buildActiveCardItem(dynamic card, String ownerName) {
             mainAxisAlignment: MainAxisAlignment.spaceBetween,
             children: [
               Text(
-                card['type_debit_name'] ?? 'Virtual Card',
+                card['type_debit_name'] ?? 'Novapay',
                 style: const TextStyle(
                   color: Colors.white,
                   fontWeight: FontWeight.bold,
@@ -455,8 +454,8 @@ Widget _buildActiveCardItem(dynamic card, String ownerName) {
           Row(
             mainAxisAlignment: MainAxisAlignment.spaceBetween,
             children: [
-               Text(
-                card['Virtual'] == 'true' ? 'Virtual Card' : "Physical Card",
+              Text(
+                card['virtual'] == "true" ? "Virtual Card" : "Physical Card",
                 style: TextStyle(color: Colors.white70, fontSize: 12),
               ),
                             Image.network(
