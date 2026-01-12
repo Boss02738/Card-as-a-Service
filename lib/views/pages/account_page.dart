@@ -33,6 +33,8 @@ class _AccountPageState extends State<AccountPage> {
                   padding: const EdgeInsets.symmetric(horizontal: 15),
                   child: AccountWidget(),
                 ),
+                SizedBox(height: 20),
+                
               ],
             ),
           ),
@@ -50,10 +52,10 @@ class _AccountPageState extends State<AccountPage> {
                     Get.toNamed('/home');
                   } else if (index == 2) {
                     Get.toNamed('/my_cards');
+                  }else if (index == 3) {
+                    Get.toNamed('/setting');
                   }
-                  // }else if (index == 4) {
-                  //   Get.toNamed('/settings');
-                  // }
+                  
                 },
               ),
             ],

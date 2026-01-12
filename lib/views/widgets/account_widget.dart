@@ -7,10 +7,10 @@ class AccountWidget extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    // ใช้ Get.find เพื่อดึง HomeController ที่ถูกสร้างไว้แล้วในหน้า Home
+    // ใช้ Get.find เพื่อดึง HomeController 
     final HomeController homeController = Get.find<HomeController>();
 
-    return Obx(() => Container( // หุ้มด้วย Obx เพื่อให้ยอดเงินอัปเดตอัตโนมัติ
+    return Obx(() => Container( 
       padding: const EdgeInsets.all(20),
       height: 200,
       width: double.infinity,

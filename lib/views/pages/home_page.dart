@@ -70,7 +70,11 @@ class _HomePageState extends State<HomePage> {
             Get.toNamed('/account');
           } else if (index == 2) {
             Get.toNamed('/my_cards');
-          }
+          } else if (index == 0) {
+            Get.toNamed('/home');
+          } else if (index == 3 ){
+            Get.toNamed('/setting');
+          } 
         },
       ),
     );
@@ -99,7 +103,7 @@ class _HomePageState extends State<HomePage> {
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         mainAxisAlignment:
-            MainAxisAlignment.spaceBetween, // กระจายเนื้อหาให้สวยงาม
+            MainAxisAlignment.spaceBetween, 
         children: [
           Row(
             mainAxisAlignment: MainAxisAlignment.spaceBetween,

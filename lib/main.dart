@@ -15,14 +15,16 @@ import 'package:my_app/views/pages/Register/info.dart';
 import 'package:my_app/views/pages/Register/success_register_page.dart';
 import 'package:my_app/views/pages/cards/my_card_detail.dart';
 import 'package:my_app/views/pages/cards/my_card_page.dart';
+import 'package:my_app/views/pages/physical/address.dart';
 import 'package:my_app/views/pages/pin_login_page.dart';
 import 'package:my_app/views/pages/Register/welcome_page.dart';
 import 'package:my_app/views/pages/Register/confirm_otp.dart';
 import 'package:my_app/views/pages/Create_cards/pin_verify_page.dart';
-import 'package:my_app/views/pages/Create_cards/success_createcard_page.dart';
+import 'package:my_app/views/pages/Create_cards/success_page.dart';
 import 'package:my_app/views/pages/Create_cards/type_cards.dart';
 import 'package:my_app/views/pages/Create_cards/card_confirm_page.dart';
-import 'package:my_app/views/pages/cards/success_change_limit.dart';
+import 'package:my_app/views/pages/profile.dart';
+import 'package:my_app/views/pages/setting_page.dart';
 
 void main() {
   WidgetsFlutterBinding.ensureInitialized();
@@ -49,7 +51,7 @@ class _NovaPayAppState extends State<NovaPayApp> {
   Widget build(BuildContext context) {
     return GetMaterialApp(
       debugShowCheckedModeBanner: false,
-      initialRoute: '/',
+      initialRoute: '/profile',
       getPages: [
         //Register
         GetPage(name: '/', page: () => const Welcome_Page()),
@@ -62,19 +64,24 @@ class _NovaPayAppState extends State<NovaPayApp> {
         GetPage(name: "/account", page: () => const AccountPage()),
         //Card
         GetPage(name: "/my_cards", page: () => const MyCardPage()),
-        GetPage(name: "/my_card_detail", page: () =>  MyCardDetail()),
-        GetPage(name: "/success_change_limit", page: () => const SuccessChangeLimitPaga()),
-        GetPage(name: "/change_limit_card", page: () => const ChangeLimitCard()),
+        GetPage(name: "/my_card_detail", page: () => MyCardDetail()),
+        GetPage(
+          name: "/change_limit_card",
+          page: () => const ChangeLimitCard(),
+        ),
         GetPage(name: "/sensitive", page: () => const SensitiveDataPage()),
+
         //creaate_card
         GetPage(name: "/type_cards", page: () => const Type_Cards()),
         GetPage(name: "/card_detail", page: () => const Card_Detail()),
         GetPage(name: "/card_confirm", page: () => const Card_Confirm_Page()),
         GetPage(name: "/pin_verify_page", page: () => const PinVerifyPage()),
-        GetPage(
-          name: "/success_createcard",
-          page: () => const SuccessCreatecardPaga(),
-        ),
+        GetPage(name: "/success_createcard", page: () => const SuccessPaga()),
+        //Physical card
+        GetPage(name: "/adress", page: () => const Address()),
+        //Setting
+        GetPage(name: "/setting", page: () => const SettingPage()),
+        GetPage(name: "/profile", page: () => const Profile()),
       ],
     );
   }

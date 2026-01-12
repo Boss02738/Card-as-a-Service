@@ -48,7 +48,6 @@ class HomeController extends GetxController {
         // แปลงข้อมูลจาก UTF-8 เพื่อรองรับภาษาไทย
         final data = jsonDecode(utf8.decode(response.bodyBytes));
         
-        // 3. อัปเดตค่าไปยังตัวแปร Observable
         fullNameTh.value = data['fullNameTh'];
         fullNameEn.value = data['fullNameEn'];
 
@@ -56,14 +55,13 @@ class HomeController extends GetxController {
         accountType.value = data['accountType'];
         balance.value = (data['balance'] as num).toDouble();
         
-        // ให่ม่ ดึงข้อมูลบัตร
+
         if (data['card_id'] != null) {
           myCards.value = data['card_id']; 
           print("ดึงข้อมูลบัตรสำเร็จ: ${myCards.length} ใบ");
         } else {
-          myCards.clear(); // ถ้าไม่มีบัตรให้เป็นลิสต์ว่าง
+          myCards.clear();
         }
-
       } else {
         print("Error: ${response.statusCode}");
         Get.snackbar('Error', 'ไม่สามารถดึงข้อมูลบัญชีได้');
