@@ -13,7 +13,9 @@ class HomeController extends GetxController {
   var accountType = ''.obs;
   var balance = 0.0.obs;
   var fullNameEn = ''.obs;
-  
+  var createdAt = ''.obs;
+  var email = ''.obs;
+  var number = ''.obs;
   // ดึงข้อมูลบัตรของฉัน
   var myCards = [].obs; // เก็บ List ของบัตรที่ดึงมาจาก API
 
@@ -51,6 +53,8 @@ class HomeController extends GetxController {
         fullNameTh.value = data['fullNameTh'];
         fullNameEn.value = data['fullNameEn'];
 
+        email.value = data['email'];
+        createdAt.value = data['createdAt'];
         accountNumber.value = data['accountNumber'];
         accountType.value = data['accountType'];
         balance.value = (data['balance'] as num).toDouble();

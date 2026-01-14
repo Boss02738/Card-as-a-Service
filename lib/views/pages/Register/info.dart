@@ -75,7 +75,7 @@ class _InfoState extends State<Info> {
                                 hintText: 'กรอกหมายเลขบัตรประชาชน',
                               ),
                               keyboardType: TextInputType.number,
-                            ),
+                            ), 
                             SizedBox(height: 20),
                             Text(
                               'วัน/เดือน/ปีเกิด',

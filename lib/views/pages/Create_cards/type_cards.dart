@@ -63,7 +63,6 @@ class Type_Cards extends StatelessWidget {
     // แปลงรูปภาพ Base64
     Uint8List? imageBytes;
     if (card['type_debit_image'] != null) {
-      // มีคำว่า data:image/png;base64, นำออกก่อนแปลง
       String base64String = card['type_debit_image'].split(',').last;
       imageBytes = base64Decode(base64String);
     }

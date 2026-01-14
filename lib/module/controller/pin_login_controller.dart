@@ -57,7 +57,6 @@ Future<void> loginWithPin() async {
         // --- ส่วนที่ต้องเพิ่ม/แก้ไข ---
         final responseData = jsonDecode(response.body);
         
-        // สมมติว่า API ส่งมาในรูปแบบ {"token": "xxxxxx", ...}
         String? token = responseData['token']; 
 
         if (token != null) {

@@ -8,6 +8,7 @@ import 'package:my_app/views/pages/Register/face_verify.dart';
 import 'package:my_app/views/pages/Create_cards/card_details.dart';
 import 'package:my_app/views/pages/account_page.dart';
 import 'package:my_app/views/pages/cards/change_limit_card.dart';
+import 'package:my_app/views/pages/cards/request_physicalcard.dart';
 import 'package:my_app/views/pages/cards/sensitivedata.dart';
 import 'package:my_app/views/pages/home_page.dart';
 import 'package:my_app/views/pages/Register/idcard_verify.dart';
@@ -51,7 +52,7 @@ class _NovaPayAppState extends State<NovaPayApp> {
   Widget build(BuildContext context) {
     return GetMaterialApp(
       debugShowCheckedModeBanner: false,
-      initialRoute: '/profile',
+      initialRoute: '/',
       getPages: [
         //Register
         GetPage(name: '/', page: () => const Welcome_Page()),
@@ -70,7 +71,6 @@ class _NovaPayAppState extends State<NovaPayApp> {
           page: () => const ChangeLimitCard(),
         ),
         GetPage(name: "/sensitive", page: () => const SensitiveDataPage()),
-
         //creaate_card
         GetPage(name: "/type_cards", page: () => const Type_Cards()),
         GetPage(name: "/card_detail", page: () => const Card_Detail()),
@@ -78,7 +78,8 @@ class _NovaPayAppState extends State<NovaPayApp> {
         GetPage(name: "/pin_verify_page", page: () => const PinVerifyPage()),
         GetPage(name: "/success_createcard", page: () => const SuccessPaga()),
         //Physical card
-        GetPage(name: "/adress", page: () => const Address()),
+        GetPage(name: "/address_input", page: () => const Address()),
+        GetPage(name: "/requestPhysical", page: () => const RequestPhysical()),
         //Setting
         GetPage(name: "/setting", page: () => const SettingPage()),
         GetPage(name: "/profile", page: () => const Profile()),

@@ -129,7 +129,6 @@ class _Card_DetailState extends State<Card_Detail> {
         ),
       ),
 
-      // 4. ส่วนปุ่มด้านล่างปรับให้เหมือน Figma
       bottomNavigationBar: SafeArea(
         child: Padding(
           padding: const EdgeInsets.symmetric(horizontal: 25, vertical: 20),
@@ -166,7 +165,6 @@ class _Card_DetailState extends State<Card_Detail> {
                 ),
               ),
 
-              // ฝั่งขวา: ต่อไป + ArrowFab
               ValueListenableBuilder<bool>(
                 valueListenable: isButtonEnabled,
                 builder: (context, enabled, child) {
@@ -177,7 +175,7 @@ class _Card_DetailState extends State<Card_Detail> {
                         style: TextStyle(
                           fontSize: 18,
                           fontWeight: FontWeight.bold,
-                          // ข้อความเปลี่ยนจากสีเทาเป็นสีเขียวเข้มหรือดำเมื่อเปิดใช้งาน
+                          
                           color: enabled
                               ? const Color.fromARGB(255, 45, 75, 10)
                               : Colors.grey[400],
@@ -217,7 +215,6 @@ class _Card_DetailState extends State<Card_Detail> {
   }
 }
 
-// 5. คลาส TermsCheckbox (คงเดิมตามที่คุณให้มา)
 class TermsCheckbox extends StatefulWidget {
   final Function(bool) onChanged;
   const TermsCheckbox({super.key, required this.onChanged});

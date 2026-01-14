@@ -135,6 +135,7 @@ class _MyCardPageState extends State<MyCardPage> {
                   setState(() => _selectedIndex = index);
                   if (index == 0) Get.toNamed('/home');
                   if (index == 1) Get.toNamed('/account');
+                  if (index == 3) Get.toNamed('/setting');
                 },
               ),
             ),

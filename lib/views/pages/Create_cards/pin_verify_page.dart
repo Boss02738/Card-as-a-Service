@@ -8,7 +8,6 @@ class PinVerifyPage extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    // ใช้ Controller ตัวใหม่สำหรับ Verify PIN สร้างบัตร
     final PinVerifyController controller = Get.put(PinVerifyController());
 
     return Scaffold(
@@ -21,13 +20,16 @@ class PinVerifyPage extends StatelessWidget {
                 const SizedBox(height: 60),
                 const BrandLogo(),
                 const SizedBox(height: 40),
-                
+
                 Text(
-                  // ✅ เปลี่ยนข้อความตาม Action
                   controller.args['action'] == 'change_limit'
                       ? 'ยืนยันรหัสผ่านเพื่อเปลี่ยนวงเงิน'
+                      : controller.args['action'] == 'view_sensitive'
+                      ? 'ยืนยันรหัสผ่านเพื่อดูเลขบัตร'
+                      : controller.args['action'] ==
+                            'request_physical' // ✅ เพิ่มบรรทัดนี้
+                      ? 'ยืนยันรหัสผ่านเพื่อขอรับบัตรแข็ง'
                       : 'ยืนยันรหัสผ่านเพื่อสร้างบัตร',
-                      // : 'ยืนยันรหัสผ่านเพื่อดูเลขบัตร',
                   style: const TextStyle(
                     fontSize: 20,
                     fontWeight: FontWeight.bold,
@@ -36,7 +38,6 @@ class PinVerifyPage extends StatelessWidget {
 
                 const SizedBox(height: 30),
 
-                // แสดงจุด PIN
                 Obx(
                   () => Row(
                     mainAxisAlignment: MainAxisAlignment.center,

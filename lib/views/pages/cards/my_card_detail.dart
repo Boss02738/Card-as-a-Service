@@ -56,7 +56,7 @@ class MyCardDetail extends StatelessWidget {
               ],
             ),
             Obx(() {
-              // ✅ ดึงข้อมูลบัตรใบนี้จาก Controller หลักที่อัปเดตแล้ว
+              //  ดึงข้อมูลบัตรใบนี้จาก Controller หลักที่อัปเดตแล้ว
               final latestCard = Get.find<MyCardsController>().myCards
                   .firstWhere(
                     (c) => c['card_id'] == currentCardId,
@@ -158,7 +158,36 @@ class MyCardDetail extends StatelessWidget {
             // 5. Physical Card Section
             _buildSectionHeader("บัตร Physical"),
             _buildDetailSection([
-              _buildRow("ขอบัตร Physical", "", showArrow: true),
+              Obx(() {
+                // ดึงข้อมูลล่าสุดเพื่อให้แน่ใจว่าได้เลขบัตรที่ถูกต้อง
+                final latestCard = Get.find<MyCardsController>().myCards
+                    .firstWhere(
+                      (c) => c['card_id'] == currentCardId,
+                      orElse: () => card,
+                    );
+
+                // my_card_detail.dart
+                return InkWell(
+                  onTap: () {
+                    // ดึงข้อมูลบัตรล่าสุดจาก list ใน controller
+                    final latestCard = Get.find<MyCardsController>().myCards
+                        .firstWhere(
+                          (c) => c['card_id'] == currentCardId,
+                          orElse: () => card,
+                        );
+
+                    Get.toNamed(
+                      '/requestPhysical',
+                      arguments: {
+                        'card':
+                            latestCard, // ส่งข้อมูลบัตรที่มี type_debit แฝงอยู่ไป
+                        'ownerName': ownerEn,
+                      },
+                    );
+                  },
+                  child: _buildRow("ขอบัตร Physical", "", showArrow: true),
+                );
+              }),
               _buildRow("เปิดใช้งานบัตร Physical", "", showArrow: true),
             ]),
 

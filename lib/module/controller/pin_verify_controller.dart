@@ -19,8 +19,10 @@ class PinVerifyController extends GetxController {
       enteredPin.value += number.toString();
     }
     if (enteredPin.value.length == 6) {
-      // เมื่อครบ 6 หลัก ให้ยิง API ทันที
-      if (args['action'] == 'view_sensitive') {
+      // ✅ เพิ่มเงื่อนไขเช็ค action ขอบัตรแข็ง
+      if (args['action'] == 'request_physical') {
+        processRequestPhysical();
+      } else if (args['action'] == 'view_sensitive') {
         processViewSensitiveData();
       } else if (args['action'] == 'change_limit') {
         processChangeLimit();
@@ -102,11 +104,13 @@ class PinVerifyController extends GetxController {
       );
 
       if (success) {
-        // Get.offAllNamed('/success_createcard', arguments: {
-        //   "title": "ปรับวงเงินสำเร็จ!",
-        //   "subtitle": "ระบบได้ทำการปรับเปลี่ยนวงเงินการใช้จ่ายของคุณแล้ว"
-        // });
-        Get.offAllNamed('/success_change_limit');
+        Get.offAllNamed(
+          '/success_createcard',
+          arguments: {
+            "title": "ปรับวงเงินสำเร็จ!",
+            "subtitle": "ระบบได้ทำการปรับเปลี่ยนวงเงินการใช้จ่ายของคุณแล้ว",
+          },
+        );
       } else {
         Get.snackbar(
           'ผิดพลาด',
@@ -144,8 +148,7 @@ class PinVerifyController extends GetxController {
           arguments: {
             'card': args['card'],
             'ownerName': args['ownerName'],
-            'sensitive':
-                sensitiveData, // ข้อมูลจาก API: expiry, encrypted_pan, encrypted_cvv
+            'sensitive': sensitiveData,
           },
         );
       } else {
@@ -159,5 +162,110 @@ class PinVerifyController extends GetxController {
     }
   }
 
-  // ในส่วน addNumber อย่าลืมเช็คเงื่อนไข
+  // Future<void> activateCards() async {
+  //   try {
+  //     isLoading.value = true;
+  //     String? token = await storage.read(key: 'accessToken');
+  //     String? deviceId = await getDeviceId();
+
+  //     // Map<String, dynamic> body = {
+  //     //   "pin": enteredPin.value,
+  //     //   "deviceId": deviceId,
+  //     //   "typeDebitId": cardData['type_debit_id'], // ID บัตรที่เลือกมา
+  //     // };
+  //     final response = await http.post(
+  //       Uri.parse("${ApiConstants.baseUrl}${ApiConstants.activatecard}"),
+
+  //       headers: {
+  //         "Content-Type": "application/json",
+  //         "Authorization": "Bearer $token",
+  //       },
+  //       // body
+  //     );
+  //     if (response.statusCode == 200){
+
+  //     }
+  //   } catch (e) {
+  //     Get.snackbar('Error', 'เกิดข้อผิดพลาดในการเชื่อมต่อ');
+  //   } finally {
+  //     isLoading.value = false;
+  //   }
+  // }
+  Future<void> requestPhysicalCards() async {
+    try {
+      isLoading.value = true;
+      String? token = await storage.read(key: 'accessToken');
+      String? deviceId = await getDeviceId();
+
+      // Map<String, dynamic> body = {
+      //   "pin": enteredPin.value,
+      //   "deviceId": deviceId,
+      //   "typeDebitId": cardData['type_debit_id'], // ID บัตรที่เลือกมา
+      // };
+      final response = await http.post(
+        Uri.parse("${ApiConstants.baseUrl}${ApiConstants.requestphysicalcard}"),
+
+        headers: {
+          "Content-Type": "application/json",
+          "Authorization": "Bearer $token",
+        },
+        // body
+      );
+      if (response.statusCode == 200) {}
+    } catch (e) {
+      Get.snackbar('Error', 'เกิดข้อผิดพลาดในการเชื่อมต่อ');
+    } finally {
+      isLoading.value = false;
+    }
+  }
+
+  Future<void> processRequestPhysical() async {
+    try {
+      isLoading.value = true;
+      String? token = await storage.read(key: 'accessToken');
+      String? deviceId = await getDeviceId();
+
+      // 📦 เตรียม Body ข้อมูล (ที่อยู่ + PIN + DeviceID)
+      Map<String, dynamic> addressInfo = args['addressData'];
+      Map<String, dynamic> body = {
+        ...addressInfo, // ดึงข้อมูลที่อยู่จากหน้า Address
+        "pin": enteredPin.value,
+        "deviceId": deviceId,
+      };
+
+      // 🚀 ยิง API เส้น requestphysicalcard
+      final response = await http.post(
+        Uri.parse(
+          "${ApiConstants.baseUrl}${ApiConstants.requestphysicalcard.replaceFirst('{card_id}', args['card']['card_id'])}",
+        ),
+        headers: {
+          "Content-Type": "application/json",
+          "Authorization": "Bearer $token",
+        },
+        body: jsonEncode(body),
+      );
+
+      if (response.statusCode == 200) {
+        Get.offAllNamed(
+          '/success_createcard',
+          arguments: {
+            "title": "ขอบัตรแข็งสำเร็จ!",
+            "subtitle": "ระบบกำลังจัดส่งบัตรไปยังที่อยู่ของคุณ",
+          },
+        );
+      } else {
+        final errorData = jsonDecode(utf8.decode(response.bodyBytes));
+        Get.snackbar(
+          'ผิดพลาด',
+          errorData['message'] ?? 'ไม่สามารถดำเนินการได้',
+        );
+        enteredPin.value = '';
+      }
+    } catch (e) {
+      Get.snackbar('Error', 'เกิดข้อผิดพลาดในการเชื่อมต่อ');
+      enteredPin.value = '';
+    } finally {
+      isLoading.value = false;
+    }
+  }
 }
