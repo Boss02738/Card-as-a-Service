@@ -19,18 +19,109 @@ class PinVerifyController extends GetxController {
       enteredPin.value += number.toString();
     }
     if (enteredPin.value.length == 6) {
-      // ✅ เพิ่มเงื่อนไขเช็ค action ขอบัตรแข็ง
+      //  เพิ่มเงื่อนไขเช็ค action ขอบัตรแข็ง
       if (args['action'] == 'request_physical') {
         processRequestPhysical();
       } else if (args['action'] == 'view_sensitive') {
         processViewSensitiveData();
       } else if (args['action'] == 'change_limit') {
         processChangeLimit();
+      } else if (args['action'] == 'activate_physical_flow') {
+        verifyAppPinForActivation();
       } else {
         createVirtualCard();
       }
     }
   }
+
+  // ✅ ฟังก์ชันใหม่สำหรับตรวจสอบ PIN แอปก่อนตั้งรหัสบัตร
+// ในไฟล์ pin_verify_controller.dart
+Future<void> processFinalActivate(String newCardPin, dynamic originalArgs) async {
+  try {
+    isLoading.value = true;
+    String? token = await storage.read(key: 'accessToken');
+    String? deviceId = await getDeviceId();
+
+    // 📦 รวบรวมข้อมูลตามที่ Postman กำหนด
+    Map<String, dynamic> body = {
+      "pin": originalArgs['app_pin'], // PIN แอปที่ส่งมาจากขั้นตอนก่อนหน้า
+      "deviceId": deviceId,
+      "lastDigits": originalArgs['input_data']['last_digits'],
+      "expiry": originalArgs['input_data']['expiry'],
+      "cvv": originalArgs['input_data']['cvv'],
+      "newCardPin": newCardPin, // รหัส ATM 6 หลักที่ตั้งใหม่
+    };
+
+    final response = await http.post(
+      Uri.parse("${ApiConstants.baseUrl}/api/v1/mobile/feature/card/${originalArgs['card']['card_id']}/activate"),
+      headers: {
+        "Content-Type": "application/json",
+        "Authorization": "Bearer $token",
+      },
+      body: jsonEncode(body),
+    );
+
+    if (response.statusCode == 200) {
+      // ✅ สำเร็จ! ไปหน้า Success
+      Get.offAllNamed('/success_page', arguments: {
+        "title": "เปิดใช้งานสำเร็จ",
+        "subtitle": "บัตรของคุณพร้อมใช้งานแล้ว",
+      });
+    } else {
+      final errorData = jsonDecode(utf8.decode(response.bodyBytes));
+      Get.snackbar('ผิดพลาด', errorData['message'] ?? 'ไม่สามารถเปิดใช้งานบัตรได้');
+    }
+  } catch (e) {
+    Get.snackbar('Error', 'เกิดข้อผิดพลาดในการเชื่อมต่อ');
+  } finally {
+    isLoading.value = false;
+  }
+}
+
+Future<void> verifyAppPinForActivation() async {
+  try {
+    isLoading.value = true;
+    String? token = await storage.read(key: 'accessToken');
+    String? deviceId = await getDeviceId();
+
+    // 🚀 ใช้ API เส้น Sensitive มาเป็นตัว Check PIN (เพราะเส้นนี้เช็ค PIN แน่นอน)
+    final response = await http.post(
+      Uri.parse(
+        "${ApiConstants.baseUrl}${ApiConstants.sensitive.replaceFirst('{card_id}', args['card']['card_id'])}",
+      ),
+      headers: {
+        "Content-Type": "application/json",
+        "Authorization": "Bearer $token",
+      },
+      body: jsonEncode({
+        "pin": enteredPin.value,
+        "deviceId": deviceId,
+      }),
+    );
+
+    if (response.statusCode == 200) {
+      // ✅ ถ้าผ่าน แสดงว่า PIN แอปถูกต้อง
+      // ดึงข้อมูล Sensitive เก็บไว้ใช้ตอนยิง Activate ขั้นตอนสุดท้าย
+      final sensitiveData = jsonDecode(utf8.decode(response.bodyBytes));
+      
+      Get.toNamed('/set_card_pin', arguments: {
+        ...args,
+        'app_pin': enteredPin.value,
+        'sensitive_data': sensitiveData, // เก็บเลขบัตรเต็มไว้ส่งตอน Activate
+      });
+    } else {
+      // ❌ PIN ผิด (ตามที่ Backend ตอบกลับ)
+      Get.snackbar('ผิดพลาด', 'รหัสผ่านไม่ถูกต้อง');
+      enteredPin.value = ''; 
+    }
+  } catch (e) {
+    Get.snackbar('Error', 'เกิดข้อผิดพลาดในการเชื่อมต่อ');
+    enteredPin.value = '';
+  } finally {
+    isLoading.value = false;
+  }
+}
+
 
   void deleteNumber() {
     if (enteredPin.value.isNotEmpty) {

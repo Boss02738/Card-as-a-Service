@@ -459,7 +459,7 @@ Widget _buildActiveCardItem(dynamic card, String ownerName) {
             mainAxisAlignment: MainAxisAlignment.spaceBetween,
             children: [
               Text(
-                card['virtual'] == "true" ? "Virtual Card" : "Physical Card",
+                card['virtual'] == true ? 'Virtual Card' : 'Physical Card',
                 style: TextStyle(color: Colors.white70, fontSize: 12),
               ),
                             Image.network(

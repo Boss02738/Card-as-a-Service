@@ -25,5 +25,9 @@ class ApiConstants {
   static const String limitcard = "/api/v1/mobile/feature/card/{card_id}/limit";
   static const String sensitive = "/api/v1/mobile/feature/card/{card_id}/sensitive";
   static const String requestphysicalcard = "/api/v1/mobile/feature/card/{card_id}/physical";
-  static const String activatecard = "/api/v1/mobile/feature/card/{card_id}/activatecard";
+  static const String activatecard = "/api/v1/mobile/feature/card/{card_id}/activate";
+
+  //pin
+  static const String changePassword = "/api/v1/mobile/feature/change-pin";
+  static const String forgetPassword = "/api/v1/mobile/auth/forget-pin";
 }

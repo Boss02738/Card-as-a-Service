@@ -235,8 +235,8 @@ class _ChangeLimitCardState extends State<ChangeLimitCard> {
           Row(
             mainAxisAlignment: MainAxisAlignment.spaceBetween,
             children: [
-              const Text(
-                "Virtual Card",
+               Text(
+                card['virtual'] == true ? 'Virtual Card' : 'Physical Card',
                 style: TextStyle(color: Colors.white70, fontSize: 12),
               ),
               Image.network(

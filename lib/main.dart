@@ -7,9 +7,11 @@ import 'package:my_app/views/pages/Register/enter_phone_page.dart';
 import 'package:my_app/views/pages/Register/face_verify.dart';
 import 'package:my_app/views/pages/Create_cards/card_details.dart';
 import 'package:my_app/views/pages/account_page.dart';
+import 'package:my_app/views/pages/cards/activate_physical.dart';
 import 'package:my_app/views/pages/cards/change_limit_card.dart';
 import 'package:my_app/views/pages/cards/request_physicalcard.dart';
 import 'package:my_app/views/pages/cards/sensitivedata.dart';
+import 'package:my_app/views/pages/changepin_page.dart';
 import 'package:my_app/views/pages/home_page.dart';
 import 'package:my_app/views/pages/Register/idcard_verify.dart';
 import 'package:my_app/views/pages/Register/info.dart';
@@ -17,6 +19,7 @@ import 'package:my_app/views/pages/Register/success_register_page.dart';
 import 'package:my_app/views/pages/cards/my_card_detail.dart';
 import 'package:my_app/views/pages/cards/my_card_page.dart';
 import 'package:my_app/views/pages/physical/address.dart';
+import 'package:my_app/views/pages/physical/setpin_physical.dart';
 import 'package:my_app/views/pages/pin_login_page.dart';
 import 'package:my_app/views/pages/Register/welcome_page.dart';
 import 'package:my_app/views/pages/Register/confirm_otp.dart';
@@ -80,9 +83,13 @@ class _NovaPayAppState extends State<NovaPayApp> {
         //Physical card
         GetPage(name: "/address_input", page: () => const Address()),
         GetPage(name: "/requestPhysical", page: () => const RequestPhysical()),
+        GetPage(name: "/activate_physical", page: () => const ActivatePhysical()),
+        GetPage(name: "/set_card_pin", page: () => const SetpinPhysical()),
         //Setting
         GetPage(name: "/setting", page: () => const SettingPage()),
         GetPage(name: "/profile", page: () => const Profile()),
+        //pin
+        GetPage(name: "/change_pin", page: () => const ChangePinPage()),
       ],
     );
   }

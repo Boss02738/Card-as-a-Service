@@ -27,7 +27,10 @@ class SettingPage extends StatelessWidget {
               title: const Text('ข้อมูลส่วนตัว'),
               subtitle: const Text(
                 'ชื่อผู้ใช้,อีเมล,เบอร์โทรศัพท์',
-                style: TextStyle(fontSize: 12,color:Color.fromARGB(255, 104, 104, 104)),
+                style: TextStyle(
+                  fontSize: 12,
+                  color: Color.fromARGB(255, 104, 104, 104),
+                ),
               ),
               trailing: const Icon(
                 Icons.arrow_forward_ios,
@@ -40,12 +43,18 @@ class SettingPage extends StatelessWidget {
               },
             ),
             ListTile(
-              leading: const Icon(Icons.credit_card,color: Color.fromARGB(255, 134, 133, 133),),
-              
+              leading: const Icon(
+                Icons.credit_card,
+                color: Color.fromARGB(255, 134, 133, 133),
+              ),
+
               title: const Text('จัดการบัตรเดบิต'),
               subtitle: const Text(
                 'ปรับวงเงิน,เปิเปิด/ปิดใช้งานบัตร,ดูเลขบัตรม,ขอบัตรจริง',
-                style: TextStyle(fontSize: 12,color:Color.fromARGB(255, 104, 104, 104)),
+                style: TextStyle(
+                  fontSize: 12,
+                  color: Color.fromARGB(255, 104, 104, 104),
+                ),
               ),
               trailing: const Icon(
                 Icons.arrow_forward_ios,
@@ -62,7 +71,10 @@ class SettingPage extends StatelessWidget {
               title: const Text('ความปลอดภัย'),
               subtitle: const Text(
                 'เปลี่ยนรหัส PIN',
-                style: TextStyle(fontSize: 12,color:Color.fromARGB(255, 104, 104, 104)),
+                style: TextStyle(
+                  fontSize: 12,
+                  color: Color.fromARGB(255, 104, 104, 104),
+                ),
               ),
               trailing: const Icon(
                 Icons.arrow_forward_ios,
@@ -70,7 +82,9 @@ class SettingPage extends StatelessWidget {
                 color: Color.fromARGB(255, 169, 169, 169),
               ),
 
-              onTap: () {},
+              onTap: () {
+                Get.toNamed("/change_pin");
+              },
             ),
           ],
         ),

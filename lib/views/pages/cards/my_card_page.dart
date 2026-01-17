@@ -232,7 +232,7 @@ class _MyCardPageState extends State<MyCardPage> {
             mainAxisAlignment: MainAxisAlignment.spaceBetween,
             children: [
               Text(
-                card['virtual'] == "true" ? "Virtual Card" : "Physical Card",
+                card['virtual'] == true ? "Virtual Card" : "Physical Card",
                 style: const TextStyle(color: Colors.white70, fontSize: 12),
               ),
               Image.network(

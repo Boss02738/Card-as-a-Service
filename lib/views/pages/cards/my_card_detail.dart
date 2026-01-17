@@ -157,39 +157,53 @@ class MyCardDetail extends StatelessWidget {
 
             // 5. Physical Card Section
             _buildSectionHeader("บัตร Physical"),
-            _buildDetailSection([
-              Obx(() {
-                // ดึงข้อมูลล่าสุดเพื่อให้แน่ใจว่าได้เลขบัตรที่ถูกต้อง
-                final latestCard = Get.find<MyCardsController>().myCards
-                    .firstWhere(
-                      (c) => c['card_id'] == currentCardId,
-                      orElse: () => card,
-                    );
+            Obx(() {
+              // ดึงข้อมูลล่าสุดจาก Controller เพื่อเช็คสถานะ
+              final latestCard = Get.find<MyCardsController>().myCards
+                  .firstWhere(
+                    (c) => c['card_id'] == currentCardId,
+                    orElse: () => card,
+                  );
 
-                // my_card_detail.dart
-                return InkWell(
-                  onTap: () {
-                    // ดึงข้อมูลบัตรล่าสุดจาก list ใน controller
-                    final latestCard = Get.find<MyCardsController>().myCards
-                        .firstWhere(
-                          (c) => c['card_id'] == currentCardId,
-                          orElse: () => card,
-                        );
+              // ✅ ตรวจสอบว่าเป็นบัตรแข็ง (Physical) หรือไม่ จากค่า virtual ใน JSON
+              // ถ้า virtual == "false" แสดงว่าเป็นบัตรแข็งแล้ว
+              bool isAlreadyPhysical =
+                  latestCard['virtual'].toString() == "false";
 
-                    Get.toNamed(
-                      '/requestPhysical',
-                      arguments: {
-                        'card':
-                            latestCard, // ส่งข้อมูลบัตรที่มี type_debit แฝงอยู่ไป
-                        'ownerName': ownerEn,
-                      },
-                    );
-                  },
-                  child: _buildRow("ขอบัตร Physical", "", showArrow: true),
-                );
-              }),
-              _buildRow("เปิดใช้งานบัตร Physical", "", showArrow: true),
-            ]),
+              return _buildDetailSection([
+                // ✅ 1. ปุ่มขอบัตร: แสดงเฉพาะเมื่อยังเป็นบัตร Virtual (isAlreadyPhysical เป็น false)
+                if (!isAlreadyPhysical)
+                  InkWell(
+                    onTap: () {
+                      Get.toNamed(
+                        '/requestPhysical',
+                        arguments: {
+                          'action': 'view_sensitive_for_activate',
+                          'card': latestCard,
+                          'ownerName': ownerEn,
+                        },
+                      );
+                    },
+                    child: _buildRow("ขอบัตร Physical", "", showArrow: true),
+                  ),
+
+                // ✅ 2. ปุ่มเปิดใช้งาน: แสดงเฉพาะเมื่อเป็นบัตร Physical แล้ว (isAlreadyPhysical เป็น true)
+                if (isAlreadyPhysical)
+                  InkWell(
+                    onTap: () {
+                      Get.toNamed(
+                        '/activate_physical',
+                        arguments: {'card': latestCard, 'ownerName': ownerEn},
+                      );
+                    },
+                    child: _buildRow(
+                      "เปิดใช้งานบัตร Physical",
+                      "",
+                      showArrow: true,
+                    ),
+                  ),
+              ]);
+            }),
 
             Obx(
               () => statusCardController.isLoading.value
@@ -265,7 +279,7 @@ class MyCardDetail extends StatelessWidget {
             mainAxisAlignment: MainAxisAlignment.spaceBetween,
             children: [
               Text(
-                card['virtual'] == "true" ? "Virtual Card" : "Physical Card",
+                card['virtual'] == true ? "Virtual Card" : "Physical Card",
                 style: TextStyle(color: Colors.white70, fontSize: 12),
               ),
               Image.network(
