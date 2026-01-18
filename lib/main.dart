@@ -6,6 +6,7 @@ import 'package:get/get_navigation/src/routes/get_route.dart';
 import 'package:my_app/views/pages/Register/enter_phone_page.dart';
 import 'package:my_app/views/pages/Register/face_verify.dart';
 import 'package:my_app/views/pages/Create_cards/card_details.dart';
+import 'package:my_app/views/pages/Register/pin_page.dart';
 import 'package:my_app/views/pages/account_page.dart';
 import 'package:my_app/views/pages/cards/activate_physical.dart';
 import 'package:my_app/views/pages/cards/change_limit_card.dart';
@@ -62,6 +63,8 @@ class _NovaPayAppState extends State<NovaPayApp> {
         GetPage(name: '/enter-phone', page: () => const EnterPhonePage()),
         GetPage(name: '/success', page: () => const SuccessRegisterPage()),
         GetPage(name: '/confirm-otp', page: () => const Confirm_otp()),
+        GetPage(name: '/face_cerify', page: () => const FaceVerify()),
+        GetPage(name: '/pin_page', page: () => const PinPage()),
         //Login & Home
         GetPage(name: '/login-pin', page: () => const PinLoginPage()),
         GetPage(name: "/home", page: () => const HomePage()),
