@@ -1,11 +1,14 @@
 import 'dart:io';
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
+import 'package:my_app/module/controller/phonenumber_controller.dart';
+import 'package:my_app/module/services/secure_storage.dart';
 import 'package:my_app/views/pages/Register/pin_page.dart';
 import 'package:my_app/views/widgets/data_card.dart';
 import 'package:my_app/views/widgets/gradient_header.dart';
 import 'package:my_app/module/services/camera_service.dart';
 import '../../widgets/arrow_fab.dart';
+import 'package:my_app/module/controller/home_controller.dart';
 
 class FaceVerify extends StatefulWidget {
   const FaceVerify({super.key});
@@ -20,6 +23,7 @@ class _FaceVerifyState extends State<FaceVerify> {
 
   @override
   Widget build(BuildContext context) {
+    // final HomeController homeController = Get.find<HomeController>();
     return Scaffold(
       body: Stack(
         children: [
@@ -41,14 +45,16 @@ class _FaceVerifyState extends State<FaceVerify> {
                   ),
                 ),
                 const SizedBox(height: 20),
-                
+
                 // --- ส่วนกรอบใบหน้า (Overlay) ---
                 Expanded(
                   child: Container(
                     width: double.infinity,
                     margin: const EdgeInsets.symmetric(horizontal: 20),
                     decoration: BoxDecoration(
-                      color: Colors.black.withOpacity(0.1), // พื้นหลังมัวเล็กน้อย
+                      color: Colors.black.withOpacity(
+                        0.1,
+                      ), // พื้นหลังมัวเล็กน้อย
                       borderRadius: BorderRadius.circular(12),
                     ),
                     child: Stack(
@@ -57,10 +63,15 @@ class _FaceVerifyState extends State<FaceVerify> {
                         _image != null
                             ? ClipRRect(
                                 borderRadius: BorderRadius.circular(12),
-                                child: Image.file(_image!, fit: BoxFit.cover, width: double.infinity, height: double.infinity),
+                                child: Image.file(
+                                  _image!,
+                                  fit: BoxFit.cover,
+                                  width: double.infinity,
+                                  height: double.infinity,
+                                ),
                               )
                             : Image.asset(
-                                'assets/images/face_verify.png', 
+                                'assets/images/face_verify.png',
                                 fit: BoxFit.contain,
                                 // color: Colors.white.withOpacity(0.8),
                               ),
@@ -76,35 +87,53 @@ class _FaceVerifyState extends State<FaceVerify> {
                       const SizedBox(height: 20),
                       // ป้ายเตือนมิจฉาชีพ
                       Container(
-                        padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 8),
+                        padding: const EdgeInsets.symmetric(
+                          horizontal: 12,
+                          vertical: 8,
+                        ),
                         decoration: BoxDecoration(
                           color: Colors.red.withOpacity(0.1),
                           borderRadius: BorderRadius.circular(8),
-                          border: Border.all(color: Colors.red.withOpacity(0.3)),
+                          border: Border.all(
+                            color: Colors.red.withOpacity(0.3),
+                          ),
                         ),
                         child: Row(
                           children: [
                             Container(
-                              padding: const EdgeInsets.symmetric(horizontal: 6, vertical: 2),
+                              padding: const EdgeInsets.symmetric(
+                                horizontal: 6,
+                                vertical: 2,
+                              ),
                               decoration: BoxDecoration(
                                 color: Colors.red,
                                 borderRadius: BorderRadius.circular(4),
                               ),
-                              child: const Text('ระวัง!', style: TextStyle(color: Colors.white, fontSize: 12, fontWeight: FontWeight.bold)),
+                              child: const Text(
+                                'ระวัง!',
+                                style: TextStyle(
+                                  color: Colors.white,
+                                  fontSize: 12,
+                                  fontWeight: FontWeight.bold,
+                                ),
+                              ),
                             ),
                             const SizedBox(width: 8),
                             const Expanded(
                               child: Text(
                                 'มิจฉาชีพหลอกให้สแกนใบหน้าเพื่อใช้งาน NovaPay',
-                                style: TextStyle(color: Colors.red, fontSize: 11),
+                                style: TextStyle(
+                                  color: Colors.red,
+                                  fontSize: 11,
+                                ),
                               ),
                             ),
                           ],
                         ),
                       ),
-                      
+
                       const SizedBox(height: 25),
-                      
+
                       // ปุ่มเปิดกล้อง
                       Center(
                         child: ElevatedButton(
@@ -118,14 +147,19 @@ class _FaceVerifyState extends State<FaceVerify> {
                           style: ElevatedButton.styleFrom(
                             backgroundColor: const Color(0xFF17337B),
                             minimumSize: const Size(280, 48),
-                            shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(8)),
+                            shape: RoundedRectangleBorder(
+                              borderRadius: BorderRadius.circular(8),
+                            ),
                           ),
-                          child: const Text('เปิดกล้องเพื่อสแกน', style: TextStyle(color: Colors.white, fontSize: 16)),
+                          child: const Text(
+                            'เปิดกล้องเพื่อสแกน',
+                            style: TextStyle(color: Colors.white, fontSize: 16),
+                          ),
                         ),
                       ),
-                      
+
                       const SizedBox(height: 30),
-                      
+
                       // ปุ่มต่อไป
                       Row(
                         mainAxisAlignment: MainAxisAlignment.end,
@@ -133,15 +167,46 @@ class _FaceVerifyState extends State<FaceVerify> {
                           Text(
                             'ต่อไป',
                             style: TextStyle(
-                              color: _image != null ? Colors.black : Colors.black.withOpacity(0.3),
+                              color: _image != null
+                                  ? Colors.black
+                                  : Colors.black.withOpacity(0.3),
                               fontSize: 16,
                             ),
                           ),
                           const SizedBox(width: 10),
+                          // ArrowFab(
+                          //   enabled: _image != null,
+                          //   onPressed: () {
+                          //     Get.to(
+                          //       () => const PinPage(),
+                          //       arguments: {'mode': 'reset_pin'},
+                          //     );
+                          //   },
+                          // ),
                           ArrowFab(
                             enabled: _image != null,
-                            onPressed: () {
-                              Get.to(() => const PinPage());
+                            // ในหน้า face_verify.dart ตรงปุ่ม ArrowFab
+                            onPressed: () async {
+                              // 🔍 1. ดึงเบอร์โทรศัพท์ที่บันทึกไว้ในเครื่องตอน Login
+                              String? savedMobile = await storage.read(
+                                key: 'userMobile',
+                              );
+
+                              // 🛡️ 2. ตรวจสอบเบอร์สำรอง (เผื่อกรณีไม่มีใน storage)
+                              if (savedMobile == null || savedMobile.isEmpty) {
+                                // ถ้าหาไม่เจอจริงๆ อาจจะดึงจาก Arguments ที่ส่งมาจากหน้า Login ก็ได้
+                                savedMobile =
+                                    Get.arguments?['mobileNumber'] ?? "";
+                              }
+
+                              // 🚀 3. ส่งไปหน้า PIN พร้อม Action และเบอร์โทร
+                              Get.toNamed(
+                                '/pin_page',
+                                arguments: {
+                                  'action': 'forgot_password_reset',
+                                  'mobileNumber': savedMobile,
+                                },
+                              );
                             },
                           ),
                         ],
