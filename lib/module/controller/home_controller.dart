@@ -52,7 +52,7 @@ class HomeController extends GetxController {
         
         fullNameTh.value = data['fullNameTh'];
         fullNameEn.value = data['fullNameEn'];
-
+        number.value = data['number'];
         email.value = data['email'];
         createdAt.value = data['createdAt'];
         accountNumber.value = data['accountNumber'];

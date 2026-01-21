@@ -1,6 +1,7 @@
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_prevent_screenshot/disablescreenshot.dart';
+import 'package:flutter/services.dart';
 import 'package:get/get_navigation/src/root/get_material_app.dart';
 import 'package:get/get_navigation/src/routes/get_route.dart';
 import 'package:my_app/views/pages/Register/change_device_page.dart';
@@ -35,7 +36,12 @@ import 'package:my_app/views/pages/setting_page.dart';
 
 void main() {
   WidgetsFlutterBinding.ensureInitialized();
-  runApp(const NovaPayApp());
+  SystemChrome.setPreferredOrientations([
+    DeviceOrientation.portraitUp,
+    DeviceOrientation.portraitDown,
+  ]).then((_) {
+    runApp(const NovaPayApp());
+  });
 }
 
 class NovaPayApp extends StatefulWidget {
@@ -102,11 +108,8 @@ class _NovaPayAppState extends State<NovaPayApp> {
 
         GetPage(name: '/user_selection', page: () => const UserSelectionPage()),
         GetPage(name: '/change_device', page: () => const ChangeDevicePage()),
-        GetPage(
-          name: '/idcard_verify',
-          page: () => const IdcardVerify(),
-        ),
+        GetPage(name: '/idcard_verify', page: () => const IdcardVerify()),
       ],
     );
-  }  
+  }
 }

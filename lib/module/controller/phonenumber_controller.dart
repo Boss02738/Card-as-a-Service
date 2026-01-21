@@ -30,7 +30,8 @@ Future<bool> submitPhone() async {
     final response = await http.post(
       url,
       headers: {'Content-Type': 'application/json'},
-      body: jsonEncode({'phoneNumber': phoneNumber.value}),
+      // body: jsonEncode({'phoneNumber': phoneNumber.value}),
+      body: jsonEncode({'mobileNumber': phoneNumber.value}),
     );
 
 
