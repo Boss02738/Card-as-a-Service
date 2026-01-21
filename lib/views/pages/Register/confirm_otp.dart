@@ -48,7 +48,7 @@ class _Confirm_otpState extends State<Confirm_otp> {
 
   void _onConfirm() {
     if (_formKey.currentState!.validate()) {
-      Get.off(() => const IdcardVerify())?.then((value) {
+      Get.offNamed('/user_selection')?.then((value) {
         // ล้างค่าเมื่อย้อนกลับมาถึงหน้าเดิม
         headerTextController.setHeaderText(
           'กรอกรหัสยืนยัน OTP',

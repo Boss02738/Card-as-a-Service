@@ -118,7 +118,7 @@ class PinLoginPage extends StatelessWidget {
         ),
         TextButton(
           onPressed: () {
-            Get.toNamed('/face_cerify');
+            Get.toNamed('/face_verify');
           },
           child: const Text(
             'ลืมรหัสผ่าน',

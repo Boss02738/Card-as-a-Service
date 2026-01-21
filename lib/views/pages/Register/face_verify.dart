@@ -138,12 +138,13 @@ class _FaceVerifyState extends State<FaceVerify> {
                       Center(
                         child: ElevatedButton(
                           onPressed: () {
-                            _cameraService.takePicture().then((file) {
-                              if (file != null) {
-                                setState(() => _image = file);
-                              }
-                            });
-                          },
+  // ✅ 1. ถ่ายรูปตามปกติ
+  _cameraService.takePicture().then((file) {
+    if (file != null) {
+      setState(() => _image = file);
+    }
+  });
+},
                           style: ElevatedButton.styleFrom(
                             backgroundColor: const Color(0xFF17337B),
                             minimumSize: const Size(280, 48),
@@ -184,31 +185,35 @@ class _FaceVerifyState extends State<FaceVerify> {
                           //   },
                           // ),
                           ArrowFab(
-                            enabled: _image != null,
-                            // ในหน้า face_verify.dart ตรงปุ่ม ArrowFab
-                            onPressed: () async {
-                              // 🔍 1. ดึงเบอร์โทรศัพท์ที่บันทึกไว้ในเครื่องตอน Login
-                              String? savedMobile = await storage.read(
-                                key: 'userMobile',
-                              );
+  enabled: _image != null,
+  onPressed: () async {
+    final dynamic args = Get.arguments;
+    
+    // 🔍 1. ตรวจสอบว่ามี Arguments หรือไม่ (ป้องกัน Error type Null)
+    final Map<String, dynamic> currentArgs = (args is Map) ? Map<String, dynamic>.from(args) : {};
 
-                              // 🛡️ 2. ตรวจสอบเบอร์สำรอง (เผื่อกรณีไม่มีใน storage)
-                              if (savedMobile == null || savedMobile.isEmpty) {
-                                // ถ้าหาไม่เจอจริงๆ อาจจะดึงจาก Arguments ที่ส่งมาจากหน้า Login ก็ได้
-                                savedMobile =
-                                    Get.arguments?['mobileNumber'] ?? "";
-                              }
+    // 🔍 2. จัดเตรียมเบอร์โทรศัพท์
+    String? mobile = currentArgs['mobileNumber'];
+    if (mobile == null || mobile.isEmpty) {
+      mobile = await storage.read(key: 'userMobile') ?? "";
+    }
 
-                              // 🚀 3. ส่งไปหน้า PIN พร้อม Action และเบอร์โทร
-                              Get.toNamed(
-                                '/pin_page',
-                                arguments: {
-                                  'action': 'forgot_password_reset',
-                                  'mobileNumber': savedMobile,
-                                },
-                              );
-                            },
-                          ),
+    // 🚀 3. แยก Action เพื่อส่งต่อข้อมูลให้ถูกต้อง
+    if (currentArgs['action'] == 'change_device_flow') {
+      // ✅ Flow ย้ายเครื่อง: ส่งต่อเลขบัตร/บัญชี/เบอร์
+      Get.toNamed('/pin_page', arguments: {
+        ...currentArgs,
+        'mobileNumber': mobile,
+      });
+    } else {
+      // ✅ Flow ลืมรหัสผ่าน หรือ Register ปกติ
+      Get.toNamed('/pin_page', arguments: {
+        'action': currentArgs['action'] ?? 'register', // Default เป็น register
+        'mobileNumber': mobile,
+      });
+    }
+  },
+),
                         ],
                       ),
                       const SizedBox(height: 15),

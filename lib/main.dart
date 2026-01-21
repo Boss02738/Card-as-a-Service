@@ -3,10 +3,12 @@ import 'package:flutter/material.dart';
 import 'package:flutter_prevent_screenshot/disablescreenshot.dart';
 import 'package:get/get_navigation/src/root/get_material_app.dart';
 import 'package:get/get_navigation/src/routes/get_route.dart';
+import 'package:my_app/views/pages/Register/change_device_page.dart';
 import 'package:my_app/views/pages/Register/enter_phone_page.dart';
 import 'package:my_app/views/pages/Register/face_verify.dart';
 import 'package:my_app/views/pages/Create_cards/card_details.dart';
 import 'package:my_app/views/pages/Register/pin_page.dart';
+import 'package:my_app/views/pages/Register/user_selection_page.dart';
 import 'package:my_app/views/pages/account_page.dart';
 import 'package:my_app/views/pages/cards/activate_physical.dart';
 import 'package:my_app/views/pages/cards/change_limit_card.dart';
@@ -63,7 +65,7 @@ class _NovaPayAppState extends State<NovaPayApp> {
         GetPage(name: '/enter-phone', page: () => const EnterPhonePage()),
         GetPage(name: '/success', page: () => const SuccessRegisterPage()),
         GetPage(name: '/confirm-otp', page: () => const Confirm_otp()),
-        GetPage(name: '/face_cerify', page: () => const FaceVerify()),
+        GetPage(name: '/face_verify', page: () => const FaceVerify()),
         GetPage(name: '/pin_page', page: () => const PinPage()),
         //Login & Home
         GetPage(name: '/login-pin', page: () => const PinLoginPage()),
@@ -86,14 +88,25 @@ class _NovaPayAppState extends State<NovaPayApp> {
         //Physical card
         GetPage(name: "/address_input", page: () => const Address()),
         GetPage(name: "/requestPhysical", page: () => const RequestPhysical()),
-        GetPage(name: "/activate_physical", page: () => const ActivatePhysical()),
+        GetPage(
+          name: "/activate_physical",
+          page: () => const ActivatePhysical(),
+        ),
         GetPage(name: "/set_card_pin", page: () => const SetpinPhysical()),
         //Setting
         GetPage(name: "/setting", page: () => const SettingPage()),
         GetPage(name: "/profile", page: () => const Profile()),
         //pin
         GetPage(name: "/change_pin", page: () => const ChangePinPage()),
+        GetPage(name: "/pin_page", page: () => const PinPage()),
+
+        GetPage(name: '/user_selection', page: () => const UserSelectionPage()),
+        GetPage(name: '/change_device', page: () => const ChangeDevicePage()),
+        GetPage(
+          name: '/idcard_verify',
+          page: () => const IdcardVerify(),
+        ),
       ],
     );
-  }
+  }  
 }

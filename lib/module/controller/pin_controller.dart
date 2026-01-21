@@ -57,101 +57,279 @@ class PinController extends GetxController {
   //   }
   // }
 
+  // เพิ่มใน PinController
+  Future<void> processChangeDevice() async {
+    try {
+      isLoading.value = true;
+      String? deviceId = await getDeviceId();
+      final dynamic args = Get.arguments;
+
+      Map<String, dynamic> body = {
+        "citizenId": args['citizenId'],
+        "accountNumber": args['accountNumber'],
+        "pin": firstPin.value, // รหัสผ่านใหม่ที่เพิ่งตั้ง
+        "mobileNumber": args['mobileNumber'] ?? lockedMobile,
+        "newDeviceId": deviceId,
+      };
+
+      final response = await http.post(
+        Uri.parse("${ApiConstants.baseUrl}${ApiConstants.changedevice}"), //
+        headers: {"Content-Type": "application/json"},
+        body: jsonEncode(body),
+      );
+
+      if (response.statusCode == 200) {
+        Get.snackbar('สำเร็จ', 'เปลี่ยนอุปกรณ์สำเร็จ กรุณาเข้าสู่ระบบใหม่');
+        Get.offAllNamed('/pin_login');
+      } else {
+        Get.snackbar('ผิดพลาด', 'ข้อมูลไม่ถูกต้อง กรุณาตรวจสอบอีกครั้ง');
+      }
+    } catch (e) {
+      Get.snackbar('Error', 'เกิดข้อผิดพลาดในการเชื่อมต่อ');
+    } finally {
+      isLoading.value = false;
+    }
+  }
+
+  // void handlePinComplete() {
+  //     if (!isConfirmMode.value) {
+  //       // --- จังหวะที่ PIN รอบแรกเสร็จ ---
+
+  //       // ✅ จุดที่ต้องเพิ่ม: สำหรับ Flow "Register" ปกติ ต้องล็อกเบอร์โทรไว้ด้วย
+  //       // แต่ถ้าเป็น Flow "Forgot Password" เราจะดึงจาก Get.arguments แทนในภายหลัง
+  //       try {
+  //         final phoneCtrl = Get.find<PhonenumberController>();
+  //         lockedMobile = phoneCtrl.phoneNumber.value;
+  //       } catch (e) {
+  //         print("Register controller not found, maybe in Forgot Password flow");
+  //       }
+
+  //       firstPin.value = enteredPin.value;
+  //       enteredPin.value = '';
+  //       isConfirmMode.value = true;
+  //     } else {
+  //       // --- จังหวะที่ PIN รอบที่สองเสร็จ ---
+  //       if (enteredPin.value == firstPin.value) {
+
+  //         // ✅ ตรวจสอบ Action: ต้องใช้ Get.arguments ในการแยก Flow
+  //         final dynamic args = Get.arguments;
+  //         final String? action = args is Map ? args['action'] : null;
+
+  //         print("DEBUG: Current Action is $action");
+
+  //         if (action == 'forgot_password_reset') {
+  //           processResetPassword(); // 🚀 เรียกฟังก์ชันรีเซ็ตรหัส
+  //         } else {
+  //           registerUser(); // 🚀 เรียกฟังก์ชันสมัครสมาชิกเดิม
+  //         }
+  //       } else {
+  //         Get.snackbar('ผิดพลาด', 'รหัสผ่านไม่ตรงกัน กรุณาลองใหม่');
+  //         enteredPin.value = '';
+  //       }
+  //     }
+  //   }
+  // ใน PinController
+
 void handlePinComplete() {
+  final dynamic args = Get.arguments;
+  final String? action = args is Map ? args['action'] : null;
+
+  if (action == 'change_device_flow') {
+    // ✅ สำหรับ Flow เปลี่ยนเครื่อง: ยิง API เช็ค PIN เดิมทันที
+    verifyOldPinAndChangeDevice();
+  } else {
+    // Flow อื่นๆ (สมัครใหม่/ลืมรหัส) ที่ต้องกรอก 2 รอบ
     if (!isConfirmMode.value) {
-      // --- จังหวะที่ PIN รอบแรกเสร็จ ---
-      
-      // ✅ จุดที่ต้องเพิ่ม: สำหรับ Flow "Register" ปกติ ต้องล็อกเบอร์โทรไว้ด้วย
-      // แต่ถ้าเป็น Flow "Forgot Password" เราจะดึงจาก Get.arguments แทนในภายหลัง
+      // สำหรับ Register: ล็อกค่าเบอร์โทรไว้
       try {
         final phoneCtrl = Get.find<PhonenumberController>();
         lockedMobile = phoneCtrl.phoneNumber.value;
       } catch (e) {
-        print("Register controller not found, maybe in Forgot Password flow");
+        print("Register controller not found");
       }
 
       firstPin.value = enteredPin.value;
       enteredPin.value = '';
       isConfirmMode.value = true;
     } else {
-      // --- จังหวะที่ PIN รอบที่สองเสร็จ ---
+      // ตรวจสอบ PIN รอบสอง
       if (enteredPin.value == firstPin.value) {
-        
-        // ✅ ตรวจสอบ Action: ต้องใช้ Get.arguments ในการแยก Flow
-        final dynamic args = Get.arguments;
-        final String? action = args is Map ? args['action'] : null;
-
-        print("DEBUG: Current Action is $action");
-
         if (action == 'forgot_password_reset') {
-          processResetPassword(); // 🚀 เรียกฟังก์ชันรีเซ็ตรหัส
+          processResetPassword();
         } else {
-          registerUser(); // 🚀 เรียกฟังก์ชันสมัครสมาชิกเดิม
+          registerUser();
         }
       } else {
-        Get.snackbar('ผิดพลาด', 'รหัสผ่านไม่ตรงกัน กรุณาลองใหม่');
+        Get.snackbar('ผิดพลาด', 'รหัสผ่านไม่ตรงกัน');
         enteredPin.value = '';
       }
     }
   }
+}
 
-Future<void> processResetPassword() async {
+// pin_controller.dart
+
+// Future<void> verifyOldPinAndChangeDevice() async {
+//   try {
+//     isLoading.value = true;
+//     String? deviceId = await getDeviceId();
+//     final dynamic args = Get.arguments;
+
+//     // 🔍 1. ตรวจสอบให้แน่ใจว่าได้เบอร์มาจากหน้า ChangeDevice/FaceVerify
+//     String mobile = "";
+//     if (args is Map) {
+//       mobile = args['mobileNumber'] ?? "";
+//     }
+
+//     if (mobile.isEmpty) {
+//       Get.snackbar('ผิดพลาด', 'ไม่พบข้อมูลเบอร์โทรศัพท์สำหรับการย้ายเครื่อง');
+//       return;
+//     }
+
+//     Map<String, dynamic> body = {
+//       "citizenId": args['citizenId'],
+//       "accountNumber": args['accountNumber'],
+//       "pin": enteredPin.value, // PIN เดิม
+//       "mobileNumber": mobile,
+//       "newDeviceId": deviceId,
+//     };
+
+//     final response = await http.post(
+//       Uri.parse("${ApiConstants.baseUrl}/api/v1/mobile/auth/change-device"),
+//       headers: {"Content-Type": "application/json"},
+//       body: jsonEncode(body),
+//     );
+
+//     if (response.statusCode == 200) {
+//       // ✅ 2. บันทึกเบอร์ลงเครื่องใหม่ทันที (นี่คือจุดที่ทำให้ Login ไม่ผ่านถ้าลืมเขียน)
+//       await storage.write(key: 'userMobile', value: mobile); 
+//       await storage.write(key: 'isRegistered', value: 'true');
+//       await storage.write(key: 'deviceId', value: deviceId ?? "");
+
+//       print("DEBUG: ย้ายเครื่องสำเร็จ บันทึกเบอร์ $mobile ลง Storage แล้ว");
+
+//       Get.snackbar('สำเร็จ', 'ยืนยันตัวตนสำเร็จ ระบบจดจำเบอร์โทรของคุณแล้ว');
+      
+//       // ให้เวลา Storage เขียนข้อมูลลง Disk แป๊บเดียว
+//       await Future.delayed(const Duration(milliseconds: 600));
+//       Get.offAllNamed('/login-pin'); 
+//     } else {
+//       final error = jsonDecode(utf8.decode(response.bodyBytes));
+//       Get.snackbar('ผิดพลาด', error['message'] ?? 'ข้อมูลไม่ถูกต้อง');
+//       enteredPin.value = '';
+//     }
+//   } catch (e) {
+//     Get.snackbar('Error', 'เกิดข้อผิดพลาด: $e');
+//   } finally {
+//     isLoading.value = false;
+//   }
+// }
+
+// ใน PinController
+Future<void> verifyOldPinAndChangeDevice() async {
   try {
     isLoading.value = true;
     String? deviceId = await getDeviceId();
-
-    // 🔍 เช็ค Arguments ให้ละเอียด
     final dynamic args = Get.arguments;
-    String mobile = "";
 
-    if (args is Map && args.containsKey('mobileNumber')) {
-      mobile = args['mobileNumber'] ?? "";
-    }
-
-    // 🛡️ ถ้าไม่มีเบอร์โทรศัพท์ ให้แจ้งเตือนแทนการปล่อยให้ Error
-    if (mobile.isEmpty) {
-      Get.snackbar('ผิดพลาด', 'ไม่พบข้อมูลเบอร์โทรศัพท์ในระบบ');
-      return;
-    }
+    // ดึงเบอร์โทรศัพท์ที่ส่งมาจากหน้า ChangeDevicePage หรือ FaceVerify
+    String mobile = args['mobileNumber'] ?? "";
 
     Map<String, dynamic> body = {
+      "citizenId": args['citizenId'],
+      "accountNumber": args['accountNumber'],
+      "pin": enteredPin.value,
       "mobileNumber": mobile,
-      "newPin": firstPin.value,
-      "deviceId": deviceId,
+      "newDeviceId": deviceId,
     };
 
-    print("DEBUG: Sending Reset PIN Request for $mobile");
-
     final response = await http.post(
-      Uri.parse("${ApiConstants.baseUrl}${ApiConstants.forgetPassword}"),
+      Uri.parse("${ApiConstants.baseUrl}${ApiConstants.changedevice}"),
       headers: {"Content-Type": "application/json"},
       body: jsonEncode(body),
     );
 
-    print("DEBUG: API Response Code: ${response.statusCode}");
-    print("DEBUG: API Response Body: ${response.body}");
-
     if (response.statusCode == 200) {
-      Get.snackbar('สำเร็จ', 'รีเซ็ตรหัสผ่านใหม่เรียบร้อยแล้ว');
-      // ล้างค่าก่อนย้ายหน้า
-      enteredPin.value = '';
-      firstPin.value = '';
-      isConfirmMode.value = false;
+      // ✅ จุดที่ต้องแก้ไข: บันทึกข้อมูลลงเครื่องใหม่เพื่อให้ Login ได้
+      await storage.write(key: 'userMobile', value: mobile); 
+      await storage.write(key: 'isRegistered', value: 'true');
       
+      print("DEBUG: บันทึกเบอร์ $mobile ลงเครื่องใหม่สำเร็จ");
+
+      Get.snackbar('สำเร็จ', 'ยืนยันตัวตนสำเร็จ กรุณาเข้าสู่ระบบ');
+      
+      // หน่วงเวลาเล็กน้อยเพื่อให้ระบบบันทึกค่าเสร็จสิ้นก่อนย้ายหน้า
       await Future.delayed(const Duration(milliseconds: 500));
-      Get.offAllNamed('/pin_login'); // กลับไปหน้า Login
+      Get.offAllNamed('/login-pin'); 
     } else {
       final error = jsonDecode(utf8.decode(response.bodyBytes));
-      Get.snackbar('ผิดพลาด', error['message'] ?? 'รีเซ็ตรหัสผ่านไม่สำเร็จ');
-      enteredPin.value = ''; // ให้ User ลองกรอก Confirm PIN ใหม่
+      Get.snackbar('ผิดพลาด', error['message'] ?? 'ข้อมูลไม่ถูกต้อง');
+      enteredPin.value = '';
     }
   } catch (e) {
-    print("DEBUG: Catch Error: $e"); // ดู Error ใน Log ว่าติดที่บรรทัดไหน
     Get.snackbar('Error', 'เกิดข้อผิดพลาดในการเชื่อมต่อ: $e');
   } finally {
     isLoading.value = false;
   }
 }
+
+  Future<void> processResetPassword() async {
+    try {
+      isLoading.value = true;
+      String? deviceId = await getDeviceId();
+
+      // 🔍 เช็ค Arguments ให้ละเอียด
+      final dynamic args = Get.arguments;
+      String mobile = "";
+
+      if (args is Map && args.containsKey('mobileNumber')) {
+        mobile = args['mobileNumber'] ?? "";
+      }
+
+      // 🛡️ ถ้าไม่มีเบอร์โทรศัพท์ ให้แจ้งเตือนแทนการปล่อยให้ Error
+      if (mobile.isEmpty) {
+        Get.snackbar('ผิดพลาด', 'ไม่พบข้อมูลเบอร์โทรศัพท์ในระบบ');
+        return;
+      }
+
+      Map<String, dynamic> body = {
+        "mobileNumber": mobile,
+        "newPin": firstPin.value,
+        "deviceId": deviceId,
+      };
+
+      print("DEBUG: Sending Reset PIN Request for $mobile");
+
+      final response = await http.post(
+        Uri.parse("${ApiConstants.baseUrl}${ApiConstants.forgetPassword}"),
+        headers: {"Content-Type": "application/json"},
+        body: jsonEncode(body),
+      );
+
+      print("DEBUG: API Response Code: ${response.statusCode}");
+      print("DEBUG: API Response Body: ${response.body}");
+
+      if (response.statusCode == 200) {
+        Get.snackbar('สำเร็จ', 'รีเซ็ตรหัสผ่านใหม่เรียบร้อยแล้ว');
+        // ล้างค่าก่อนย้ายหน้า
+        enteredPin.value = '';
+        firstPin.value = '';
+        isConfirmMode.value = false;
+
+        await Future.delayed(const Duration(milliseconds: 500));
+        Get.offAllNamed('/pin_login'); // กลับไปหน้า Login
+      } else {
+        final error = jsonDecode(utf8.decode(response.bodyBytes));
+        Get.snackbar('ผิดพลาด', error['message'] ?? 'รีเซ็ตรหัสผ่านไม่สำเร็จ');
+        enteredPin.value = ''; // ให้ User ลองกรอก Confirm PIN ใหม่
+      }
+    } catch (e) {
+      print("DEBUG: Catch Error: $e"); // ดู Error ใน Log ว่าติดที่บรรทัดไหน
+      Get.snackbar('Error', 'เกิดข้อผิดพลาดในการเชื่อมต่อ: $e');
+    } finally {
+      isLoading.value = false;
+    }
+  }
 
   void goBackToSetPin() {
     isConfirmMode.value = false;
