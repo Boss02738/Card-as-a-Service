@@ -35,14 +35,14 @@ class PinVerifyController extends GetxController {
   }
 
   // ✅ ฟังก์ชันใหม่สำหรับตรวจสอบ PIN แอปก่อนตั้งรหัสบัตร
-// ในไฟล์ pin_verify_controller.dart
+// // ในไฟล์ pin_verify_controller.dart
 Future<void> processFinalActivate(String newCardPin, dynamic originalArgs) async {
   try {
     isLoading.value = true;
     String? token = await storage.read(key: 'accessToken');
     String? deviceId = await getDeviceId();
 
-    // 📦 รวบรวมข้อมูลตามที่ Postman กำหนด
+
     Map<String, dynamic> body = {
       "pin": originalArgs['app_pin'], // PIN แอปที่ส่งมาจากขั้นตอนก่อนหน้า
       "deviceId": deviceId,
@@ -84,7 +84,6 @@ Future<void> verifyAppPinForActivation() async {
     String? token = await storage.read(key: 'accessToken');
     String? deviceId = await getDeviceId();
 
-    // 🚀 ใช้ API เส้น Sensitive มาเป็นตัว Check PIN (เพราะเส้นนี้เช็ค PIN แน่นอน)
     final response = await http.post(
       Uri.parse(
         "${ApiConstants.baseUrl}${ApiConstants.sensitive.replaceFirst('{card_id}', args['card']['card_id'])}",
@@ -100,8 +99,6 @@ Future<void> verifyAppPinForActivation() async {
     );
 
     if (response.statusCode == 200) {
-      // ✅ ถ้าผ่าน แสดงว่า PIN แอปถูกต้อง
-      // ดึงข้อมูล Sensitive เก็บไว้ใช้ตอนยิง Activate ขั้นตอนสุดท้าย
       final sensitiveData = jsonDecode(utf8.decode(response.bodyBytes));
       
       Get.toNamed('/set_card_pin', arguments: {
@@ -139,11 +136,10 @@ Future<void> verifyAppPinForActivation() async {
       String? token = await storage.read(key: 'accessToken');
       String? deviceId = await getDeviceId();
 
-      // เตรียม Data ตามที่ Postman กำหนด
       Map<String, dynamic> body = {
         "pin": enteredPin.value,
         "deviceId": deviceId,
-        "typeDebitId": cardData['type_debit_id'], // ID บัตรที่เลือกมา
+        "typeDebitId": cardData['type_debit_id'], 
       };
 
       final response = await http.post(
@@ -158,7 +154,7 @@ Future<void> verifyAppPinForActivation() async {
       if (response.statusCode == 200) {
         // สร้างสำเร็จ ไปหน้า Success
         Get.offAllNamed(
-          '/success_createcard',
+          '/success_page',
           arguments: {
             "title": "สร้างบัตรสำเร็จ!",
             "subtitle": "ระบบกำลังดำเนินการเปิดใช้งานบัตรของคุณ",
@@ -196,7 +192,7 @@ Future<void> verifyAppPinForActivation() async {
 
       if (success) {
         Get.offAllNamed(
-          '/success_createcard',
+          '/success_page',
           arguments: {
             "title": "ปรับวงเงินสำเร็จ!",
             "subtitle": "ระบบได้ทำการปรับเปลี่ยนวงเงินการใช้จ่ายของคุณแล้ว",
@@ -338,7 +334,7 @@ Future<void> verifyAppPinForActivation() async {
 
       if (response.statusCode == 200) {
         Get.offAllNamed(
-          '/success_createcard',
+          '/success_page',
           arguments: {
             "title": "ขอบัตรแข็งสำเร็จ!",
             "subtitle": "ระบบกำลังจัดส่งบัตรไปยังที่อยู่ของคุณ",

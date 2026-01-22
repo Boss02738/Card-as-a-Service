@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import 'package:my_app/views/widgets/buildHeader.dart';
 import 'package:my_app/views/widgets/custom_bottom_nav_bar.dart';
+import 'package:my_app/views/widgets/exit_confirmation_dialog.dart';
 import 'package:my_app/views/widgets/gradient_header.dart';
 import 'package:my_app/module/controller/home_controller.dart'; 
 import 'package:my_app/module/controller/my_cards_controller.dart';
@@ -20,62 +21,64 @@ class _HomePageState extends State<HomePage> {
   Widget build(BuildContext context) {
     final HomeController homeController = Get.put(HomeController());
     final MyCardsController cardController = Get.put(MyCardsController());
-    return Scaffold(
-      backgroundColor: const Color(0xFFF5F7FA),
-      body: Stack(
-        children: [
-          const GradientHeader(),
-          SafeArea(
-            child: Obx(() {
-              // ถ้ากำลังโหลด ให้โชว์ Loading
-              if (homeController.isLoading.value) {
-                return const Center(
-                  child: CircularProgressIndicator(color: Colors.white),
+    return BackButtonInterceptor(
+      child: Scaffold(
+        backgroundColor: const Color(0xFFF5F7FA),
+        body: Stack(
+          children: [
+            const GradientHeader(),
+            SafeArea(
+              child: Obx(() {
+                // ถ้ากำลังโหลด ให้โชว์ Loading
+                if (homeController.isLoading.value) {
+                  return const Center(
+                    child: CircularProgressIndicator(color: Colors.white),
+                  );
+                }
+      
+                return SingleChildScrollView(
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      const SizedBox(height: 20),
+                      const Buildheader(),
+                      const SizedBox(height: 20),
+                      Padding(
+                        padding: const EdgeInsets.symmetric(horizontal: 15),
+                        child: _buildAccount(homeController),
+                      ),
+                      const SizedBox(height: 10),
+                      _buildOffersSection(), // ส่วนข้อเสนอพิเศษ
+                      const SizedBox(height: 10),
+                      _buildMyCardsSection(
+                        cardController,
+                        homeController, // ส่วนบัตรของฉัน0.
+                      ),
+                    ],
+                  ),
                 );
-              }
-
-              return SingleChildScrollView(
-                child: Column(
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  children: [
-                    const SizedBox(height: 20),
-                    const Buildheader(),
-                    const SizedBox(height: 20),
-                    Padding(
-                      padding: const EdgeInsets.symmetric(horizontal: 15),
-                      child: _buildAccount(homeController),
-                    ),
-                    const SizedBox(height: 10),
-                    _buildOffersSection(), // ส่วนข้อเสนอพิเศษ
-                    const SizedBox(height: 10),
-                    _buildMyCardsSection(
-                      cardController,
-                      homeController, // ส่วนบัตรของฉัน0.
-                    ),
-                  ],
-                ),
-              );
-            }),
-          ),
-        ],
-      ),
-      bottomNavigationBar: CustomBottomNavBar(
-        currentIndex: _selectedIndex,
-        onTap: (index) {
-          setState(() {
-            _selectedIndex = index;
-          });
-
-          if (index == 1) {
-            Get.toNamed('/account');
-          } else if (index == 2) {
-            Get.toNamed('/my_cards');
-          } else if (index == 0) {
-            Get.toNamed('/home');
-          } else if (index == 3 ){
-            Get.toNamed('/setting');
-          } 
-        },
+              }),
+            ),
+          ],
+        ),
+        bottomNavigationBar: CustomBottomNavBar(
+          currentIndex: _selectedIndex,
+          onTap: (index) {
+            setState(() {
+              _selectedIndex = index;
+            });
+      
+            if (index == 1) {
+              Get.toNamed('/account');
+            } else if (index == 2) {
+              Get.toNamed('/my_cards');
+            } else if (index == 0) {
+              Get.toNamed('/home');
+            } else if (index == 3 ){
+              Get.toNamed('/setting');
+            } 
+          },
+        ),
       ),
     );
   }

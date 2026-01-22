@@ -37,98 +37,6 @@ class PinController extends GetxController {
       );
     }
   }
-  //   void handlePinComplete() {
-  //   if (!isConfirmMode.value) {
-  //     // จังหวะที่ PIN รอบแรกเสร็จ ให้ดึงเบอร์จาก Controller มาเก็บไว้ใน lockedMobile ทันที
-  //     final phoneCtrl = Get.find<PhonenumberController>();
-  //     lockedMobile = phoneCtrl.phoneNumber.value;
-  //     print("ล็อกค่าเบอร์โทรสำเร็จ: $lockedMobile"); // เพิ่มเพื่อเช็คใน Log
-
-  //     firstPin.value = enteredPin.value;
-  //     enteredPin.value = '';
-  //     isConfirmMode.value = true;
-  //   } else {
-  //     if (enteredPin.value == firstPin.value) {
-  //       registerUser();
-  //     } else {
-  //       Get.snackbar('ผิดพลาด', 'รหัสไม่ตรงกัน กรุณาลองใหม่');
-  //       enteredPin.value = '';
-  //     }
-  //   }
-  // }
-
-  // เพิ่มใน PinController
-  Future<void> processChangeDevice() async {
-    try {
-      isLoading.value = true;
-      String? deviceId = await getDeviceId();
-      final dynamic args = Get.arguments;
-
-      Map<String, dynamic> body = {
-        "citizenId": args['citizenId'],
-        "accountNumber": args['accountNumber'],
-        "pin": firstPin.value, // รหัสผ่านใหม่ที่เพิ่งตั้ง
-        "mobileNumber": args['mobileNumber'] ?? lockedMobile,
-        "newDeviceId": deviceId,
-      };
-
-      final response = await http.post(
-        Uri.parse("${ApiConstants.baseUrl}${ApiConstants.changedevice}"), //
-        headers: {"Content-Type": "application/json"},
-        body: jsonEncode(body),
-      );
-
-      if (response.statusCode == 200) {
-        Get.snackbar('สำเร็จ', 'เปลี่ยนอุปกรณ์สำเร็จ กรุณาเข้าสู่ระบบใหม่');
-        Get.offAllNamed('/pin_login');
-      } else {
-        Get.snackbar('ผิดพลาด', 'ข้อมูลไม่ถูกต้อง กรุณาตรวจสอบอีกครั้ง');
-      }
-    } catch (e) {
-      Get.snackbar('Error', 'เกิดข้อผิดพลาดในการเชื่อมต่อ');
-    } finally {
-      isLoading.value = false;
-    }
-  }
-
-  // void handlePinComplete() {
-  //     if (!isConfirmMode.value) {
-  //       // --- จังหวะที่ PIN รอบแรกเสร็จ ---
-
-  //       // ✅ จุดที่ต้องเพิ่ม: สำหรับ Flow "Register" ปกติ ต้องล็อกเบอร์โทรไว้ด้วย
-  //       // แต่ถ้าเป็น Flow "Forgot Password" เราจะดึงจาก Get.arguments แทนในภายหลัง
-  //       try {
-  //         final phoneCtrl = Get.find<PhonenumberController>();
-  //         lockedMobile = phoneCtrl.phoneNumber.value;
-  //       } catch (e) {
-  //         print("Register controller not found, maybe in Forgot Password flow");
-  //       }
-
-  //       firstPin.value = enteredPin.value;
-  //       enteredPin.value = '';
-  //       isConfirmMode.value = true;
-  //     } else {
-  //       // --- จังหวะที่ PIN รอบที่สองเสร็จ ---
-  //       if (enteredPin.value == firstPin.value) {
-
-  //         // ✅ ตรวจสอบ Action: ต้องใช้ Get.arguments ในการแยก Flow
-  //         final dynamic args = Get.arguments;
-  //         final String? action = args is Map ? args['action'] : null;
-
-  //         print("DEBUG: Current Action is $action");
-
-  //         if (action == 'forgot_password_reset') {
-  //           processResetPassword(); // 🚀 เรียกฟังก์ชันรีเซ็ตรหัส
-  //         } else {
-  //           registerUser(); // 🚀 เรียกฟังก์ชันสมัครสมาชิกเดิม
-  //         }
-  //       } else {
-  //         Get.snackbar('ผิดพลาด', 'รหัสผ่านไม่ตรงกัน กรุณาลองใหม่');
-  //         enteredPin.value = '';
-  //       }
-  //     }
-  //   }
-  // ใน PinController
 
 void handlePinComplete() {
   final dynamic args = Get.arguments;
@@ -167,65 +75,6 @@ void handlePinComplete() {
   }
 }
 
-// pin_controller.dart
-
-// Future<void> verifyOldPinAndChangeDevice() async {
-//   try {
-//     isLoading.value = true;
-//     String? deviceId = await getDeviceId();
-//     final dynamic args = Get.arguments;
-
-//     // 🔍 1. ตรวจสอบให้แน่ใจว่าได้เบอร์มาจากหน้า ChangeDevice/FaceVerify
-//     String mobile = "";
-//     if (args is Map) {
-//       mobile = args['mobileNumber'] ?? "";
-//     }
-
-//     if (mobile.isEmpty) {
-//       Get.snackbar('ผิดพลาด', 'ไม่พบข้อมูลเบอร์โทรศัพท์สำหรับการย้ายเครื่อง');
-//       return;
-//     }
-
-//     Map<String, dynamic> body = {
-//       "citizenId": args['citizenId'],
-//       "accountNumber": args['accountNumber'],
-//       "pin": enteredPin.value, // PIN เดิม
-//       "mobileNumber": mobile,
-//       "newDeviceId": deviceId,
-//     };
-
-//     final response = await http.post(
-//       Uri.parse("${ApiConstants.baseUrl}/api/v1/mobile/auth/change-device"),
-//       headers: {"Content-Type": "application/json"},
-//       body: jsonEncode(body),
-//     );
-
-//     if (response.statusCode == 200) {
-//       // ✅ 2. บันทึกเบอร์ลงเครื่องใหม่ทันที (นี่คือจุดที่ทำให้ Login ไม่ผ่านถ้าลืมเขียน)
-//       await storage.write(key: 'userMobile', value: mobile); 
-//       await storage.write(key: 'isRegistered', value: 'true');
-//       await storage.write(key: 'deviceId', value: deviceId ?? "");
-
-//       print("DEBUG: ย้ายเครื่องสำเร็จ บันทึกเบอร์ $mobile ลง Storage แล้ว");
-
-//       Get.snackbar('สำเร็จ', 'ยืนยันตัวตนสำเร็จ ระบบจดจำเบอร์โทรของคุณแล้ว');
-      
-//       // ให้เวลา Storage เขียนข้อมูลลง Disk แป๊บเดียว
-//       await Future.delayed(const Duration(milliseconds: 600));
-//       Get.offAllNamed('/login-pin'); 
-//     } else {
-//       final error = jsonDecode(utf8.decode(response.bodyBytes));
-//       Get.snackbar('ผิดพลาด', error['message'] ?? 'ข้อมูลไม่ถูกต้อง');
-//       enteredPin.value = '';
-//     }
-//   } catch (e) {
-//     Get.snackbar('Error', 'เกิดข้อผิดพลาด: $e');
-//   } finally {
-//     isLoading.value = false;
-//   }
-// }
-
-// ใน PinController
 Future<void> verifyOldPinAndChangeDevice() async {
   try {
     isLoading.value = true;
@@ -263,7 +112,7 @@ Future<void> verifyOldPinAndChangeDevice() async {
       Get.offAllNamed('/login-pin'); 
     } else {
       final error = jsonDecode(utf8.decode(response.bodyBytes));
-      Get.snackbar('ผิดพลาด', error['message'] ?? 'ข้อมูลไม่ถูกต้อง');
+      Get.snackbar('ผิดพลาด', error['message'] ?? 'ข้อมูลไม่ถูกต้อง กรุณาตรวจสอบข้อมูลอีกครั้ง');
       enteredPin.value = '';
     }
   } catch (e) {

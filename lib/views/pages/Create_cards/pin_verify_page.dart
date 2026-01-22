@@ -29,7 +29,7 @@ class PinVerifyPage extends StatelessWidget {
                       : controller.args['action'] == 'request_physical'
                       ? 'ยืนยันรหัสผ่านเพื่อขอรับบัตรแข็ง'
                       : controller.args['action'] == 'activate_physical_flow'
-                      ? 'กรอกรหัสผ่า่น'
+                      ? 'กรอกรหัสผ่าน'
                       : 'ยืนยันรหัสผ่านเพื่อสร้างบัตร',
                   style: const TextStyle(
                     fontSize: 20,

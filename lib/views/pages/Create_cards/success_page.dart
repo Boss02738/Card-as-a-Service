@@ -9,13 +9,9 @@ class SuccessPaga extends StatelessWidget {
   Widget build(BuildContext context) {
     final String title = Get.arguments['title'];
     final String subtitle = Get.arguments['subtitle'];
-    // final String title = args != null && args['title'] != null
         // ? args['title']
-    //     : 'ทำรายการสำเร็จ';
 
-    // final String subtitle = args != null && args['subtitle'] != null
     //     ? args['subtitle']
-    //     : 'สามารถเริ่มใช้งานได้ทันที';
     return Scaffold(
       body: Stack(
         children: [

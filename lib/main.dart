@@ -90,7 +90,7 @@ class _NovaPayAppState extends State<NovaPayApp> {
         GetPage(name: "/card_detail", page: () => const Card_Detail()),
         GetPage(name: "/card_confirm", page: () => const Card_Confirm_Page()),
         GetPage(name: "/pin_verify_page", page: () => const PinVerifyPage()),
-        GetPage(name: "/success_createcard", page: () => const SuccessPaga()),
+        GetPage(name: "/success_page", page: () => const SuccessPaga()),
         //Physical card
         GetPage(name: "/address_input", page: () => const Address()),
         GetPage(name: "/requestPhysical", page: () => const RequestPhysical()),

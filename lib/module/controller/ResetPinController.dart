@@ -43,7 +43,6 @@ class ResetPinController extends GetxController {
       String? mobile = await storage.read(key: 'userMobile'); // ดึงเบอร์จากเครื่อง
       String? deviceId = await getDeviceId();
 
-      // 📦 เตรียมข้อมูลตาม Postman
       Map<String, dynamic> body = {
         "mobileNumber": mobile,
         "newPin": firstPin.value,

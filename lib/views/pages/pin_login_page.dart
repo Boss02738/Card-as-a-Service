@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import 'package:my_app/module/controller/pin_login_controller.dart'; // อย่าลืมสร้างไฟล์นี้
+import 'package:my_app/views/widgets/exit_confirmation_dialog.dart';
 import '../widgets/brand_logo.dart';
 
 class PinLoginPage extends StatelessWidget {
@@ -8,70 +9,71 @@ class PinLoginPage extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    // เรียกใช้ Login Controller แทน Register Controller
     final PinLoginController controller = Get.put(PinLoginController());
 
-    return Scaffold(
-      backgroundColor: Colors.white,
-      body: Stack(
-        children: [
-          SafeArea(
-            child: Column(
-              children: [
-                const SizedBox(height: 60),
-                const BrandLogo(),
-                const SizedBox(height: 40),
-                const Text(
-                  'กรุณาใส่รหัสผ่าน',
-                  style: TextStyle(fontSize: 20, fontWeight: FontWeight.bold),
-                ),
-                const SizedBox(height: 30),
-
-                // จุดวงกลมแสดงสถานะ PIN
-                Obx(
-                  () => Row(
-                    mainAxisAlignment: MainAxisAlignment.center,
-                    children: List.generate(6, (index) {
-                      bool isFilled =
-                          index < controller.enteredPin.value.length;
-                      return Container(
-                        margin: const EdgeInsets.symmetric(horizontal: 8),
-                        width: 14,
-                        height: 14,
-                        decoration: BoxDecoration(
-                          shape: BoxShape.circle,
-                          border: Border.all(
-                            color: Colors.blueAccent,
-                            width: 2,
-                          ),
-                          color: isFilled
-                              ? Colors.blueAccent
-                              : Colors.transparent,
-                        ),
-                      );
-                    }),
+    return BackButtonInterceptor(
+      child: Scaffold(
+        backgroundColor: Colors.white,
+        body: Stack(
+          children: [
+            SafeArea(
+              child: Column(
+                children: [
+                  const SizedBox(height: 60),
+                  const BrandLogo(),
+                  const SizedBox(height: 40),
+                  const Text(
+                    'กรุณาใส่รหัสผ่าน',
+                    style: TextStyle(fontSize: 20, fontWeight: FontWeight.bold),
                   ),
-                ),
-
-                const Spacer(),
-
-                // Keypad สำหรับ Login
-                buildKeypad(controller),
-                const SizedBox(height: 40),
-              ],
+                  const SizedBox(height: 30),
+      
+                  // จุดวงกลมแสดงสถานะ PIN
+                  Obx(
+                    () => Row(
+                      mainAxisAlignment: MainAxisAlignment.center,
+                      children: List.generate(6, (index) {
+                        bool isFilled =
+                            index < controller.enteredPin.value.length;
+                        return Container(
+                          margin: const EdgeInsets.symmetric(horizontal: 8),
+                          width: 14,
+                          height: 14,
+                          decoration: BoxDecoration(
+                            shape: BoxShape.circle,
+                            border: Border.all(
+                              color: Colors.blueAccent,
+                              width: 2,
+                            ),
+                            color: isFilled
+                                ? Colors.blueAccent
+                                : Colors.transparent,
+                          ),
+                        );
+                      }),
+                    ),
+                  ),
+      
+                  const Spacer(),
+      
+                  // Keypad สำหรับ Login
+                  buildKeypad(controller),
+                  const SizedBox(height: 40),
+                ],
+              ),
             ),
-          ),
-
-          // หน้าจอ Loading ระหว่างเช็ครหัส
-          Obx(
-            () => controller.isLoading.value
-                ? Container(
-                    color: Colors.black26,
-                    child: const Center(child: CircularProgressIndicator()),
-                  )
-                : const SizedBox.shrink(),
-          ),
-        ],
+      
+            // หน้าจอ Loading ระหว่างเช็ครหัส
+            Obx(
+              () => controller.isLoading.value
+                  ? Container(
+                      color: Colors.black26,
+                      child: const Center(child: CircularProgressIndicator()),
+                    )
+                  : const SizedBox.shrink(),
+            ),
+          ],
+        ),
       ),
     );
   }

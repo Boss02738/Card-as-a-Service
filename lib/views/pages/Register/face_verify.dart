@@ -138,13 +138,13 @@ class _FaceVerifyState extends State<FaceVerify> {
                       Center(
                         child: ElevatedButton(
                           onPressed: () {
-  // ✅ 1. ถ่ายรูปตามปกติ
-  _cameraService.takePicture().then((file) {
-    if (file != null) {
-      setState(() => _image = file);
-    }
-  });
-},
+                            // ✅ หน้าที่เดียวคือเปิดกล้อง ห้ามเปลี่ยนหน้าตรงนี้
+                            _cameraService.takePicture().then((file) {
+                              if (file != null) {
+                                setState(() => _image = file);
+                              }
+                            });
+                          },
                           style: ElevatedButton.styleFrom(
                             backgroundColor: const Color(0xFF17337B),
                             minimumSize: const Size(280, 48),
@@ -175,45 +175,34 @@ class _FaceVerifyState extends State<FaceVerify> {
                             ),
                           ),
                           const SizedBox(width: 10),
-                          // ArrowFab(
-                          //   enabled: _image != null,
-                          //   onPressed: () {
-                          //     Get.to(
-                          //       () => const PinPage(),
-                          //       arguments: {'mode': 'reset_pin'},
-                          //     );
-                          //   },
-                          // ),
                           ArrowFab(
-  enabled: _image != null,
-  onPressed: () async {
-    final dynamic args = Get.arguments;
-    
-    // 🔍 1. ตรวจสอบว่ามี Arguments หรือไม่ (ป้องกัน Error type Null)
-    final Map<String, dynamic> currentArgs = (args is Map) ? Map<String, dynamic>.from(args) : {};
+                            enabled: _image != null,
+                            // ภายใน face_verify.dart ตรงปุ่ม ArrowFab
+                            onPressed: () async {
+                              final dynamic args = Get.arguments;
+                              final Map<String, dynamic> currentArgs =
+                                  (args is Map)
+                                  ? Map<String, dynamic>.from(args)
+                                  : {};
 
-    // 🔍 2. จัดเตรียมเบอร์โทรศัพท์
-    String? mobile = currentArgs['mobileNumber'];
-    if (mobile == null || mobile.isEmpty) {
-      mobile = await storage.read(key: 'userMobile') ?? "";
-    }
+                              // 🔍 ตรวจสอบเบอร์โทรศัพท์จากเครื่อง
+                              String? mobile = await storage.read(
+                                key: 'userMobile',
+                              );
 
-    // 🚀 3. แยก Action เพื่อส่งต่อข้อมูลให้ถูกต้อง
-    if (currentArgs['action'] == 'change_device_flow') {
-      // ✅ Flow ย้ายเครื่อง: ส่งต่อเลขบัตร/บัญชี/เบอร์
-      Get.toNamed('/pin_page', arguments: {
-        ...currentArgs,
-        'mobileNumber': mobile,
-      });
-    } else {
-      // ✅ Flow ลืมรหัสผ่าน หรือ Register ปกติ
-      Get.toNamed('/pin_page', arguments: {
-        'action': currentArgs['action'] ?? 'register', // Default เป็น register
-        'mobileNumber': mobile,
-      });
-    }
-  },
-),
+                              // 🚀 ส่งไปหน้า PIN พร้อมระบุ Action ลืมรหัสผ่านให้ชัดเจน
+                              Get.toNamed(
+                                '/pin_page',
+                                arguments: {
+                                  ...currentArgs,
+                                  'action':
+                                      currentArgs['action'] ??
+                                      'forgot_password_reset', // บังคับให้เป็นลืมรหัสถ้าไม่มีค่า
+                                  'mobileNumber': mobile,
+                                },
+                              );
+                            },
+                          ),
                         ],
                       ),
                       const SizedBox(height: 15),

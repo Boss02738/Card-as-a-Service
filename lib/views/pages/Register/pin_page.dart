@@ -18,13 +18,6 @@ class PinPage extends StatelessWidget {
             const SizedBox(height: 40),
             const BrandLogo(),
             const SizedBox(height: 20),
-
-            // หัวข้อเปลี่ยนตาม Mode
-            // Obx(() => Text(
-            //   controller.isConfirmMode.value ? 'ยืนยันรหัสผ่าน' : 'กรุณาใส่รหัสผ่าน',
-            //   style: const TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
-            // )),
-            // ใน pin_page.dart
             Obx(() {
               final dynamic args = Get.arguments;
               final String? action = args is Map ? args['action'] : null;
