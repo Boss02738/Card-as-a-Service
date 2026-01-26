@@ -1,94 +1,129 @@
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
+import 'package:my_app/module/controller/mainTab_Controller%20.dart';
+import 'package:my_app/views/widgets/brand_logo.dart';
+import 'package:my_app/views/widgets/buildHeader.dart';
+import 'package:my_app/views/widgets/exit_confirmation_dialog.dart';
+import 'package:my_app/views/widgets/gradient_header.dart';
 
-class SettingPage extends StatelessWidget {
-  const SettingPage({super.key});
+class SettingTabPage extends StatelessWidget {
+  const SettingTabPage({super.key});
 
   @override
   Widget build(BuildContext context) {
-    return Scaffold(
-      backgroundColor: const Color(0xFFF5F7FA),
-      appBar: AppBar(
-        title: const Text('ตั้งค่า', style: TextStyle(color: Colors.white)),
-        centerTitle: true,
-        backgroundColor: const Color(0xFF264FAD),
-        elevation: 0,
-        leading: IconButton(
-          icon: const Icon(Icons.arrow_back_ios, color: Colors.white),
-          onPressed: () => Get.back(),
-        ),
-      ),
-      body: Padding(
-        padding: const EdgeInsets.only(left: 5.0),
-        child: Column(
+    return BackButtonInterceptor(
+      child: Scaffold(
+        body: Stack(
           children: [
-            ListTile(
-              leading: const Icon(Icons.person),
-              title: const Text('ข้อมูลส่วนตัว'),
-              subtitle: const Text(
-                'ชื่อผู้ใช้,อีเมล,เบอร์โทรศัพท์',
-                style: TextStyle(
-                  fontSize: 12,
-                  color: Color.fromARGB(255, 104, 104, 104),
+            const GradientHeader(),
+            ListView(
+              children: [
+                SizedBox(height: 20),
+                const Buildheader(),
+                SizedBox(height: 20),
+                ListTile(
+                  leading: const Icon(
+                    Icons.person,
+                    color: Color.fromARGB(255, 255, 255, 255),
+                  ),
+                  title: const Text(
+                    'ข้อมูลส่วนตัว',
+                    style: TextStyle(color: Color.fromARGB(255, 255, 255, 255)),
+                  ),
+                  subtitle: const Text(
+                    'ชื่อผู้ใช้,อีเมล,เบอร์โทรศัพท์',
+                    style: TextStyle(
+                      fontSize: 12,
+                      color: Color.fromARGB(255, 255, 255, 255),
+                    ),
+                  ),
+                  trailing: const Icon(
+                    Icons.arrow_forward_ios,
+                    size: 16,
+                    color: Color.fromARGB(255, 255, 255, 255),
+                  ),
+      
+                  onTap: () {
+                    Get.toNamed('/profile');
+                  },
                 ),
-              ),
-              trailing: const Icon(
-                Icons.arrow_forward_ios,
-                size: 16,
-                color: Color.fromARGB(255, 169, 169, 169),
-              ),
-
-              onTap: () {
-                Get.toNamed('/profile');
-              },
-            ),
-            ListTile(
-              leading: const Icon(
-                Icons.credit_card,
-                color: Color.fromARGB(255, 134, 133, 133),
-              ),
-
-              title: const Text('จัดการบัตรเดบิต'),
-              subtitle: const Text(
-                'ปรับวงเงิน,เปิเปิด/ปิดใช้งานบัตร,ดูเลขบัตรม,ขอบัตรจริง',
-                style: TextStyle(
-                  fontSize: 12,
-                  color: Color.fromARGB(255, 104, 104, 104),
+                ListTile(
+                  leading: const Icon(
+                    Icons.credit_card,
+                    color: Color.fromARGB(255, 255, 255, 255),
+                  ),
+      
+                  title: const Text(
+                    'จัดการบัตรเดบิต',
+                    style: TextStyle(
+                      fontSize: 16,
+                      color: Color.fromARGB(255, 255, 255, 255),
+                    ),
+                  ),
+                  subtitle: const Text(
+                    'ปรับวงเงิน,เปิเปิด/ปิดใช้งานบัตร,ดูเลขบัตรม,ขอบัตรจริง',
+                    style: TextStyle(
+                      fontSize: 12,
+                      color: Color.fromARGB(255, 255, 255, 255),
+                    ),
+                  ),
+                  trailing: const Icon(
+                    Icons.arrow_forward_ios,
+                    size: 16,
+                    color: Color.fromARGB(255, 255, 255, 255),
+                  ),
+      
+                  onTap: () {
+                    Get.find<MainTabController>().changeTab(2);
+                  },
                 ),
-              ),
-              trailing: const Icon(
-                Icons.arrow_forward_ios,
-                size: 16,
-                color: Color.fromARGB(255, 169, 169, 169),
-              ),
-
-              onTap: () {
-                Get.toNamed('/my_cards');
-              },
-            ),
-            ListTile(
-              leading: const Icon(Icons.security),
-              title: const Text('ความปลอดภัย'),
-              subtitle: const Text(
-                'เปลี่ยนรหัส PIN',
-                style: TextStyle(
-                  fontSize: 12,
-                  color: Color.fromARGB(255, 104, 104, 104),
+                ListTile(
+                  leading: const Icon(
+                    Icons.security,
+                    color: Color.fromARGB(255, 255, 255, 255),
+                  ),
+      
+                  title: const Text(
+                    'ความปลอดภัย',
+                    style: TextStyle(
+                      fontSize: 16,
+                      color: Color.fromARGB(255, 255, 255, 255),
+                    ),
+                  ),
+                  subtitle: const Text(
+                    'เปลี่ยนรหัส PIN',
+                    style: TextStyle(
+                      fontSize: 12,
+                      color: Color.fromARGB(255, 255, 255, 255),
+                    ),
+                  ),
+                  trailing: const Icon(
+                    Icons.arrow_forward_ios,
+                    size: 16,
+                    color: Color.fromARGB(255, 255, 255, 255),
+                  ),
+      
+                  onTap: () {
+                    Get.toNamed("/change_pin");
+                  },
                 ),
-              ),
-              trailing: const Icon(
-                Icons.arrow_forward_ios,
-                size: 16,
-                color: Color.fromARGB(255, 169, 169, 169),
-              ),
-
-              onTap: () {
-                Get.toNamed("/change_pin");
-              },
+              ],
             ),
           ],
         ),
       ),
+    );
+  }
+}
+
+class SettingDetailPage extends StatelessWidget {
+  const SettingDetailPage({super.key});
+
+  @override
+  Widget build(BuildContext context) {
+    return Scaffold(
+      appBar: AppBar(title: Text('ตั้งค่า'), leading: BackButton()),
+      // body: ...
     );
   }
 }

@@ -50,3 +50,52 @@ class BackButtonInterceptor extends StatelessWidget {
     );
   }
 }
+// // }(
+// import 'package:flutter/material.dart';
+// import 'package:flutter/services.dart';
+// import 'package:get/get.dart';
+
+// class ExitConfirmation {
+//   static DateTime? _lastPressed;
+
+//   static void showExitSnackbar() {
+//     final now = DateTime.now();
+//     final isSecondPress = _lastPressed != null &&
+//         now.difference(_lastPressed!) <= const Duration(seconds: 2);
+
+//     if (isSecondPress) {
+//       SystemNavigator.pop();
+//     } else {
+//       _lastPressed = now;
+//       Get.snackbar(
+//         '',
+//         'กดอีกครั้งเพื่อออกจากแอป',
+//         snackPosition: SnackPosition.BOTTOM,
+//         backgroundColor: Colors.grey.shade900,
+//         colorText: Colors.white,
+//         margin: const EdgeInsets.symmetric(horizontal: 16, vertical: 20),
+//         borderRadius: 12,
+//         duration: const Duration(seconds: 2),
+//         snackStyle: SnackStyle.FLOATING,
+//         isDismissible: false,
+//       );
+//     }
+//   }
+// }
+
+// class BackButtonInterceptor extends StatelessWidget {
+//   final Widget child;
+//   const BackButtonInterceptor({super.key, required this.child});
+
+//   @override
+//   Widget build(BuildContext context) {
+//     return PopScope(
+//       canPop: false,
+//       onPopInvokedWithResult: (didPop, result) {
+//         if (didPop) return;
+//         ExitConfirmation.showExitSnackbar();
+//       },
+//       child: child,
+//     );
+//   }
+// }

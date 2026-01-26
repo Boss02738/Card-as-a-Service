@@ -165,8 +165,8 @@ Future<void> verifyOldPinAndChangeDevice() async {
         firstPin.value = '';
         isConfirmMode.value = false;
 
-        await Future.delayed(const Duration(milliseconds: 500));
-        Get.offAllNamed('/pin_login'); // กลับไปหน้า Login
+        // await Future.delayed(const Duration(milliseconds: 500));
+        Get.offAllNamed('/login-pin'); 
       } else {
         final error = jsonDecode(utf8.decode(response.bodyBytes));
         Get.snackbar('ผิดพลาด', error['message'] ?? 'รีเซ็ตรหัสผ่านไม่สำเร็จ');

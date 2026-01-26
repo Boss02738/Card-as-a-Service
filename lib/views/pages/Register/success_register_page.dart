@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
+import 'package:my_app/module/controller/mainTab_Controller%20.dart';
 import 'package:my_app/views/widgets/gradient_header.dart';
 
 class SuccessRegisterPage extends StatelessWidget {
@@ -20,9 +21,7 @@ class SuccessRegisterPage extends StatelessWidget {
                   height: 400,
                   padding: const EdgeInsets.all(24),
                   decoration: BoxDecoration(
-                    color: Colors.white.withOpacity(
-                      0.1,
-                    ), 
+                    color: Colors.white.withOpacity(0.1),
                     borderRadius: BorderRadius.circular(12),
                   ),
                   child: Column(
@@ -69,7 +68,7 @@ class SuccessRegisterPage extends StatelessWidget {
                     height: 55,
                     child: ElevatedButton(
                       onPressed: () {
-                        Get.offAllNamed('/home');
+                        Get.find<MainTabController>().changeTab(0);
                       },
                       style: ElevatedButton.styleFrom(
                         backgroundColor: const Color(0xFF17337B),

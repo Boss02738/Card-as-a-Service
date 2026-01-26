@@ -1,10 +1,11 @@
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
+import 'package:my_app/module/controller/mainTab_Controller%20.dart';
 import 'package:my_app/views/widgets/buildHeader.dart';
 import 'package:my_app/views/widgets/custom_bottom_nav_bar.dart';
 import 'package:my_app/views/widgets/exit_confirmation_dialog.dart';
 import 'package:my_app/views/widgets/gradient_header.dart';
-import 'package:my_app/module/controller/home_controller.dart'; 
+import 'package:my_app/module/controller/home_controller.dart';
 import 'package:my_app/module/controller/my_cards_controller.dart';
 
 class HomePage extends StatefulWidget {
@@ -15,8 +16,6 @@ class HomePage extends StatefulWidget {
 }
 
 class _HomePageState extends State<HomePage> {
-  int _selectedIndex = 0;
-
   @override
   Widget build(BuildContext context) {
     final HomeController homeController = Get.put(HomeController());
@@ -35,7 +34,7 @@ class _HomePageState extends State<HomePage> {
                     child: CircularProgressIndicator(color: Colors.white),
                   );
                 }
-      
+
                 return SingleChildScrollView(
                   child: Column(
                     crossAxisAlignment: CrossAxisAlignment.start,
@@ -60,24 +59,6 @@ class _HomePageState extends State<HomePage> {
               }),
             ),
           ],
-        ),
-        bottomNavigationBar: CustomBottomNavBar(
-          currentIndex: _selectedIndex,
-          onTap: (index) {
-            setState(() {
-              _selectedIndex = index;
-            });
-      
-            if (index == 1) {
-              Get.toNamed('/account');
-            } else if (index == 2) {
-              Get.toNamed('/my_cards');
-            } else if (index == 0) {
-              Get.toNamed('/home');
-            } else if (index == 3 ){
-              Get.toNamed('/setting');
-            } 
-          },
         ),
       ),
     );
@@ -105,8 +86,7 @@ class _HomePageState extends State<HomePage> {
       ),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
-        mainAxisAlignment:
-            MainAxisAlignment.spaceBetween, 
+        mainAxisAlignment: MainAxisAlignment.spaceBetween,
         children: [
           Row(
             mainAxisAlignment: MainAxisAlignment.spaceBetween,
@@ -233,9 +213,16 @@ Widget _buildOffersSection() {
               ),
             ),
             ElevatedButton(
-              onPressed: () => Get.toNamed('/my_cards'),
+              onPressed: () {
+                Get.find<MainTabController>().changeTab(2);
+              },
               style: ElevatedButton.styleFrom(
-                backgroundColor: const Color.fromARGB(255, 169, 169, 169).withOpacity(0.1),
+                backgroundColor: const Color.fromARGB(
+                  255,
+                  169,
+                  169,
+                  169,
+                ).withOpacity(0.1),
                 shape: RoundedRectangleBorder(
                   borderRadius: BorderRadius.circular(20),
                 ),
@@ -328,9 +315,16 @@ Widget _buildMyCardsSection(
               ),
             ),
             ElevatedButton(
-              onPressed: () => Get.toNamed('/my_cards'),
+              onPressed: (){
+              Get.find<MainTabController>().changeTab(2);
+              },
               style: ElevatedButton.styleFrom(
-                backgroundColor: const Color.fromARGB(255, 169, 169, 169).withOpacity(0.1),
+                backgroundColor: const Color.fromARGB(
+                  255,
+                  169,
+                  169,
+                  169,
+                ).withOpacity(0.1),
                 shape: RoundedRectangleBorder(
                   borderRadius: BorderRadius.circular(20),
                 ),
@@ -405,10 +399,7 @@ Widget _buildActiveCardItem(dynamic card, String ownerName) {
       decoration: BoxDecoration(
         borderRadius: BorderRadius.circular(20),
         gradient: const LinearGradient(
-          colors: [
-            Color(0xFF264FAD),
-            Color(0xFF162E7A),
-          ],
+          colors: [Color(0xFF264FAD), Color(0xFF162E7A)],
           begin: Alignment.topLeft,
           end: Alignment.bottomRight,
         ),
@@ -428,7 +419,7 @@ Widget _buildActiveCardItem(dynamic card, String ownerName) {
             mainAxisAlignment: MainAxisAlignment.spaceBetween,
             children: [
               Text(
-                card['type_debit_name'] ?? 'Novapay',
+                card['card_name'] ?? 'Novapay',
                 style: const TextStyle(
                   color: Colors.white,
                   fontWeight: FontWeight.bold,
@@ -465,10 +456,10 @@ Widget _buildActiveCardItem(dynamic card, String ownerName) {
                 card['virtual'] == true ? 'Virtual Card' : 'Physical Card',
                 style: TextStyle(color: Colors.white70, fontSize: 12),
               ),
-                            Image.network(
-                  'https://upload.wikimedia.org/wikipedia/commons/thumb/2/2a/Mastercard-logo.svg/1280px-Mastercard-logo.svg.png',
-                  width: 30,
-                ),
+              Image.network(
+                'https://upload.wikimedia.org/wikipedia/commons/thumb/2/2a/Mastercard-logo.svg/1280px-Mastercard-logo.svg.png',
+                width: 30,
+              ),
             ],
           ),
         ],

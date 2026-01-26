@@ -26,7 +26,7 @@ class ChangePinPage extends StatelessWidget {
             children: [
               const BrandLogo(),
               const SizedBox(height: 40),
-              // 🏷️ หัวข้อเปลี่ยนตาม Step
+              //  หัวข้อเปลี่ยนตาม Step
               Obx(() => Text(
                 controller.currentStep.value == ChangePinStep.current
                     ? 'กรอกรหัสปัจจุบัน'
@@ -36,7 +36,7 @@ class ChangePinPage extends StatelessWidget {
                 style: const TextStyle(fontSize: 22, fontWeight: FontWeight.bold),
               )),
               const SizedBox(height: 30),
-              // ⚪ จุดวงกลมแสดง PIN
+              //  จุดวงกลมแสดง PIN
               Obx(() => Row(
                 mainAxisAlignment: MainAxisAlignment.center,
                 children: List.generate(6, (index) {

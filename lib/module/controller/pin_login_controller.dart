@@ -64,7 +64,7 @@ Future<void> loginWithPin() async {
           await storage.write(key: 'accessToken', value: token);
           print("DEBUG: บันทึก Token สำเร็จ");
           
-          Get.offAllNamed('/home'); // เข้าหน้าหลัก
+          Get.offAllNamed('/main'); // เข้าหน้าหลัก
         } else {
           Get.snackbar('Error', 'ไม่ได้รับรหัสยืนยันจากระบบ (Token is null)');
         }

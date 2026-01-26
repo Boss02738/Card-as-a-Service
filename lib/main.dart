@@ -2,8 +2,11 @@ import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_prevent_screenshot/disablescreenshot.dart';
 import 'package:flutter/services.dart';
+import 'package:get/get.dart';
 import 'package:get/get_navigation/src/root/get_material_app.dart';
 import 'package:get/get_navigation/src/routes/get_route.dart';
+import 'package:my_app/module/binding/main_tab_binding.dart';
+import 'package:my_app/module/controller/mainTab_Controller%20.dart';
 import 'package:my_app/views/pages/Register/change_device_page.dart';
 import 'package:my_app/views/pages/Register/enter_phone_page.dart';
 import 'package:my_app/views/pages/Register/face_verify.dart';
@@ -33,6 +36,7 @@ import 'package:my_app/views/pages/Create_cards/type_cards.dart';
 import 'package:my_app/views/pages/Create_cards/card_confirm_page.dart';
 import 'package:my_app/views/pages/profile.dart';
 import 'package:my_app/views/pages/setting_page.dart';
+import 'package:my_app/views/widgets/custom_bottom_nav_bar.dart';
 
 void main() {
   WidgetsFlutterBinding.ensureInitialized();
@@ -40,18 +44,18 @@ void main() {
     DeviceOrientation.portraitUp,
     DeviceOrientation.portraitDown,
   ]).then((_) {
-    runApp(const NovaPayApp());
+    runApp(NovaPayApp());
   });
 }
 
 class NovaPayApp extends StatefulWidget {
-  const NovaPayApp({super.key});
+  NovaPayApp({super.key});
+  final pages = [HomePage(), MyCardPage(), SettingTabPage()];
   @override
   State<NovaPayApp> createState() => _NovaPayAppState();
 }
 
 class _NovaPayAppState extends State<NovaPayApp> {
-  // ย้าย Logic การกัน Screenshot มาไว้ที่นี่ตามเดิม
   final _flutterPreventScreenshot = FlutterPreventScreenshot.instance;
 
   @override
@@ -66,6 +70,12 @@ class _NovaPayAppState extends State<NovaPayApp> {
       debugShowCheckedModeBanner: false,
       initialRoute: '/',
       getPages: [
+        GetPage(
+          name: "/main",
+          page: () => MainPage(),
+          binding: MainTabBinding(),
+        ),
+
         //Register
         GetPage(name: '/', page: () => const Welcome_Page()),
         GetPage(name: '/enter-phone', page: () => const EnterPhonePage()),
@@ -77,6 +87,7 @@ class _NovaPayAppState extends State<NovaPayApp> {
         GetPage(name: '/login-pin', page: () => const PinLoginPage()),
         GetPage(name: "/home", page: () => const HomePage()),
         GetPage(name: "/account", page: () => const AccountPage()),
+        GetPage(name: "/main", page: () => MainPage()),
         //Card
         GetPage(name: "/my_cards", page: () => const MyCardPage()),
         GetPage(name: "/my_card_detail", page: () => MyCardDetail()),
@@ -100,7 +111,7 @@ class _NovaPayAppState extends State<NovaPayApp> {
         ),
         GetPage(name: "/set_card_pin", page: () => const SetpinPhysical()),
         //Setting
-        GetPage(name: "/setting", page: () => const SettingPage()),
+        GetPage(name: "/setting", page: () => const SettingTabPage()),
         GetPage(name: "/profile", page: () => const Profile()),
         //pin
         GetPage(name: "/change_pin", page: () => const ChangePinPage()),
@@ -110,6 +121,27 @@ class _NovaPayAppState extends State<NovaPayApp> {
         GetPage(name: '/change_device', page: () => const ChangeDevicePage()),
         GetPage(name: '/idcard_verify', page: () => const IdcardVerify()),
       ],
+    );
+  }
+}
+
+class MainPage extends StatelessWidget {
+  MainPage({super.key});
+
+  final controller = Get.find<MainTabController>(); // ✅ ถูก
+
+  final pages = [HomePage(), AccountPage(), MyCardPage(), SettingTabPage()];
+
+  @override
+  Widget build(BuildContext context) {
+    return Obx(
+      () => Scaffold(
+        body: pages[controller.currentIndex.value],
+        bottomNavigationBar: CustomBottomNavBar(
+          currentIndex: controller.currentIndex.value,
+          onTap: controller.changeTab,
+        ),
+      ),
     );
   }
 }

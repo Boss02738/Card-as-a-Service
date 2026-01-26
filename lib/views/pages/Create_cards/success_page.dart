@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
+import 'package:my_app/module/controller/mainTab_Controller%20.dart';
 import 'package:my_app/views/widgets/gradient_header.dart';
 
 class SuccessPaga extends StatelessWidget {
@@ -9,8 +10,8 @@ class SuccessPaga extends StatelessWidget {
   Widget build(BuildContext context) {
     final String title = Get.arguments['title'];
     final String subtitle = Get.arguments['subtitle'];
-        // ? args['title']
-
+    // ? args['title']
+    Get.put(MainTabController());
     //     ? args['subtitle']
     return Scaffold(
       body: Stack(
@@ -45,7 +46,7 @@ class SuccessPaga extends StatelessWidget {
 
                   const SizedBox(height: 30),
 
-                   Text(
+                  Text(
                     title,
                     style: TextStyle(
                       color: Colors.white,
@@ -54,7 +55,7 @@ class SuccessPaga extends StatelessWidget {
                     ),
                   ),
                   const SizedBox(height: 8),
-                   Text(
+                  Text(
                     subtitle,
                     style: TextStyle(color: Colors.white70, fontSize: 16),
                   ),
@@ -72,7 +73,8 @@ class SuccessPaga extends StatelessWidget {
                       height: 50,
                       child: ElevatedButton(
                         onPressed: () {
-                          Get.offAllNamed('/home');
+                          Get.find<MainTabController>().changeTab(0);
+                          Get.offAllNamed('/main');
                         },
                         style: ElevatedButton.styleFrom(
                           backgroundColor: const Color(0xFF1D46B9),

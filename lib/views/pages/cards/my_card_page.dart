@@ -4,6 +4,7 @@ import 'package:my_app/module/controller/my_cards_controller.dart';
 import 'package:my_app/module/controller/home_controller.dart';
 import 'package:my_app/views/widgets/buildHeader.dart';
 import 'package:my_app/views/widgets/custom_bottom_nav_bar.dart';
+import 'package:my_app/views/widgets/exit_confirmation_dialog.dart';
 import 'package:my_app/views/widgets/gradient_header.dart';
 
 class MyCardPage extends StatefulWidget {
@@ -14,132 +15,121 @@ class MyCardPage extends StatefulWidget {
 }
 
 class _MyCardPageState extends State<MyCardPage> {
-  int _selectedIndex = 2;
-
   @override
   Widget build(BuildContext context) {
     // ดึง Controller มาใช้งาน
     final MyCardsController cardController = Get.find<MyCardsController>();
     final HomeController homeController = Get.find<HomeController>();
 
-    return DefaultTabController(
-      length: 3, // ทั้งหมด, เปิดใช้งาน, ระงับชั่วคราว
-      child: Scaffold(
-        body: Stack(
-          children: [
-            const GradientHeader(),
-            SafeArea(
-              child: Column(
-                children: [
-                  const SizedBox(height: 20),
-                  const Buildheader(),
-                  const SizedBox(height: 20),
-
-                  // ส่วนของ TabBar และรายการบัตร
-                  Expanded(
-                    child: Container(
-                      margin: const EdgeInsets.symmetric(horizontal: 15),
-                      padding: const EdgeInsets.all(10),
-                      decoration: BoxDecoration(
-                        color: const Color.fromARGB(220, 255, 255, 255),
-                        borderRadius: BorderRadius.circular(15),
-                      ),
-                      child: Column(
-                        children: [
-                          // TabBar
-                          const TabBar(
-                            indicatorColor: Color(0xFF264FAD),
-                            labelColor: Color(0xFF264FAD),
-                            unselectedLabelColor: Colors.grey,
-                            indicatorSize: TabBarIndicatorSize.label,
-                            tabs: [
-                              Tab(text: 'ทั้งหมด'),
-                              Tab(text: 'เปิดใช้งาน'),
-                              Tab(text: 'ระงับชั่วคราว'),
-                            ],
-                          ),
-                          const SizedBox(height: 15),
-
-                          // แสดงรายการบัตรตามสถานะ
-                          Expanded(
-                            child: TabBarView(
-                              children: [
-                                // Tab: ทั้งหมด
-                                Obx(
-                                  () => _buildCardList(
-                                    cardController.myCards,
-                                    homeController.fullNameEn.value,
-                                  ),
-                                ),
-                                // Tab: เปิดใช้งาน
-                                Obx(
-                                  () => _buildCardList(
-                                    cardController.myCards
-                                        .where((c) => c['status'] == 'active')
-                                        .toList(),
-                                    homeController.fullNameEn.value,
-                                  ),
-                                ),
-                                // Tab: ระงับชั่วคราว (สมมติ status คือ 'inactive' หรือ 'hold')
-                                Obx(
-                                  () => _buildCardList(
-                                    cardController.myCards
-                                        .where((c) => c['status'] != 'active')
-                                        .toList(),
-                                    homeController.fullNameEn.value,
-                                  ),
-                                ),
+    return BackButtonInterceptor(
+      child: DefaultTabController(
+        length: 3, // ทั้งหมด, เปิดใช้งาน, ระงับชั่วคราว
+        child: Scaffold(
+          body: Stack(
+            children: [
+              const GradientHeader(),
+              SafeArea(
+                child: Column(
+                  children: [
+                    const SizedBox(height: 20),
+                    const Buildheader(),
+                    const SizedBox(height: 20),
+      
+                    // ส่วนของ TabBar และรายการบัตร
+                    Expanded(
+                      child: Container(
+                        margin: const EdgeInsets.symmetric(horizontal: 15),
+                        padding: const EdgeInsets.all(10),
+                        decoration: BoxDecoration(
+                          color: const Color.fromARGB(220, 255, 255, 255),
+                          borderRadius: BorderRadius.circular(15),
+                        ),
+                        child: Column(
+                          children: [
+                            // TabBar
+                            const TabBar(
+                              indicatorColor: Color(0xFF264FAD),
+                              labelColor: Color(0xFF264FAD),
+                              unselectedLabelColor: Colors.grey,
+                              indicatorSize: TabBarIndicatorSize.label,
+                              tabs: [
+                                Tab(text: 'ทั้งหมด'),
+                                Tab(text: 'เปิดใช้งาน'),
+                                Tab(text: 'ระงับชั่วคราว'),
                               ],
                             ),
-                          ),
-
-                          // ปุ่มสมัครบัตรด้านล่าง
-                          Padding(
-                            padding: const EdgeInsets.symmetric(vertical: 10),
-                            child: SizedBox(
-                              width: double.infinity,
-                              height: 50,
-                              child: ElevatedButton(
-                                onPressed: () => Get.toNamed('/type_cards'),
-                                style: ElevatedButton.styleFrom(
-                                  backgroundColor: const Color(0xFF264FAD),
-                                  shape: RoundedRectangleBorder(
-                                    borderRadius: BorderRadius.circular(10),
+                            const SizedBox(height: 15),
+      
+                            // แสดงรายการบัตรตามสถานะ
+                            Expanded(
+                              child: TabBarView(
+                                children: [
+                                  // Tab: ทั้งหมด
+                                  Obx(
+                                    () => _buildCardList(
+                                      cardController.myCards,
+                                      homeController.fullNameEn.value,
+                                    ),
                                   ),
-                                ),
-                                child: const Text(
-                                  'สมัครบัตรเดบิต',
-                                  style: TextStyle(
-                                    color: Colors.white,
-                                    fontSize: 18,
+                                  // Tab: เปิดใช้งาน
+                                  Obx(
+                                    () => _buildCardList(
+                                      cardController.myCards
+                                          .where((c) => c['status'] == 'active')
+                                          .toList(),
+                                      homeController.fullNameEn.value,
+                                    ),
+                                  ),
+                                  // Tab: ระงับชั่วคราว (สมมติ status คือ 'inactive' หรือ 'hold')
+                                  Obx(
+                                    () => _buildCardList(
+                                      cardController.myCards
+                                          .where((c) => c['status'] != 'active')
+                                          .toList(),
+                                      homeController.fullNameEn.value,
+                                    ),
+                                  ),
+                                ],
+                              ),
+                            ),
+      
+                            // ปุ่มสมัครบัตรด้านล่าง
+                            Padding(
+                              padding: const EdgeInsets.symmetric(vertical: 10),
+                              child: SizedBox(
+                                width: double.infinity,
+                                height: 50,
+                                child: ElevatedButton(
+                                  onPressed: () => Get.toNamed('/type_cards'),
+                                  style: ElevatedButton.styleFrom(
+                                    backgroundColor: const Color(0xFF264FAD),
+                                    shape: RoundedRectangleBorder(
+                                      borderRadius: BorderRadius.circular(10),
+                                    ),
+                                  ),
+                                  child: const Text(
+                                    'สมัครบัตรเดบิต',
+                                    style: TextStyle(
+                                      color: Colors.white,
+                                      fontSize: 18,
+                                    ),
                                   ),
                                 ),
                               ),
                             ),
-                          ),
-                        ],
+                          ],
+                        ),
                       ),
                     ),
-                  ),
-                  const SizedBox(height: 70), // เว้นที่ให้ NavBar
-                ],
+                    const SizedBox(height: 10), // เว้นที่ให้ NavBar
+                  ],
+                ),
               ),
-            ),
+      
+              // NavBar อยู่ด้านล่างสุด
 
-            // NavBar อยู่ด้านล่างสุด
-            Align(
-              alignment: Alignment.bottomCenter,
-              child: CustomBottomNavBar(
-                currentIndex: _selectedIndex,
-                onTap: (index) {
-                  setState(() => _selectedIndex = index);
-                  if (index == 0) Get.toNamed('/home');
-                  if (index == 1) Get.toNamed('/account');
-                  if (index == 3) Get.toNamed('/setting');
-                },
-              ),
-            ),
-          ],
+            ],
+          ),
         ),
       ),
     );
