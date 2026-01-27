@@ -1,23 +1,36 @@
+import 'dart:convert';
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
+import 'package:my_app/module/controller/card_detail_controller.dart';
 import 'package:my_app/module/controller/home_controller.dart';
 import 'package:my_app/module/controller/my_cards_controller.dart';
 import 'package:my_app/module/controller/status_card_controller.dart';
 
-class MyCardDetail extends StatelessWidget {
+class MyCardDetail extends StatefulWidget {
   const MyCardDetail({super.key});
 
   @override
-  Widget build(BuildContext context) {
-    final dynamic data = Get.arguments;
-    final dynamic card = data['card'];
-    final String ownerEn = data['ownerName'];
-    final HomeController homeController = Get.find<HomeController>();
-    final StatusCardController statusCardController = Get.put(
-      StatusCardController(),
-    );
-    final String currentCardId = card['card_id'];
+  State<MyCardDetail> createState() => _MyCardDetailState();
+}
 
+class _MyCardDetailState extends State<MyCardDetail> {
+  // ดึง Controller ที่จัดการข้อมูลรายละเอียดบัตร
+  final detailController = Get.put(CardDetailController());
+  final StatusCardController statusCardController = Get.put(
+    StatusCardController(),
+  );
+  final HomeController homeController = Get.find<HomeController>();
+
+  @override
+  void initState() {
+    super.initState();
+    // ✅ ดึงเฉพาะ card_id จาก arguments เพื่อนำไปเรียก API เส้น detail
+    final String cardId = Get.arguments['card_id'];
+    detailController.fetchCardDetail(cardId);
+  }
+
+  @override
+  Widget build(BuildContext context) {
     return Scaffold(
       backgroundColor: const Color(0xFFF5F7FA),
       appBar: AppBar(
@@ -33,42 +46,42 @@ class MyCardDetail extends StatelessWidget {
           onPressed: () => Get.back(),
         ),
       ),
-      body: SingleChildScrollView(
-        child: Column(
-          children: [
-            Container(
-              padding: const EdgeInsets.symmetric(vertical: 20, horizontal: 20),
+      body: Obx(() {
+        if (detailController.isLoading.value) {
+          return const Center(
+            child: CircularProgressIndicator(color: Color(0xFF264FAD)),
+          );
+        }
 
-              child: _buildCard(card, ownerEn),
-            ),
+        final card = detailController.cardData;
+        if (card.isEmpty) return const Center(child: Text("ไม่พบข้อมูลบัตร"));
 
-            const SizedBox(height: 20),
+        final String currentCardId = card['card_id'];
+        final String ownerEn = homeController.fullNameEn.value;
+        final String Cardname = card['card_name'];
 
-            // 2. Card Information Section
-            Column(
-              children: [
-                Center(
-                  child: const Text(
-                    "รายละเอียดบัตร",
-                    style: TextStyle(fontWeight: FontWeight.bold),
-                  ),
+        // ซิงค์สถานะการระงับบัตรกับ status controller
+        bool isCurrentlyFrozen = card['status'] != 'active';
+        statusCardController.isCardFrozen.value = isCurrentlyFrozen;
+
+        return SingleChildScrollView(
+          child: Column(
+            children: [
+              Container(
+                padding: const EdgeInsets.symmetric(
+                  vertical: 20,
+                  horizontal: 20,
                 ),
-              ],
-            ),
-            Obx(() {
-              //  ดึงข้อมูลบัตรใบนี้จาก Controller หลักที่อัปเดตแล้ว
-              final latestCard = Get.find<MyCardsController>().myCards
-                  .firstWhere(
-                    (c) => c['card_id'] == currentCardId,
-                    orElse: () => card,
-                  );
+                child: _buildCard(card, ownerEn,Cardname),
+              ),
+              const SizedBox(height: 20),
 
-              bool isCurrentlyFrozen = latestCard['status'] != 'active';
-              // อัปเดตค่าใน status controller ให้ตรงกับความจริงล่าสุด
-              statusCardController.isCardFrozen.value = isCurrentlyFrozen;
-
-              return _buildDetailSection([
-                _buildRow("ชื่อ นามสกุล", ownerEn),
+              const Text(
+                "รายละเอียดบัตร",
+                style: TextStyle(fontWeight: FontWeight.bold),
+              ),
+              _buildDetailSection([
+                _buildRow("ชื่อ นามสกุล", homeController.fullNameTh.value),
                 _buildRow(
                   "สถานะบัตร",
                   isCurrentlyFrozen ? "ปิดใช้งาน" : "เปิดใช้งาน",
@@ -76,219 +89,170 @@ class MyCardDetail extends StatelessWidget {
                 ),
                 _buildRow("ผูกกับบัญชี", homeController.accountNumber.value),
                 InkWell(
-                  onTap: () {
-                    Get.toNamed(
-                      '/pin_verify_page',
-                      // ส่ง latestCard ไปเพื่อให้หน้าปรับวงเงินเห็นยอดล่าสุดด้วย
-                      arguments: {
-                        'action': 'view_sensitive',
-                        'card': latestCard,
-                        'ownerName': ownerEn,
-                      },
-                    );
-                  },
+                  onTap: () => Get.toNamed(
+                    '/pin_verify_page',
+                    arguments: {
+                      'action': 'view_sensitive',
+                      'card': card,
+                      'ownerName': ownerEn,
+                    },
+                  ),
                   child: _buildRow("ดูเลขบัตร", "", showArrow: true),
                 ),
-              ]);
-            }),
+              ]),
 
-            _buildSectionHeader("วงเงิน"),
-            Obx(() {
-              // ✅ ดึงข้อมูลล่าสุดจาก Controller เพื่อให้ยอดวงเงินอัปเดตทันที
-              final latestCard = Get.find<MyCardsController>().myCards
-                  .firstWhere(
-                    (c) => c['card_id'] == currentCardId,
-                    orElse: () => card,
-                  );
-
-              return _buildDetailSection([
+              _buildSectionHeader("วงเงิน"),
+              _buildDetailSection([
                 _buildRow(
                   "วงเงินปัจจุบัน",
-                  // ✅ ใช้ข้อมูลจาก latestCard แทน card ปกติ
-                  "${latestCard['current_spending_limit'].toString().replaceAllMapped(RegExp(r'(\d{1,3})(?=(\d{3})+(?!\d))'), (Match m) => '${m[1]},')}0 บาท",
+                  "${card['current_spending_limit'].toString().replaceAllMapped(RegExp(r'(\d{1,3})(?=(\d{3})+(?!\d))'), (Match m) => '${m[1]},')} บาท",
                   isBoldValue: true,
                 ),
                 InkWell(
-                  onTap: () {
-                    Get.toNamed(
-                      '/change_limit_card',
-                      // ส่ง latestCard ไปเพื่อให้หน้าปรับวงเงินเห็นยอดล่าสุดด้วย
-                      arguments: {'card': latestCard, 'ownerName': ownerEn},
-                    );
-                  },
+                  onTap: () => Get.toNamed(
+                    '/change_limit_card',
+                    arguments: {'card': card, 'ownerName': ownerEn},
+                  ),
                   child: _buildRow("ปรับวงเงิน", "", showArrow: true),
                 ),
-              ]);
-            }),
+              ]),
 
-            _buildSectionHeader("ความปลอดภัย"),
-            _buildDetailSection([
-              Padding(
-                padding: const EdgeInsets.symmetric(
-                  vertical: 10,
-                  horizontal: 15,
-                ),
-                child: Row(
-                  mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                  children: [
-                    const Text(
-                      "เปิดใช้งานบัตร",
-                      style: TextStyle(fontSize: 16),
-                    ),
-                    Obx(
-                      () => Switch(
-                        value: !statusCardController
-                            .isCardFrozen
-                            .value, // active = !frozen
+              _buildSectionHeader("ความปลอดภัย"),
+              _buildDetailSection([
+                Padding(
+                  padding: const EdgeInsets.symmetric(
+                    vertical: 10,
+                    horizontal: 15,
+                  ),
+                  child: Row(
+                    mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                    children: [
+                      const Text(
+                        "เปิดใช้งานบัตร",
+                        style: TextStyle(fontSize: 16),
+                      ),
+                      Switch(
+                        value: !statusCardController.isCardFrozen.value,
                         onChanged: (val) {
-                          if (val) {
-                            statusCardController.unfreezeCard(card['card_id']);
-                          } else {
-                            statusCardController.freezeCard(card['card_id']);
-                          }
+                          if (val)
+                            statusCardController.unfreezeCard(currentCardId);
+                          else
+                            statusCardController.freezeCard(currentCardId);
                         },
                         activeColor: const Color(0xFF264FAD),
                       ),
-                    ),
-                  ],
+                    ],
+                  ),
                 ),
-              ),
-            ]),
+              ]),
 
-            // 5. Physical Card Section
-            _buildSectionHeader("บัตร Physical"),
-            Obx(() {
-              // ดึงข้อมูลล่าสุดจาก Controller เพื่อเช็คสถานะ
-              final latestCard = Get.find<MyCardsController>().myCards
-                  .firstWhere(
-                    (c) => c['card_id'] == currentCardId,
-                    orElse: () => card,
-                  );
-
-              // ✅ ตรวจสอบว่าเป็นบัตรแข็ง (Physical) หรือไม่ จากค่า virtual ใน JSON
-              // ถ้า virtual == "false" แสดงว่าเป็นบัตรแข็งแล้ว
-              bool isAlreadyPhysical =
-                  latestCard['virtual'].toString() == "false";
-
-              return _buildDetailSection([
-                // ✅ 1. ปุ่มขอบัตร: แสดงเฉพาะเมื่อยังเป็นบัตร Virtual (isAlreadyPhysical เป็น false)
-                if (!isAlreadyPhysical)
+              _buildSectionHeader("บัตร Physical"),
+              _buildDetailSection([
+                if (card['virtual'] == true)
                   InkWell(
-                    onTap: () {
-                      Get.toNamed(
-                        '/requestPhysical',
-                        arguments: {
-                          'action': 'view_sensitive_for_activate',
-                          'card': latestCard,
-                          'ownerName': ownerEn,
-                        },
-                      );
-                    },
+                    onTap: () => Get.toNamed(
+                      '/requestPhysical',
+                      arguments: {
+                        'action': 'view_sensitive_for_activate',
+                        'card': card,
+                        'ownerName': ownerEn,
+                      },
+                    ),
                     child: _buildRow("ขอบัตร Physical", "", showArrow: true),
                   ),
-
-                // ✅ 2. ปุ่มเปิดใช้งาน: แสดงเฉพาะเมื่อเป็นบัตร Physical แล้ว (isAlreadyPhysical เป็น true)
-                if (isAlreadyPhysical)
+                if (card['virtual'] == false)
                   InkWell(
-                    onTap: () {
-                      Get.toNamed(
-                        '/activate_physical',
-                        arguments: {'card': latestCard, 'ownerName': ownerEn},
-                      );
-                    },
+                    onTap: () => Get.toNamed(
+                      '/activate_physical',
+                      arguments: {'card': card, 'ownerName': ownerEn},
+                    ),
                     child: _buildRow(
                       "เปิดใช้งานบัตร Physical",
                       "",
                       showArrow: true,
                     ),
                   ),
-              ]);
-            }),
-
-            Obx(
-              () => statusCardController.isLoading.value
-                  ? Container(
-                      color: Colors.black26,
-                      child: const Center(child: CircularProgressIndicator()),
-                    )
-                  : const SizedBox.shrink(),
-            ),
-          ],
-        ),
-      ),
+              ]),
+              const SizedBox(height: 30),
+            ],
+          ),
+        );
+      }),
     );
   }
 
-  // Card Component
-  Widget _buildCard(dynamic card, String name) {
+  // ฟังก์ชันวาดหน้าบัตร โดยรองรับรูปภาพ Base64 จาก API
+  Widget _buildCard(dynamic card, String name, String cardname) {
     return Container(
       height: 190,
       width: double.infinity,
-      padding: const EdgeInsets.all(20),
       decoration: BoxDecoration(
         borderRadius: BorderRadius.circular(20),
-        gradient: const LinearGradient(
-          colors: [Color(0xFF3B5BDB), Color(0xFF162E7A)],
-          begin: Alignment.topLeft,
-          end: Alignment.bottomRight,
-        ),
+        // ✅ แสดงรูปภาพจริงที่ได้จาก API (ถ้ามี)
+        image: card['card_image'] != null
+            ? DecorationImage(
+                image: MemoryImage(base64Decode(card['card_image'])),
+                fit: BoxFit.cover,
+              )
+            : null,
+        gradient: card['card_image'] == null
+            ? const LinearGradient(
+                colors: [Color(0xFF3B5BDB), Color(0xFF162E7A)],
+                begin: Alignment.topLeft,
+                end: Alignment.bottomRight,
+              )
+            : null,
         boxShadow: [
           BoxShadow(
-            color: Colors.black.withOpacity(0.2),
+            color: Colors.black26,
             blurRadius: 10,
             offset: const Offset(0, 5),
           ),
         ],
       ),
-      child: Column(
-        crossAxisAlignment: CrossAxisAlignment.start,
-        mainAxisAlignment: MainAxisAlignment.spaceBetween,
-        children: [
-          Row(
-            mainAxisAlignment: MainAxisAlignment.spaceBetween,
-            children: [
-              const Text(
-                "Novapay",
-                style: TextStyle(
-                  color: Colors.white,
-                  fontSize: 18,
-                  fontWeight: FontWeight.bold,
+      child: Padding(
+        padding: const EdgeInsets.all(20),
+        child: Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          mainAxisAlignment: MainAxisAlignment.spaceBetween,
+          children: [
+            Text(
+              cardname.toUpperCase(),
+              style: const TextStyle(color: Colors.white, fontSize: 16),
+            ),
+            Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                Text(
+                  name.toUpperCase(),
+                  style: const TextStyle(color: Colors.white, fontSize: 16),
                 ),
-              ),
-            ],
-          ),
-          Column(
-            crossAxisAlignment: CrossAxisAlignment.start,
-            children: [
-              Text(
-                name.toUpperCase(),
-                style: const TextStyle(color: Colors.white, fontSize: 16),
-              ),
-              const SizedBox(height: 5),
-              Text(
-                "**** **** **** ${card['last_digits']}",
-                style: const TextStyle(
-                  color: Colors.white,
-                  fontSize: 20,
-                  letterSpacing: 2,
+                const SizedBox(height: 5),
+                Text(
+                  "**** **** **** ${card['last_digits']}",
+                  style: const TextStyle(
+                    color: Colors.white,
+                    fontSize: 20,
+                    letterSpacing: 2,
+                  ),
                 ),
-              ),
-            ],
-          ),
-          Row(
-            mainAxisAlignment: MainAxisAlignment.spaceBetween,
-            children: [
-              Text(
-                card['virtual'] == true ? "Virtual Card" : "Physical Card",
-                style: TextStyle(color: Colors.white70, fontSize: 12),
-              ),
-              Image.network(
-                'https://upload.wikimedia.org/wikipedia/commons/thumb/2/2a/Mastercard-logo.svg/1280px-Mastercard-logo.svg.png',
-                width: 40,
-              ),
-            ],
-          ),
-        ],
+              ],
+            ),
+            Row(
+              mainAxisAlignment: MainAxisAlignment.spaceBetween,
+              children: [
+                Text(
+                  card['virtual'] == true ? "Virtual Card" : "Physical Card",
+                  style: const TextStyle(color: Colors.white70, fontSize: 12),
+                ),
+                Image.network(
+                  'https://upload.wikimedia.org/wikipedia/commons/thumb/2/2a/Mastercard-logo.svg/1280px-Mastercard-logo.svg.png',
+                  width: 40,
+                ),
+              ],
+            ),
+          ],
+        ),
       ),
     );
   }
@@ -300,11 +264,7 @@ class MyCardDetail extends StatelessWidget {
         alignment: Alignment.centerLeft,
         child: Text(
           title,
-          style: const TextStyle(
-            fontSize: 14,
-            fontWeight: FontWeight.bold,
-            color: Colors.black,
-          ),
+          style: const TextStyle(fontSize: 14, fontWeight: FontWeight.bold),
         ),
       ),
     );
@@ -345,10 +305,7 @@ class MyCardDetail extends StatelessWidget {
         children: [
           Text(
             label,
-            style: const TextStyle(
-              color: Color.fromARGB(255, 89, 88, 88),
-              fontSize: 14,
-            ),
+            style: const TextStyle(color: Color(0xFF595858), fontSize: 14),
           ),
           Row(
             children: [
@@ -361,10 +318,13 @@ class MyCardDetail extends StatelessWidget {
                 ),
               ),
               if (showArrow)
-                const Icon(
-                  Icons.arrow_forward_ios,
-                  size: 14,
-                  color: Colors.grey,
+                const Padding(
+                  padding: EdgeInsets.only(left: 5),
+                  child: Icon(
+                    Icons.arrow_forward_ios,
+                    size: 14,
+                    color: Colors.grey,
+                  ),
                 ),
             ],
           ),

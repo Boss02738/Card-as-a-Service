@@ -3,7 +3,6 @@ import 'package:get/get.dart';
 import 'package:my_app/module/controller/my_cards_controller.dart';
 import 'package:my_app/module/controller/home_controller.dart';
 import 'package:my_app/views/widgets/buildHeader.dart';
-import 'package:my_app/views/widgets/custom_bottom_nav_bar.dart';
 import 'package:my_app/views/widgets/exit_confirmation_dialog.dart';
 import 'package:my_app/views/widgets/gradient_header.dart';
 
@@ -147,7 +146,8 @@ class _MyCardPageState extends State<MyCardPage> {
           onTap: () {
             Get.toNamed(
               '/my_card_detail',
-              arguments: {'card': card, 'ownerName': ownerName},
+              // arguments: {'card': card, 'ownerName': ownerName},
+              arguments: {'card_id': card['card_id']},
             );
           },
           child: Padding(
@@ -178,8 +178,8 @@ class _MyCardPageState extends State<MyCardPage> {
           Row(
             mainAxisAlignment: MainAxisAlignment.spaceBetween,
             children: [
-              const Text(
-                "NovaPay",
+               Text(
+                card['card_name'] ?? 'Novapay',
                 style: TextStyle(color: Colors.white, fontSize: 18),
               ),
               // ป้ายสถานะ (Badge)
