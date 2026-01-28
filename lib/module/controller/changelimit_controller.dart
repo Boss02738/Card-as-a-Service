@@ -18,7 +18,7 @@ class ChangelimitController extends GetxController {
       String? deviceId = await getDeviceId();
 
       final response = await http.post(
-        Uri.parse("${ApiConstants.baseUrl}${ApiConstants.limitcard.replaceFirst('{card_id}', cardId)}"),
+        Uri.parse("${ApiConstants.baseUrl}${ApiConstants.limitcard}"),
         headers: {
           'Content-Type': "application/json",
           'Authorization': 'Bearer $token',
@@ -27,6 +27,7 @@ class ChangelimitController extends GetxController {
           "amount": newLimit,
           "pin": pin,
           "deviceId": deviceId,
+          "card_id": cardId
         }),
       );
 

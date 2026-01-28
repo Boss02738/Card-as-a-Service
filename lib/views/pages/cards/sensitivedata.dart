@@ -49,7 +49,7 @@ class SensitiveDataPage extends StatelessWidget {
                 _buildRow("สถานะบัตร", card['status'] == 'active' ? "เปิดใช้งาน" : "ปิดใช้งาน", 
                     valueColor: card['status'] == 'active' ? Colors.green : Colors.red),
                 _buildRow("ผูกกับบัญชี", Get.find<HomeController>().accountNumber.value),
-                _buildRow("EXP : ${sensitive['expiry']}", "CVV/CVC : ${sensitive['encrypted_cvv']}"),
+                _buildRow("EXP : ${sensitive['expiry']}", "CVV/CVC : ${sensitive['cvv']}"),
               ],
             ),
           ),
@@ -75,14 +75,14 @@ class SensitiveDataPage extends StatelessWidget {
           Text(name.toUpperCase(), style: const TextStyle(color: Colors.white)),
           // ✅ แสดงเลขบัตรเต็มจาก API
           Text(
-            _formatFullPan(sensitive['encrypted_pan']),
+            _formatFullPan(sensitive['pan']),
             style: const TextStyle(color: Colors.white, fontSize: 20, letterSpacing: 2),
           ),
           Row(
             mainAxisAlignment: MainAxisAlignment.spaceBetween,
             children: [
               Text("EXP : ${sensitive['expiry']}", style: const TextStyle(color: Colors.white)),
-              Text("CVC/CVV : ${sensitive['encrypted_cvv']}", style: const TextStyle(color: Colors.white)),
+              Text("CVC/CVV : ${sensitive['cvv']}", style: const TextStyle(color: Colors.white)),
               Image.network('https://upload.wikimedia.org/wikipedia/commons/thumb/2/2a/Mastercard-logo.svg/1280px-Mastercard-logo.svg.png', width: 40),
             ],
           ),

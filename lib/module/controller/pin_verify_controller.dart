@@ -21,9 +21,9 @@ class PinVerifyController extends GetxController {
     if (enteredPin.value.length == 6) {
       //  เพิ่มเงื่อนไขเช็ค action ขอบัตรแข็ง
       if (args['action'] == 'request_physical') {
-        processRequestPhysical();
+        processRequestPhysical({args['card']['card_id']});
       } else if (args['action'] == 'view_sensitive') {
-        processViewSensitiveData();
+        processViewSensitiveData({});
       } else if (args['action'] == 'change_limit') {
         processChangeLimit();
       } else if (args['action'] == 'activate_physical_flow') {
@@ -35,90 +35,100 @@ class PinVerifyController extends GetxController {
   }
 
   // ✅ ฟังก์ชันใหม่สำหรับตรวจสอบ PIN แอปก่อนตั้งรหัสบัตร
-// // ในไฟล์ pin_verify_controller.dart
-Future<void> processFinalActivate(String newCardPin, dynamic originalArgs) async {
-  try {
-    isLoading.value = true;
-    String? token = await storage.read(key: 'accessToken');
-    String? deviceId = await getDeviceId();
+  // // ในไฟล์ pin_verify_controller.dart
+  Future<void> processFinalActivate(
+    String newCardPin,
+    dynamic originalArgs,
+  ) async {
+    try {
+      isLoading.value = true;
+      String? token = await storage.read(key: 'accessToken');
+      String? deviceId = await getDeviceId();
 
-
-    Map<String, dynamic> body = {
-      "pin": originalArgs['app_pin'], // PIN แอปที่ส่งมาจากขั้นตอนก่อนหน้า
-      "deviceId": deviceId,
-      "lastDigits": originalArgs['input_data']['last_digits'],
-      "expiry": originalArgs['input_data']['expiry'],
-      "cvv": originalArgs['input_data']['cvv'],
-      "newCardPin": newCardPin, // รหัส ATM 6 หลักที่ตั้งใหม่
-    };
-
-    final response = await http.post(
-      Uri.parse("${ApiConstants.baseUrl}/api/v1/mobile/feature/card/${originalArgs['card']['card_id']}/activate"),
-      headers: {
-        "Content-Type": "application/json",
-        "Authorization": "Bearer $token",
-      },
-      body: jsonEncode(body),
-    );
-
-    if (response.statusCode == 200) {
-      // ✅ สำเร็จ! ไปหน้า Success
-      Get.offAllNamed('/success_page', arguments: {
-        "title": "เปิดใช้งานสำเร็จ",
-        "subtitle": "บัตรของคุณพร้อมใช้งานแล้ว",
-      });
-    } else {
-      final errorData = jsonDecode(utf8.decode(response.bodyBytes));
-      Get.snackbar('ผิดพลาด', errorData['message'] ?? 'ไม่สามารถเปิดใช้งานบัตรได้');
-    }
-  } catch (e) {
-    Get.snackbar('Error', 'เกิดข้อผิดพลาดในการเชื่อมต่อ');
-  } finally {
-    isLoading.value = false;
-  }
-}
-
-Future<void> verifyAppPinForActivation() async {
-  try {
-    isLoading.value = true;
-    String? token = await storage.read(key: 'accessToken');
-    String? deviceId = await getDeviceId();
-
-    final response = await http.post(
-      Uri.parse(
-        "${ApiConstants.baseUrl}${ApiConstants.sensitive.replaceFirst('{card_id}', args['card']['card_id'])}",
-      ),
-      headers: {
-        "Content-Type": "application/json",
-        "Authorization": "Bearer $token",
-      },
-      body: jsonEncode({
-        "pin": enteredPin.value,
+      Map<String, dynamic> body = {
+        "pin": enteredPin.value, // PIN แอปที่ส่งมาจากขั้นตอนก่อนหน้า
         "deviceId": deviceId,
-      }),
-    );
+        "lastDigits": originalArgs['input_data']['last_digits'],
+        "expiry": originalArgs['input_data']['expiry'],
+        "cvv": originalArgs['input_data']['cvv'],
+        "newCardPin": newCardPin, // รหัส ATM 6 หลักที่ตั้งใหม่
+        "card_id": originalArgs['card']['card_id'], // ✅ เพิ่มบรรทัดนี้เพื่อให้ API รู้ว่าเปิดใบไหน
+      };
 
-    if (response.statusCode == 200) {
-      final sensitiveData = jsonDecode(utf8.decode(response.bodyBytes));
-      
-      Get.toNamed('/set_card_pin', arguments: {
-        ...args,
-        'app_pin': enteredPin.value,
-        'sensitive_data': sensitiveData, // เก็บเลขบัตรเต็มไว้ส่งตอน Activate
-      });
-    } else {
-      // ❌ PIN ผิด (ตามที่ Backend ตอบกลับ)
-      Get.snackbar('ผิดพลาด', 'รหัสผ่านไม่ถูกต้อง');
-      enteredPin.value = ''; 
+      final response = await http.post(
+        Uri.parse(
+          "${ApiConstants.baseUrl}${ApiConstants.activatecard}",
+        ),
+        headers: {
+          "Content-Type": "application/json",
+          "Authorization": "Bearer $token",
+        },
+        body: jsonEncode(body),
+      );
+
+      if (response.statusCode == 200) {
+        // ✅ สำเร็จ! ไปหน้า Success
+        Get.offAllNamed(
+          '/success_page',
+          arguments: {
+            "title": "เปิดใช้งานสำเร็จ",
+            "subtitle": "บัตรของคุณพร้อมใช้งานแล้ว",
+          },
+        );
+      } else {
+        final errorData = jsonDecode(utf8.decode(response.bodyBytes));
+        Get.snackbar(
+          'ผิดพลาด',
+          errorData['message'] ?? 'ไม่สามารถเปิดใช้งานบัตรได้',
+        );
+      }
+    } catch (e) {
+      Get.snackbar('Error', 'เกิดข้อผิดพลาดในการเชื่อมต่อ');
+    } finally {
+      isLoading.value = false;
     }
-  } catch (e) {
-    Get.snackbar('Error', 'เกิดข้อผิดพลาดในการเชื่อมต่อ');
-    enteredPin.value = '';
-  } finally {
-    isLoading.value = false;
   }
-}
 
+  Future<void> verifyAppPinForActivation() async {
+    try {
+      isLoading.value = true;
+      String? token = await storage.read(key: 'accessToken');
+      String? deviceId = await getDeviceId();
+
+      final response = await http.post(
+        Uri.parse("${ApiConstants.baseUrl}${ApiConstants.sensitive}"),
+        headers: {
+          "Content-Type": "application/json",
+          "Authorization": "Bearer $token",
+        },
+        body: jsonEncode({
+          "pin": enteredPin.value,
+          "deviceId": deviceId,
+          "card_id": args['card']['card_id']
+        }),
+      );
+
+      if (response.statusCode == 200) {
+
+        Get.toNamed(
+          '/set_card_pin',
+          arguments: {
+            ...args,
+            'app_pin': enteredPin.value,
+          },
+        );
+      } else {
+        // ❌ PIN ผิด (ตามที่ Backend ตอบกลับ)
+        Get.snackbar('ผิดพลาด', 'รหัสผ่านไม่ถูกต้อง');
+        enteredPin.value = '';
+      }
+    } catch (e) {
+      Get.snackbar('Error', 'เกิดข้อผิดพลาดในการเชื่อมต่อ');
+      enteredPin.value = '';
+    } finally {
+      isLoading.value = false;
+    }
+  }
 
   void deleteNumber() {
     if (enteredPin.value.isNotEmpty) {
@@ -139,7 +149,7 @@ Future<void> verifyAppPinForActivation() async {
       Map<String, dynamic> body = {
         "pin": enteredPin.value,
         "deviceId": deviceId,
-        "typeDebitId": cardData['type_debit_id'], 
+        "typeDebitId": cardData['type_debit_id'],
       };
 
       final response = await http.post(
@@ -210,21 +220,23 @@ Future<void> verifyAppPinForActivation() async {
     }
   }
 
-  Future<void> processViewSensitiveData() async {
+  Future<void> processViewSensitiveData(cardId) async {
     try {
       isLoading.value = true;
       String? token = await storage.read(key: 'accessToken');
       String? deviceId = await getDeviceId();
 
       final response = await http.post(
-        Uri.parse(
-          "${ApiConstants.baseUrl}${ApiConstants.sensitive.replaceFirst('{card_id}', args['card']['card_id'])}",
-        ),
+        Uri.parse("${ApiConstants.baseUrl}${ApiConstants.sensitive}"),
         headers: {
           "Content-Type": "application/json",
           "Authorization": "Bearer $token",
         },
-        body: jsonEncode({"pin": enteredPin.value, "deviceId": deviceId}),
+        body: jsonEncode({
+          "pin": enteredPin.value,
+          "deviceId": deviceId,
+          "card_id": args['card_id'],
+        }),
       );
 
       if (response.statusCode == 200) {
@@ -249,110 +261,115 @@ Future<void> verifyAppPinForActivation() async {
     }
   }
 
-  // Future<void> activateCards() async {
+Future<void> processRequestPhysical(cardId) async {
+  try {
+    isLoading.value = true;
+    String? token = await storage.read(key: 'accessToken');
+    String? deviceId = await getDeviceId();
+
+    // 📦 1. ดึงข้อมูลที่อยู่จาก arguments ที่ส่งมาจากหน้าก่อนหน้า
+    Map<String, dynamic> addressInfo = args['addressData'];
+
+    // 📦 2. รวมข้อมูลทั้งหมด (ที่อยู่ + PIN + DeviceID + CardID) เข้าเป็นก้อนเดียว
+    // ให้ตรงตามโครงสร้างใน Postman
+    // Map<String, dynamic> requestBody = {
+    //   ...addressInfo,        
+    //   "pin": enteredPin.value, 
+    //   "deviceId": deviceId,    
+    //   "card_id": cardId,     
+    // };
+    Map<String, dynamic> requestBody = {
+      "address": addressInfo['address'],
+      "subdistrict": addressInfo['subdistrict'],
+      "district": addressInfo['district'],
+      "province": addressInfo['province'],
+      "zipcode": addressInfo['zipcode'],
+      "pin": enteredPin.value, // PIN 6 หลักที่ User เพิ่งกรอก
+      "deviceId": deviceId,
+      "card_id": args['card']['card_id'], // ✅ ใส่ card_id รวมเข้าไปในนี้
+    };
+
+    // 🚀 3. ยิง API โดยใช้ Body ที่รวมข้อมูลครบแล้ว
+    final response = await http.post(
+      Uri.parse("${ApiConstants.baseUrl}${ApiConstants.requestphysicalcard}"),
+      headers: {
+        "Content-Type": "application/json",
+        "Authorization": "Bearer $token",
+      },
+      body: jsonEncode(requestBody), 
+    );
+
+    if (response.statusCode == 200) {
+      Get.offAllNamed(
+        '/success_page',
+        arguments: {
+          "title": "ขอบัตรแข็งสำเร็จ!",
+          "subtitle": "ระบบกำลังจัดส่งบัตรไปยังที่อยู่ของคุณ",
+        },
+      );
+    } else {
+      final errorData = jsonDecode(utf8.decode(response.bodyBytes));
+      Get.snackbar(
+        'ผิดพลาด',
+        errorData['message'] ?? 'ไม่สามารถดำเนินการได้',
+      );
+      enteredPin.value = '';
+    }
+  } catch (e) {
+    Get.snackbar('Error', 'เกิดข้อผิดพลาดในการเชื่อมต่อ');
+    enteredPin.value = '';
+  } finally {
+    isLoading.value = false;
+  }
+}
+  // Future<void> processRequestPhysical(cardId) async {
   //   try {
   //     isLoading.value = true;
   //     String? token = await storage.read(key: 'accessToken');
   //     String? deviceId = await getDeviceId();
 
-  //     // Map<String, dynamic> body = {
-  //     //   "pin": enteredPin.value,
-  //     //   "deviceId": deviceId,
-  //     //   "typeDebitId": cardData['type_debit_id'], // ID บัตรที่เลือกมา
-  //     // };
-  //     final response = await http.post(
-  //       Uri.parse("${ApiConstants.baseUrl}${ApiConstants.activatecard}"),
+  //     // 📦 เตรียม Body ข้อมูล (ที่อยู่ + PIN + DeviceID)
+  //     Map<String, dynamic> addressInfo = args['addressData'];
+  //     Map<String, dynamic> body = {
+  //       ...addressInfo, // ดึงข้อมูลที่อยู่จากหน้า Address
+  //       "pin": enteredPin.value,
+  //       "deviceId": deviceId,
+        
+  //     };
 
+  //     // 🚀 ยิง API เส้น requestphysicalcard
+  //     final response = await http.post(
+  //       Uri.parse(
+  //         "${ApiConstants.baseUrl}${ApiConstants.requestphysicalcard}",
+  //       ),
   //       headers: {
   //         "Content-Type": "application/json",
   //         "Authorization": "Bearer $token",
   //       },
-  //       // body
+  //       body: jsonEncode({"card_id": cardId}), // ส่ง card_id ใน request body
   //     );
-  //     if (response.statusCode == 200){
 
+  //     if (response.statusCode == 200) {
+  //       Get.offAllNamed(
+  //         '/success_page',
+  //         arguments: {
+  //           "title": "ขอบัตรแข็งสำเร็จ!",
+  //           "subtitle": "ระบบกำลังจัดส่งบัตรไปยังที่อยู่ของคุณ",
+  //         },
+  //       );
+  //     } else {
+  //       final errorData = jsonDecode(utf8.decode(response.bodyBytes));
+  //       Get.snackbar(
+  //         'ผิดพลาด',
+  //         errorData['message'] ?? 'ไม่สามารถดำเนินการได้',
+  //       );
+  //       enteredPin.value = '';
   //     }
   //   } catch (e) {
   //     Get.snackbar('Error', 'เกิดข้อผิดพลาดในการเชื่อมต่อ');
+  //     enteredPin.value = '';
   //   } finally {
   //     isLoading.value = false;
   //   }
   // }
-  Future<void> requestPhysicalCards() async {
-    try {
-      isLoading.value = true;
-      String? token = await storage.read(key: 'accessToken');
-      String? deviceId = await getDeviceId();
-
-      // Map<String, dynamic> body = {
-      //   "pin": enteredPin.value,
-      //   "deviceId": deviceId,
-      //   "typeDebitId": cardData['type_debit_id'], // ID บัตรที่เลือกมา
-      // };
-      final response = await http.post(
-        Uri.parse("${ApiConstants.baseUrl}${ApiConstants.requestphysicalcard}"),
-
-        headers: {
-          "Content-Type": "application/json",
-          "Authorization": "Bearer $token",
-        },
-        // body
-      );
-      if (response.statusCode == 200) {}
-    } catch (e) {
-      Get.snackbar('Error', 'เกิดข้อผิดพลาดในการเชื่อมต่อ');
-    } finally {
-      isLoading.value = false;
-    }
-  }
-
-  Future<void> processRequestPhysical() async {
-    try {
-      isLoading.value = true;
-      String? token = await storage.read(key: 'accessToken');
-      String? deviceId = await getDeviceId();
-
-      // 📦 เตรียม Body ข้อมูล (ที่อยู่ + PIN + DeviceID)
-      Map<String, dynamic> addressInfo = args['addressData'];
-      Map<String, dynamic> body = {
-        ...addressInfo, // ดึงข้อมูลที่อยู่จากหน้า Address
-        "pin": enteredPin.value,
-        "deviceId": deviceId,
-      };
-
-      // 🚀 ยิง API เส้น requestphysicalcard
-      final response = await http.post(
-        Uri.parse(
-          "${ApiConstants.baseUrl}${ApiConstants.requestphysicalcard.replaceFirst('{card_id}', args['card']['card_id'])}",
-        ),
-        headers: {
-          "Content-Type": "application/json",
-          "Authorization": "Bearer $token",
-        },
-        body: jsonEncode(body),
-      );
-
-      if (response.statusCode == 200) {
-        Get.offAllNamed(
-          '/success_page',
-          arguments: {
-            "title": "ขอบัตรแข็งสำเร็จ!",
-            "subtitle": "ระบบกำลังจัดส่งบัตรไปยังที่อยู่ของคุณ",
-          },
-        );
-      } else {
-        final errorData = jsonDecode(utf8.decode(response.bodyBytes));
-        Get.snackbar(
-          'ผิดพลาด',
-          errorData['message'] ?? 'ไม่สามารถดำเนินการได้',
-        );
-        enteredPin.value = '';
-      }
-    } catch (e) {
-      Get.snackbar('Error', 'เกิดข้อผิดพลาดในการเชื่อมต่อ');
-      enteredPin.value = '';
-    } finally {
-      isLoading.value = false;
-    }
-  }
 }

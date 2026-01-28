@@ -3,7 +3,6 @@ import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import 'package:my_app/module/controller/card_detail_controller.dart';
 import 'package:my_app/module/controller/home_controller.dart';
-import 'package:my_app/module/controller/my_cards_controller.dart';
 import 'package:my_app/module/controller/status_card_controller.dart';
 
 class MyCardDetail extends StatefulWidget {
@@ -47,12 +46,6 @@ class _MyCardDetailState extends State<MyCardDetail> {
         ),
       ),
       body: Obx(() {
-        if (detailController.isLoading.value) {
-          return const Center(
-            child: CircularProgressIndicator(color: Color(0xFF264FAD)),
-          );
-        }
-
         final card = detailController.cardData;
         if (card.isEmpty) return const Center(child: Text("ไม่พบข้อมูลบัตร"));
 
@@ -63,7 +56,11 @@ class _MyCardDetailState extends State<MyCardDetail> {
         // ซิงค์สถานะการระงับบัตรกับ status controller
         bool isCurrentlyFrozen = card['status'] != 'active';
         statusCardController.isCardFrozen.value = isCurrentlyFrozen;
-
+        // ✅ แก้ไขจุดนี้: เรียกใช้ฟังก์ชันตั้งค่าเริ่มต้นเพียงครั้งเดียว (หรือเช็คค่าก่อนเซ็ต)
+        // ห้ามเซ็ต value ตรงๆ ใน build แบบนี้: statusCardController.isCardFrozen.value = ...
+        if (!statusCardController.isLoading.value) {
+          statusCardController.isCardFrozen.value = card['status'] != 'active';
+        }
         return SingleChildScrollView(
           child: Column(
             children: [
@@ -72,7 +69,7 @@ class _MyCardDetailState extends State<MyCardDetail> {
                   vertical: 20,
                   horizontal: 20,
                 ),
-                child: _buildCard(card, ownerEn,Cardname),
+                child: _buildCard(card, ownerEn, Cardname),
               ),
               const SizedBox(height: 20),
 
@@ -94,6 +91,8 @@ class _MyCardDetailState extends State<MyCardDetail> {
                     arguments: {
                       'action': 'view_sensitive',
                       'card': card,
+                      'card_id':
+                          card['card_id'], // ✅ ส่ง card_id ไปด้วยเพื่อให้ API ทำงานได้
                       'ownerName': ownerEn,
                     },
                   ),
@@ -132,12 +131,15 @@ class _MyCardDetailState extends State<MyCardDetail> {
                         style: TextStyle(fontSize: 16),
                       ),
                       Switch(
-                        value: !statusCardController.isCardFrozen.value,
+                        value: !statusCardController
+                            .isCardFrozen
+                            .value, // active = !frozen
                         onChanged: (val) {
-                          if (val)
+                          if (val) {
                             statusCardController.unfreezeCard(currentCardId);
-                          else
+                          } else {
                             statusCardController.freezeCard(currentCardId);
+                          }
                         },
                         activeColor: const Color(0xFF264FAD),
                       ),
@@ -145,10 +147,14 @@ class _MyCardDetailState extends State<MyCardDetail> {
                   ),
                 ),
               ]),
+              //
+              if ((card['is_physical_requested'] == false && card['virtual'] == true) 
+                  || (card['virtual'] == false && card['status'] == 'inactive'))
+                _buildSectionHeader("บัตร Physical"),
 
-              _buildSectionHeader("บัตร Physical"),
               _buildDetailSection([
-                if (card['virtual'] == true)
+                if (card['virtual'] == true &&
+                    card['is_physical_requested'] == false)
                   InkWell(
                     onTap: () => Get.toNamed(
                       '/requestPhysical',
@@ -160,7 +166,7 @@ class _MyCardDetailState extends State<MyCardDetail> {
                     ),
                     child: _buildRow("ขอบัตร Physical", "", showArrow: true),
                   ),
-                if (card['virtual'] == false)
+                if (card['virtual'] == false && card['status'] == 'inactive')
                   InkWell(
                     onTap: () => Get.toNamed(
                       '/activate_physical',

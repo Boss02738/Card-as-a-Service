@@ -10,7 +10,6 @@ class MyCardsController extends GetxController {
 
   get selectedCard => null;
 
-
   @override
   void onInit() {
     super.onInit();
@@ -30,7 +29,7 @@ class MyCardsController extends GetxController {
         },
       );
 
-     if (response.statusCode == 200) {
+      if (response.statusCode == 200) {
         final List<dynamic> data = jsonDecode(utf8.decode(response.bodyBytes));
         myCards.assignAll(data); // อัปเดตข้อมูลบัตรทั้งหมด
         print("ดึงข้อมูลบัตรสำเร็จ: ${myCards.length} ใบ");
@@ -45,7 +44,7 @@ class MyCardsController extends GetxController {
     }
   }
 
-  void fetchUserCards () async {
+  void fetchUserCards() async {
     await fetchMyCards();
   }
 }

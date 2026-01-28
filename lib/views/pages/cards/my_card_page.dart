@@ -146,7 +146,6 @@ class _MyCardPageState extends State<MyCardPage> {
           onTap: () {
             Get.toNamed(
               '/my_card_detail',
-              // arguments: {'card': card, 'ownerName': ownerName},
               arguments: {'card_id': card['card_id']},
             );
           },

@@ -16,8 +16,6 @@ class AddressController extends GetxController {
       "district": districtCtrl.text,
       "province": provincetCtrl.text,
       "zipcode": zipcodeCtrl.text,
-      "pin": "123456",
-      "deviceId": "DEVICE-UUID-999",
     };
   }
 }
