@@ -45,7 +45,7 @@ class _AccountPageState extends State<AccountPage> {
                           color: Colors.white, // ส่วนล่างเป็นสีขาว
                           borderRadius: BorderRadius.circular(15),
                           boxShadow: [
-                            BoxShadow(
+                             BoxShadow(
                               color: Colors.black.withOpacity(0.1),
                               blurRadius: 10,
                               offset: const Offset(0, 5),

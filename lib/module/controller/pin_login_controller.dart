@@ -4,7 +4,6 @@ import 'package:http/http.dart' as http;
 import 'package:my_app/core/api_constants.dart';
 import 'package:my_app/module/services/device_id.dart';
 import 'package:my_app/module/services/secure_storage.dart';
-import 'package:my_app/core/api_constants.dart';
 
 class PinLoginController extends GetxController {
   var enteredPin = ''.obs;

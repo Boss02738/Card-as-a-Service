@@ -1,6 +1,5 @@
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
-import 'package:my_app/views/pages/Register/idcard_verify.dart';
 import 'package:pinput/pinput.dart';
 import 'package:my_app/module/controller/header_text_controller.dart';
 import 'package:my_app/module/controller/phonenumber_controller.dart';

@@ -21,7 +21,6 @@ class _RequestPhysicaState extends State<RequestPhysical> {
   @override
   Widget build(BuildContext context) {
     final dynamic card = args['card']; // ข้อมูลบัตรปัจจุบันจากหน้า MyCardDetail
-    final String ownerName = args['ownerName'];
 
     // ดึง Controller มาใช้งาน (ใช้ find เพราะควรถูกสร้างมาจากหน้า List ประเภทบัตรแล้ว)
     final TypeCardsController typeController = Get.put(TypeCardsController());

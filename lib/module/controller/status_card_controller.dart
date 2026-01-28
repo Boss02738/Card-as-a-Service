@@ -4,7 +4,6 @@ import 'package:http/http.dart' as http;
 import 'package:my_app/core/api_constants.dart';
 import 'package:my_app/module/controller/card_detail_controller.dart';
 import 'package:my_app/module/controller/my_cards_controller.dart';
-import 'package:my_app/module/services/device_id.dart';
 import 'package:my_app/module/services/secure_storage.dart';
 
 // lib/module/controller/status_card_controller.dart

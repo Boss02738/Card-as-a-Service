@@ -21,11 +21,12 @@ class ApiConstants {
 
   // My Cards
   static const String mycards = "/api/v1/mobile/feature/my-cards";
-  
   static const String freeze = "/api/v1/mobile/feature/card/freeze";
   static const String unfreeze ="/api/v1/mobile/feature/card/unfreeze";
   static const String limitcard = "/api/v1/mobile/feature/card/limit";
   static const String sensitive = "/api/v1/mobile/feature/card/sensitive";
+
+  static const String cardTraking = "/api/v1/mobile/feature/card/tracking";
   static const String requestphysicalcard ="/api/v1/mobile/feature/card/physical";
   static const String activatecard = "/api/v1/mobile/feature/card/activate";
 

@@ -2,7 +2,6 @@ import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import 'package:my_app/module/services/secure_storage.dart';
 import 'package:my_app/views/widgets/gradient_header.dart';
-import 'package:my_app/module/services/secure_storage.dart'; // import ตัว storage ที่คุณสร้างไว้
 
 class Welcome_Page extends StatefulWidget {
   const Welcome_Page({super.key});

@@ -3,7 +3,6 @@ import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import 'package:my_app/module/controller/header_text_controller.dart';
 import 'package:my_app/module/services/camera_service.dart';
-import 'package:my_app/views/pages/Register/face_verify.dart';
 import 'package:my_app/views/pages/Register/info.dart';
 import 'package:my_app/views/widgets/brand_logo.dart';
 import 'package:my_app/views/widgets/data_card.dart';

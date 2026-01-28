@@ -148,8 +148,9 @@ class _MyCardDetailState extends State<MyCardDetail> {
                 ),
               ]),
               //
-              if ((card['is_physical_requested'] == false && card['virtual'] == true) 
-                  || (card['virtual'] == false && card['status'] == 'inactive'))
+              if ((card['is_physical_requested'] == false &&
+                      card['virtual'] == true) ||
+                  (card['virtual'] == false && card['status'] == 'inactive'))
                 _buildSectionHeader("บัตร Physical"),
 
               _buildDetailSection([
@@ -166,7 +167,7 @@ class _MyCardDetailState extends State<MyCardDetail> {
                     ),
                     child: _buildRow("ขอบัตร Physical", "", showArrow: true),
                   ),
-                if (card['virtual'] == false && card['status'] == 'inactive')
+                if (card['virtual'] == false && card['status'] == 'inactive' && detailController.trackingData['delivery_status'] == 'success')
                   InkWell(
                     onTap: () => Get.toNamed(
                       '/activate_physical',
@@ -179,6 +180,26 @@ class _MyCardDetailState extends State<MyCardDetail> {
                     ),
                   ),
               ]),
+              // if (card['virtual'] == false && card['status'] == 'inactive')
+              //   _buildDetailSection([
+              //     _buildRow(
+              //       "สถานะขนส่งบัตร",
+              //       "${card['current_spending_limit'].toString().replaceAllMapped(RegExp(r'(\d{1,3})(?=(\d{3})+(?!\d))'), (Match m) => '${m[1]},')} บาท",
+              //       isBoldValue: true,
+              //     ),
+              //   ]),
+              if (card['virtual'] == false && card['status'] == 'inactive') ...[
+                _buildDetailSection([
+                  _buildRow(
+                    "สถานะปัจจุบัน",
+                    // ✅ ดึงข้อมูลสถานะจาก trackingData เช่น "กำลังจัดส่ง" หรือ "เตรียมจัดส่ง"
+                    detailController.trackingData['delivery_status'] ??
+                        "กำลังเตรียมการจัดส่ง",
+                    valueColor: Colors.blueAccent,
+                    isBoldValue: true,
+                  ),
+                ]),
+              ],
               const SizedBox(height: 30),
             ],
           ),
