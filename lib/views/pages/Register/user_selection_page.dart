@@ -37,8 +37,8 @@ class UserSelectionPage extends StatelessWidget {
                           onTap: () => Get.toNamed(
                             '/idcard_verify',
                             arguments: {
+                              ...Get.arguments,
                               'action': 'register',
-                              'mobileNumber': Get.arguments['verifiedMobile'],
                             },
                           ),
                         ),
@@ -51,6 +51,7 @@ class UserSelectionPage extends StatelessWidget {
                           onTap: () => Get.toNamed(
                             '/change_device',
                             arguments: {
+                              ...Get.arguments,
                               'action':
                                   'change_device_flow', // ✅ กำหนดเป็นย้ายเครื่องเฉพาะเมื่อกดปุ่มนี้
                               'mobileNumber': Get.arguments['verifiedMobile'],

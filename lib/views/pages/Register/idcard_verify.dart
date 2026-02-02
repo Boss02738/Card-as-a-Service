@@ -49,21 +49,21 @@ class _IdcardVerifyState extends State<IdcardVerify> {
               child: Column(
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
-                   SizedBox(height: 30.h),
+                  SizedBox(height: 30.h),
                   const BrandLogo(),
-                   SizedBox(height: 30.h),
-                   Padding(
+                  SizedBox(height: 30.h),
+                  Padding(
                     padding: EdgeInsets.symmetric(horizontal: 22.w),
                     child: HeaderTexts(),
                   ),
-                   SizedBox(height: 20.h),
+                  SizedBox(height: 20.h),
                   Expanded(
                     child: DataCard(
                       child: SizedBox(
                         child: Column(
                           crossAxisAlignment: CrossAxisAlignment.start,
                           children: [
-                             SizedBox(height: 20.h),
+                            SizedBox(height: 20.h),
                             // --- ส่วนกรอบบัตรประชาชนจำลอง ---
                             Container(
                               width: double.infinity,
@@ -144,12 +144,12 @@ class _IdcardVerifyState extends State<IdcardVerify> {
                                     51,
                                     123,
                                   ),
-                                  minimumSize:  Size(250.r, 45.r),
+                                  minimumSize: Size(250.r, 45.r),
                                   shape: RoundedRectangleBorder(
                                     borderRadius: BorderRadius.circular(8.r),
                                   ),
                                 ),
-                                child:  Text(
+                                child: Text(
                                   'เปิดกล้องเพื่อสแกน',
                                   style: TextStyle(
                                     color: Colors.white,
@@ -158,8 +158,8 @@ class _IdcardVerifyState extends State<IdcardVerify> {
                                 ),
                               ),
                             ),
-      Text(PhoneCtrl.phoneNumber.value),
-                             SizedBox(height: 40.h),
+                            Text(PhoneCtrl.phoneNumber.value),
+                            SizedBox(height: 40.h),
 
                             Row(
                               mainAxisAlignment: MainAxisAlignment.end,
@@ -171,16 +171,19 @@ class _IdcardVerifyState extends State<IdcardVerify> {
                                     fontSize: 16.sp,
                                   ),
                                 ),
-                                 SizedBox(width: 10.w),
+                                SizedBox(width: 10.w),
                                 ArrowFab(
                                   enabled: _image != null,
                                   onPressed: () {
-                                    Get.to(Info());
+                                    Get.to(
+                                      () => const Info(),
+                                      arguments: Get.arguments,
+                                    );
                                   },
                                 ),
                               ],
                             ),
-                             SizedBox(height: 20.h),
+                            SizedBox(height: 20.h),
                           ],
                         ),
                       ),

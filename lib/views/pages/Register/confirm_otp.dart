@@ -50,7 +50,7 @@ class _Confirm_otpState extends State<Confirm_otp> {
     if (_formKey.currentState!.validate()) {
       Get.offNamed(
         '/user_selection',
-        arguments: {'verifiedMobile': phonenumberController.phoneNumber.value},
+        arguments: {'verifiedMobile': phonenumberController.phoneNumber.value,},
       )?.then((value) {
         // ล้างค่าเมื่อย้อนกลับมาถึงหน้าเดิม
         headerTextController.setHeaderText(

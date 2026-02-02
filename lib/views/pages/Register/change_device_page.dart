@@ -84,16 +84,19 @@ class _ChangeDevicePageState extends State<ChangeDevicePage> {
                             ArrowFab(
                               enabled: true,
                               onPressed: () {
+                                final String verifiedMobile =
+                                    Get.arguments?['mobileNumber'] ??
+                                    phoneCtrl.phoneNumber.value;
+
                                 if (_idCardCtrl.text.length == 13 &&
-                                    _accNoCtrl.text.isNotEmpty) {
+                                    _accNoCtrl.text.length == 10) {
                                   Get.toNamed(
                                     '/face_verify',
                                     arguments: {
                                       'action': 'change_device_flow',
                                       'citizenId': _idCardCtrl.text,
                                       'accountNumber': _accNoCtrl.text,
-                                      'mobileNumber':
-                                          phoneCtrl.phoneNumber.value,
+                                      'mobileNumber': verifiedMobile,
                                       // อย่าลืมส่งเบอร์โทรไปด้วยถ้ายังไม่มีใน Storage
                                     },
                                   );

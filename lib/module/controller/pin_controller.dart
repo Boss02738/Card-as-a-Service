@@ -42,13 +42,15 @@ class PinController extends GetxController {
   void handlePinComplete() {
     final dynamic args = Get.arguments;
     String? action = (args is Map) ? args['action'] : null;
+    print('DEBUG Pin args = ${Get.arguments}');
+
     if (action == 'change_device_flow') {
       verifyOldPinAndChangeDevice();
     } else {
       if (!isConfirmMode.value) {
         firstPin.value = enteredPin.value; // เก็บค่ารหัสรอบแรกไว้
         enteredPin.value = '';
-         
+
         isConfirmMode.value = true;
       } else {
         if (enteredPin.value == firstPin.value) {
@@ -75,7 +77,10 @@ class PinController extends GetxController {
 
       // ดึงเบอร์โทรศัพท์ที่ส่งมาจากหน้า ChangeDevicePage หรือ FaceVerify
       String mobile = args['mobileNumber'] ?? "";
-
+      if (mobile.isEmpty) {
+        Get.snackbar('ผิดพลาด', 'ไม่พบข้อมูลเบอร์โทรศัพท์');
+        return;
+      }
       Map<String, dynamic> body = {
         "citizenId": args['citizenId'],
         "accountNumber": args['accountNumber'],
@@ -94,14 +99,13 @@ class PinController extends GetxController {
         // ✅ จุดที่ต้องแก้ไข: บันทึกข้อมูลลงเครื่องใหม่เพื่อให้ Login ได้
         await storage.write(key: 'userMobile', value: mobile);
         await storage.write(key: 'isRegistered', value: 'true');
+        await storage.write(key: 'deviceId', value: deviceId ?? "");
 
         print("DEBUG: บันทึกเบอร์ $mobile ลงเครื่องใหม่สำเร็จ");
-
         Get.snackbar('สำเร็จ', 'ยืนยันตัวตนสำเร็จ กรุณาเข้าสู่ระบบ');
 
-        // หน่วงเวลาเล็กน้อยเพื่อให้ระบบบันทึกค่าเสร็จสิ้นก่อนย้ายหน้า
         await Future.delayed(const Duration(milliseconds: 500));
-        Get.offAllNamed('/login-pin');
+        Get.offAllNamed('/success');
       } else {
         final error = jsonDecode(utf8.decode(response.bodyBytes));
         Get.snackbar(
@@ -206,9 +210,14 @@ class PinController extends GetxController {
         // ใช้ lockedMobile ในการบันทึกลงเครื่อง
         print("กำลังบันทึกข้อมูลลง Storage สำหรับเบอร์: $lockedMobile");
 
-        await storage.write(key: 'userMobile', value: lockedMobile);
+        // await storage.write(key: 'userMobile', value: lockedMobile);
+
         await storage.write(key: 'deviceId', value: deviceId ?? "");
         await storage.write(key: 'isRegistered', value: 'true');
+        await storage.write(
+          key: 'userMobile',
+          value: Get.arguments['verifiedMobile'],
+        );
 
         print("บันทึกสำเร็จ! ค่าเบอร์คือ: $lockedMobile");
 

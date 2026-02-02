@@ -178,36 +178,45 @@ class _FaceVerifyState extends State<FaceVerify> {
                             // ภายใน face_verify.dart ตรงปุ่ม ArrowFab
                             // face_verify.dart
                             onPressed: () async {
-                              final dynamic args = Get.arguments;
+                              final args = Get.arguments;
+                              var mobile = args?['verifiedMobile'];
+
                               final Map<String, dynamic> currentArgs =
                                   (args is Map)
                                   ? Map<String, dynamic>.from(args)
                                   : {};
-                              String action =
+
+                              final String action =
                                   currentArgs['action'] ??
                                   'forgot_password_reset';
-                              // 1. ตรวจสอบว่าเป็นการสมัครใหม่หรือไม่
-                              bool isRegister =
-                                  currentArgs['action'] == 'register';
 
-                              String? mobile;
-
-                              if (isRegister) {
-                                // ✅ ถ้าเป็นสมัครใหม่ ให้ดึงเบอร์จาก Controller ที่กรอกไว้ตอนหน้าแรก
+                              if (action == 'register') {
+                                // สมัครใหม่ → ใช้จาก controller
                                 mobile = phoneCtrl.phoneNumber.value;
+                              } else if (action == 'change_device_flow') {
+                                // 🔥 ย้ายเครื่อง → ใช้จาก arguments เท่านั้น
+                                mobile =
+                                    currentArgs['verifiedMobile'] ??
+                                    currentArgs['mobileNumber'];
                               } else {
-                                // กรณีอื่นๆ (ลืมรหัส/ย้ายเครื่อง) ดึงจาก Storage
+                                // ลืมรหัส → ใช้จาก storage
                                 mobile = await storage.read(key: 'userMobile');
                               }
 
-                              // 2. ส่งไปหน้า PIN พร้อม Arguments ที่ถูกต้อง
+                              if (mobile == null || mobile.isEmpty) {
+                                Get.snackbar(
+                                  'ผิดพลาด',
+                                  'ไม่พบข้อมูลเบอร์โทรศัพท์',
+                                );
+                                return;
+                              }
+
                               Get.toNamed(
                                 '/pin_page',
                                 arguments: {
                                   ...currentArgs,
                                   'action': action,
-                                  'mobileNumber':
-                                      mobile, // ✅ ตอนนี้จะมีค่าเบอร์โทรส่งไปแน่นอน
+                                  'mobileNumber': mobile,
                                 },
                               );
                             },

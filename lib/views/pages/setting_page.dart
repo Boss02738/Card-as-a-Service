@@ -61,7 +61,7 @@ class SettingTabPage extends StatelessWidget {
                     ),
                   ),
                   subtitle: const Text(
-                    'ปรับวงเงิน,เปิเปิด/ปิดใช้งานบัตร,ดูเลขบัตรม,ขอบัตรจริง',
+                    'ปรับวงเงิน,เปิด/ปิดใช้งานบัตร,ดูเลขบัตร,ขอบัตรจริง',
                     style: TextStyle(
                       fontSize: 12,
                       color: Color.fromARGB(255, 255, 255, 255),
