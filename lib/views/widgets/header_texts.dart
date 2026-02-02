@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:get/get.dart';
 import 'package:my_app/module/controller/header_text_controller.dart';
 
@@ -15,18 +16,18 @@ class HeaderTexts extends StatelessWidget {
       children: [
         Text(
           controller.title.value, // ดึงค่าจาก Controller
-          style: const TextStyle(
+          style: TextStyle(
             color: Colors.white,
-            fontSize: 18,
+            fontSize: 18.sp,
             fontWeight: FontWeight.w600,
           ),
         ),
-        const SizedBox(height: 6),
+       SizedBox(height: 6.h),
         Text(
           controller.subtitle.value, // ดึงค่าจาก Controller
-          style: const TextStyle(color: Color.fromARGB(255, 0, 0, 0), fontSize: 16),
+          style: TextStyle(color: Color.fromARGB(255, 0, 0, 0), fontSize: 16.sp),
         ),
-        const SizedBox(height: 20),
+       SizedBox(height: 20.h),
       ],
     ));
   }

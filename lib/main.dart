@@ -1,12 +1,12 @@
-import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_prevent_screenshot/disablescreenshot.dart';
 import 'package:flutter/services.dart';
 import 'package:get/get.dart';
-import 'package:get/get_navigation/src/root/get_material_app.dart';
-import 'package:get/get_navigation/src/routes/get_route.dart';
 import 'package:my_app/module/binding/main_tab_binding.dart';
+import 'package:my_app/module/controller/auth_flow_controller.dart';
+import 'package:my_app/module/controller/header_text_controller.dart';
 import 'package:my_app/module/controller/mainTab_Controller%20.dart';
+import 'package:my_app/module/controller/phonenumber_controller.dart';
 import 'package:my_app/views/pages/Register/change_device_page.dart';
 import 'package:my_app/views/pages/Register/enter_phone_page.dart';
 import 'package:my_app/views/pages/Register/face_verify.dart';
@@ -36,7 +36,9 @@ import 'package:my_app/views/pages/Create_cards/type_cards.dart';
 import 'package:my_app/views/pages/Create_cards/card_confirm_page.dart';
 import 'package:my_app/views/pages/profile.dart';
 import 'package:my_app/views/pages/setting_page.dart';
+import 'package:my_app/views/test.dart';
 import 'package:my_app/views/widgets/custom_bottom_nav_bar.dart';
+import 'package:flutter_screenutil/flutter_screenutil.dart';
 
 void main() {
   WidgetsFlutterBinding.ensureInitialized();
@@ -66,61 +68,87 @@ class _NovaPayAppState extends State<NovaPayApp> {
 
   @override
   Widget build(BuildContext context) {
-    return GetMaterialApp(
-      debugShowCheckedModeBanner: false,
-      initialRoute: '/',
-      getPages: [
-        GetPage(
-          name: "/main",
-          page: () => MainPage(),
-          binding: MainTabBinding(),
-        ),
+    return ScreenUtilInit(
+      designSize: const Size(393, 852),
+      minTextAdapt: true,
+      splitScreenMode: true,
+      builder: (context, child) {
+        return GetMaterialApp(
+          debugShowCheckedModeBanner: false,
+          initialRoute: '/',
 
-        //Register
-        GetPage(name: '/', page: () => const Welcome_Page()),
-        GetPage(name: '/enter-phone', page: () => const EnterPhonePage()),
-        GetPage(name: '/success', page: () => const SuccessRegisterPage()),
-        GetPage(name: '/confirm-otp', page: () => const Confirm_otp()),
-        GetPage(name: '/face_verify', page: () => const FaceVerify()),
-        GetPage(name: '/pin_page', page: () => const PinPage()),
-        //Login & Home
-        GetPage(name: '/login-pin', page: () => const PinLoginPage()),
-        GetPage(name: "/home", page: () => const HomePage()),
-        GetPage(name: "/account", page: () => const AccountPage()),
-        GetPage(name: "/main", page: () => MainPage()),
-        //Card
-        GetPage(name: "/my_cards", page: () => const MyCardPage()),
-        GetPage(name: "/my_card_detail", page: () => MyCardDetail()),
-        GetPage(
-          name: "/change_limit_card",
-          page: () => const ChangeLimitCard(),
-        ),
-        GetPage(name: "/sensitive", page: () => const SensitiveDataPage()),
-        //creaate_card
-        GetPage(name: "/type_cards", page: () => const Type_Cards()),
-        GetPage(name: "/card_detail", page: () => const Card_Detail()),
-        GetPage(name: "/card_confirm", page: () => const Card_Confirm_Page()),
-        GetPage(name: "/pin_verify_page", page: () => const PinVerifyPage()),
-        GetPage(name: "/success_page", page: () => const SuccessPaga()),
-        //Physical card
-        GetPage(name: "/address_input", page: () => const Address()),
-        GetPage(name: "/requestPhysical", page: () => const RequestPhysical()),
-        GetPage(
-          name: "/activate_physical",
-          page: () => const ActivatePhysical(),
-        ),
-        GetPage(name: "/set_card_pin", page: () => const SetpinPhysical()),
-        //Setting
-        GetPage(name: "/setting", page: () => const SettingTabPage()),
-        GetPage(name: "/profile", page: () => const Profile()),
-        //pin
-        GetPage(name: "/change_pin", page: () => const ChangePinPage()),
-        GetPage(name: "/pin_page", page: () => const PinPage()),
+          initialBinding: BindingsBuilder(() {
+            Get.lazyPut(() => PhonenumberController(), fenix: true);
+            Get.lazyPut(() => HeaderTextController(), fenix: true);
+          }),
+          
+          getPages: [
+            GetPage(
+              name: "/main",
+              page: () => MainPage(),
+              binding: MainTabBinding(),
+            ),
 
-        GetPage(name: '/user_selection', page: () => const UserSelectionPage()),
-        GetPage(name: '/change_device', page: () => const ChangeDevicePage()),
-        GetPage(name: '/idcard_verify', page: () => const IdcardVerify()),
-      ],
+            //Register
+            GetPage(name: '/', page: () => const Welcome_Page()),
+            GetPage(name: '/enter-phone', page: () => const EnterPhonePage()),
+            GetPage(name: '/success', page: () => const SuccessRegisterPage()),
+            GetPage(name: '/confirm-otp', page: () => const Confirm_otp()),
+            GetPage(name: '/face_verify', page: () => const FaceVerify()),
+            GetPage(name: '/pin_page', page: () => const PinPage()),
+            //Login & Home
+            GetPage(name: '/login-pin', page: () => const PinLoginPage()),
+            GetPage(name: "/home", page: () => const HomePage()),
+            GetPage(name: "/account", page: () => const AccountPage()),
+            GetPage(name: "/main", page: () => MainPage()),
+            //Card
+            GetPage(name: "/my_cards", page: () => const MyCardPage()),
+            GetPage(name: "/my_card_detail", page: () => MyCardDetail()),
+            GetPage(
+              name: "/change_limit_card",
+              page: () => const ChangeLimitCard(),
+            ),
+            GetPage(name: "/sensitive", page: () => const SensitiveDataPage()),
+            //creaate_card
+            GetPage(name: "/type_cards", page: () => const Type_Cards()),
+            GetPage(name: "/card_detail", page: () => const Card_Detail()),
+            GetPage(
+              name: "/card_confirm",
+              page: () => const Card_Confirm_Page(),
+            ),
+            GetPage(
+              name: "/pin_verify_page",
+              page: () => const PinVerifyPage(),
+            ),
+            GetPage(name: "/success_page", page: () => const SuccessPaga()),
+            //Physical card
+            GetPage(name: "/address_input", page: () => const Address()),
+            GetPage(
+              name: "/requestPhysical",
+              page: () => const RequestPhysical(),
+            ),
+            GetPage(
+              name: "/activate_physical",
+              page: () => const ActivatePhysical(),
+            ),
+            GetPage(name: "/set_card_pin", page: () => const SetpinPhysical()),
+            //Setting
+            GetPage(name: "/setting", page: () => const SettingTabPage()),
+            GetPage(name: "/profile", page: () => const Profile()),
+            //pin
+            GetPage(name: "/change_pin", page: () => const ChangePinPage()),
+            GetPage(name: "/pin_page", page: () => const PinPage()),
+            GetPage(name: '/user_selection', page: () => UserSelectionPage()),
+            GetPage(
+              name: '/change_device',
+              page: () => const ChangeDevicePage(),
+            ),
+            GetPage(name: '/idcard_verify', page: () => const IdcardVerify()),
+
+            GetPage(name: '/test', page: () => const VueScreen()),
+          ],
+        );
+      },
     );
   }
 }
@@ -128,7 +156,7 @@ class _NovaPayAppState extends State<NovaPayApp> {
 class MainPage extends StatelessWidget {
   MainPage({super.key});
 
-  final controller = Get.find<MainTabController>(); // ✅ ถูก
+  final controller = Get.find<MainTabController>();
 
   final pages = [HomePage(), AccountPage(), MyCardPage(), SettingTabPage()];
 

@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:get/get.dart';
 import 'package:my_app/module/controller/phonenumber_controller.dart';
 import 'package:my_app/views/widgets/brand_logo.dart';
@@ -26,26 +27,30 @@ class _ChangeDevicePageState extends State<ChangeDevicePage> {
           SafeArea(
             child: Column(
               children: [
-                const SizedBox(height: 40),
+                SizedBox(height: 40.h),
                 const BrandLogo(),
-                const SizedBox(height: 40),
-                const Text(
+                SizedBox(height: 40.h),
+                Text(
                   'เข้าใช้งานบัญชีเดิม',
                   style: TextStyle(
                     color: Colors.white,
-                    fontSize: 20,
+                    fontSize: 20.sp,
                     fontWeight: FontWeight.bold,
                   ),
                 ),
-                const SizedBox(height: 20),
+                SizedBox(height: 20.h),
                 Expanded(
                   child: DataCard(
                     child: Column(
                       crossAxisAlignment: CrossAxisAlignment.start,
                       children: [
-                        const Text(
+                        SizedBox(height: 20.h),
+                        Text(
                           'เลขบัตรประชาชน',
-                          style: TextStyle(fontWeight: FontWeight.bold),
+                          style: TextStyle(
+                            fontWeight: FontWeight.bold,
+                            fontSize: 12.sp,
+                          ),
                         ),
                         TextField(
                           controller: _idCardCtrl,
@@ -54,10 +59,13 @@ class _ChangeDevicePageState extends State<ChangeDevicePage> {
                             hintText: 'กรอกหมายเลข 13 หลัก',
                           ),
                         ),
-                        const SizedBox(height: 30),
-                        const Text(
+                        SizedBox(height: 30.h),
+                        Text(
                           'เลขที่บัญชี',
-                          style: TextStyle(fontWeight: FontWeight.bold),
+                          style: TextStyle(
+                            fontWeight: FontWeight.bold,
+                            fontSize: 12.sp,
+                          ),
                         ),
                         TextField(
                           controller: _accNoCtrl,
@@ -71,7 +79,7 @@ class _ChangeDevicePageState extends State<ChangeDevicePage> {
                           mainAxisAlignment: MainAxisAlignment.end,
                           children: [
                             const Text('ต่อไป'),
-                            const SizedBox(width: 10),
+                            SizedBox(width: 10.w),
                             // ใน ChangeDevicePage
                             ArrowFab(
                               enabled: true,
@@ -84,7 +92,8 @@ class _ChangeDevicePageState extends State<ChangeDevicePage> {
                                       'action': 'change_device_flow',
                                       'citizenId': _idCardCtrl.text,
                                       'accountNumber': _accNoCtrl.text,
-                                      'mobileNumber': phoneCtrl.phoneNumber.value
+                                      'mobileNumber':
+                                          phoneCtrl.phoneNumber.value,
                                       // อย่าลืมส่งเบอร์โทรไปด้วยถ้ายังไม่มีใน Storage
                                     },
                                   );
@@ -96,6 +105,7 @@ class _ChangeDevicePageState extends State<ChangeDevicePage> {
                                 }
                               },
                             ),
+                            SizedBox(height: 30.h),
                           ],
                         ),
                       ],

@@ -15,6 +15,7 @@ class PinController extends GetxController {
   var isLoading = false.obs;
 
   String lockedMobile = "";
+
   //pin
   void addNumber(int number) {
     if (enteredPin.value.length < 6) {
@@ -38,89 +39,83 @@ class PinController extends GetxController {
     }
   }
 
-void handlePinComplete() {
-  final dynamic args = Get.arguments;
-  final String? action = args is Map ? args['action'] : null;
-
-  if (action == 'change_device_flow') {
-    // ✅ สำหรับ Flow เปลี่ยนเครื่อง: ยิง API เช็ค PIN เดิมทันที
-    verifyOldPinAndChangeDevice();
-  } else {
-    // Flow อื่นๆ (สมัครใหม่/ลืมรหัส) ที่ต้องกรอก 2 รอบ
-    if (!isConfirmMode.value) {
-      // สำหรับ Register: ล็อกค่าเบอร์โทรไว้
-      try {
-        final phoneCtrl = Get.find<PhonenumberController>();
-        lockedMobile = phoneCtrl.phoneNumber.value;
-      } catch (e) {
-        print("Register controller not found");
-      }
-
-      firstPin.value = enteredPin.value;
-      enteredPin.value = '';
-      isConfirmMode.value = true;
+  void handlePinComplete() {
+    final dynamic args = Get.arguments;
+    String? action = (args is Map) ? args['action'] : null;
+    if (action == 'change_device_flow') {
+      verifyOldPinAndChangeDevice();
     } else {
-      // ตรวจสอบ PIN รอบสอง
-      if (enteredPin.value == firstPin.value) {
-        if (action == 'forgot_password_reset') {
-          processResetPassword();
-        } else {
-          registerUser();
-        }
+      if (!isConfirmMode.value) {
+        firstPin.value = enteredPin.value; // เก็บค่ารหัสรอบแรกไว้
+        enteredPin.value = '';
+         
+        isConfirmMode.value = true;
       } else {
-        Get.snackbar('ผิดพลาด', 'รหัสผ่านไม่ตรงกัน');
+        if (enteredPin.value == firstPin.value) {
+          if (action == 'register') {
+            registerUser();
+          } else if (action == 'forgot_password_reset') {
+            processResetPassword();
+          } else {
+            registerUser();
+          }
+        } else {
+          Get.snackbar('ผิดพลาด', 'รหัสผ่านไม่ตรงกัน');
+          enteredPin.value = '';
+        }
+      }
+    }
+  }
+
+  Future<void> verifyOldPinAndChangeDevice() async {
+    try {
+      isLoading.value = true;
+      String? deviceId = await getDeviceId();
+      final dynamic args = Get.arguments;
+
+      // ดึงเบอร์โทรศัพท์ที่ส่งมาจากหน้า ChangeDevicePage หรือ FaceVerify
+      String mobile = args['mobileNumber'] ?? "";
+
+      Map<String, dynamic> body = {
+        "citizenId": args['citizenId'],
+        "accountNumber": args['accountNumber'],
+        "pin": enteredPin.value,
+        "mobileNumber": mobile,
+        "newDeviceId": deviceId,
+      };
+
+      final response = await http.post(
+        Uri.parse("${ApiConstants.baseUrl}${ApiConstants.changedevice}"),
+        headers: {"Content-Type": "application/json"},
+        body: jsonEncode(body),
+      );
+
+      if (response.statusCode == 200) {
+        // ✅ จุดที่ต้องแก้ไข: บันทึกข้อมูลลงเครื่องใหม่เพื่อให้ Login ได้
+        await storage.write(key: 'userMobile', value: mobile);
+        await storage.write(key: 'isRegistered', value: 'true');
+
+        print("DEBUG: บันทึกเบอร์ $mobile ลงเครื่องใหม่สำเร็จ");
+
+        Get.snackbar('สำเร็จ', 'ยืนยันตัวตนสำเร็จ กรุณาเข้าสู่ระบบ');
+
+        // หน่วงเวลาเล็กน้อยเพื่อให้ระบบบันทึกค่าเสร็จสิ้นก่อนย้ายหน้า
+        await Future.delayed(const Duration(milliseconds: 500));
+        Get.offAllNamed('/login-pin');
+      } else {
+        final error = jsonDecode(utf8.decode(response.bodyBytes));
+        Get.snackbar(
+          'ผิดพลาด',
+          error['message'] ?? 'ข้อมูลไม่ถูกต้อง กรุณาตรวจสอบข้อมูลอีกครั้ง',
+        );
         enteredPin.value = '';
       }
+    } catch (e) {
+      Get.snackbar('Error', 'เกิดข้อผิดพลาดในการเชื่อมต่อ: $e');
+    } finally {
+      isLoading.value = false;
     }
   }
-}
-
-Future<void> verifyOldPinAndChangeDevice() async {
-  try {
-    isLoading.value = true;
-    String? deviceId = await getDeviceId();
-    final dynamic args = Get.arguments;
-
-    // ดึงเบอร์โทรศัพท์ที่ส่งมาจากหน้า ChangeDevicePage หรือ FaceVerify
-    String mobile = args['mobileNumber'] ?? "";
-
-    Map<String, dynamic> body = {
-      "citizenId": args['citizenId'],
-      "accountNumber": args['accountNumber'],
-      "pin": enteredPin.value,
-      "mobileNumber": mobile,
-      "newDeviceId": deviceId,
-    };
-
-    final response = await http.post(
-      Uri.parse("${ApiConstants.baseUrl}${ApiConstants.changedevice}"),
-      headers: {"Content-Type": "application/json"},
-      body: jsonEncode(body),
-    );
-
-    if (response.statusCode == 200) {
-      // ✅ จุดที่ต้องแก้ไข: บันทึกข้อมูลลงเครื่องใหม่เพื่อให้ Login ได้
-      await storage.write(key: 'userMobile', value: mobile); 
-      await storage.write(key: 'isRegistered', value: 'true');
-      
-      print("DEBUG: บันทึกเบอร์ $mobile ลงเครื่องใหม่สำเร็จ");
-
-      Get.snackbar('สำเร็จ', 'ยืนยันตัวตนสำเร็จ กรุณาเข้าสู่ระบบ');
-      
-      // หน่วงเวลาเล็กน้อยเพื่อให้ระบบบันทึกค่าเสร็จสิ้นก่อนย้ายหน้า
-      await Future.delayed(const Duration(milliseconds: 500));
-      Get.offAllNamed('/login-pin'); 
-    } else {
-      final error = jsonDecode(utf8.decode(response.bodyBytes));
-      Get.snackbar('ผิดพลาด', error['message'] ?? 'ข้อมูลไม่ถูกต้อง กรุณาตรวจสอบข้อมูลอีกครั้ง');
-      enteredPin.value = '';
-    }
-  } catch (e) {
-    Get.snackbar('Error', 'เกิดข้อผิดพลาดในการเชื่อมต่อ: $e');
-  } finally {
-    isLoading.value = false;
-  }
-}
 
   Future<void> processResetPassword() async {
     try {
@@ -166,7 +161,7 @@ Future<void> verifyOldPinAndChangeDevice() async {
         isConfirmMode.value = false;
 
         // await Future.delayed(const Duration(milliseconds: 500));
-        Get.offAllNamed('/login-pin'); 
+        Get.offAllNamed('/login-pin');
       } else {
         final error = jsonDecode(utf8.decode(response.bodyBytes));
         Get.snackbar('ผิดพลาด', error['message'] ?? 'รีเซ็ตรหัสผ่านไม่สำเร็จ');
@@ -188,13 +183,14 @@ Future<void> verifyOldPinAndChangeDevice() async {
 
   Future<void> registerUser() async {
     final infoCtrl = Get.find<InfoController>();
+    final phoneCtrl = Get.find<PhonenumberController>();
     try {
       isLoading.value = true;
       String? deviceId = await getDeviceId();
-
+      String mobile = phoneCtrl.phoneNumber.value;
       // ส่ง API โดยใช้ lockedMobile
       Map<String, dynamic> finalData = {
-        "mobileNumber": lockedMobile,
+        "mobileNumber": mobile,
         ...infoCtrl.toJson(),
         "pin": firstPin.value,
         "deviceId": deviceId,

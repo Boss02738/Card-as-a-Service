@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:flutter_screenutil/flutter_screenutil.dart';
 
 class ButtonBottom extends StatelessWidget {
   const ButtonBottom({super.key});
@@ -10,7 +11,7 @@ class ButtonBottom extends StatelessWidget {
         child: Column(
           children: [
             Padding(
-              padding: const EdgeInsets.all(8.0),
+              padding:  EdgeInsets.all(8.0.r),
               child: ElevatedButton(
                 style: ElevatedButton.styleFrom(
                   // gradient: LinearGradient(

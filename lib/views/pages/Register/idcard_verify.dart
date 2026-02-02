@@ -1,7 +1,9 @@
 import 'dart:io';
 import 'package:flutter/material.dart';
+import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:get/get.dart';
 import 'package:my_app/module/controller/header_text_controller.dart';
+import 'package:my_app/module/controller/phonenumber_controller.dart';
 import 'package:my_app/module/services/camera_service.dart';
 import 'package:my_app/views/pages/Register/info.dart';
 import 'package:my_app/views/widgets/brand_logo.dart';
@@ -23,7 +25,7 @@ class _IdcardVerifyState extends State<IdcardVerify> {
 
   File? _image; // ตัวแปรเก็บรูปที่ถ่าย
   final CameraService _cameraService = CameraService();
-
+  final PhoneCtrl = Get.find<PhonenumberController>();
   @override
   void initState() {
     super.initState();
@@ -47,37 +49,37 @@ class _IdcardVerifyState extends State<IdcardVerify> {
               child: Column(
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
-                  const SizedBox(height: 30),
+                   SizedBox(height: 30.h),
                   const BrandLogo(),
-                  const SizedBox(height: 30),
-                  const Padding(
-                    padding: EdgeInsets.symmetric(horizontal: 22),
+                   SizedBox(height: 30.h),
+                   Padding(
+                    padding: EdgeInsets.symmetric(horizontal: 22.w),
                     child: HeaderTexts(),
                   ),
-                  const SizedBox(height: 20),
+                   SizedBox(height: 20.h),
                   Expanded(
                     child: DataCard(
                       child: SizedBox(
                         child: Column(
                           crossAxisAlignment: CrossAxisAlignment.start,
                           children: [
-                            const SizedBox(height: 20),
+                             SizedBox(height: 20.h),
                             // --- ส่วนกรอบบัตรประชาชนจำลอง ---
                             Container(
                               width: double.infinity,
-                              height: 200,
+                              height: 200.h,
                               decoration: BoxDecoration(
                                 color: Colors.white,
                                 borderRadius: BorderRadius.circular(15),
                                 border: Border.all(
                                   color: Colors.black12,
-                                  width: 1,
+                                  width: 1.w,
                                 ),
                                 boxShadow: [
                                   BoxShadow(
                                     color: Colors.black.withOpacity(0.05),
-                                    blurRadius: 10,
-                                    offset: const Offset(0, 5),
+                                    blurRadius: 10.r,
+                                    offset: Offset(0, 5.h),
                                   ),
                                 ],
                               ),
@@ -95,8 +97,8 @@ class _IdcardVerifyState extends State<IdcardVerify> {
                                           top: 15,
                                           left: 15,
                                           child: Container(
-                                            width: 40,
-                                            height: 40,
+                                            width: 40.w,
+                                            height: 40.h,
                                             decoration: BoxDecoration(
                                               shape: BoxShape.circle,
                                               border: Border.all(
@@ -109,8 +111,8 @@ class _IdcardVerifyState extends State<IdcardVerify> {
                                           right: 15,
                                           bottom: 40,
                                           child: Container(
-                                            width: 60,
-                                            height: 75,
+                                            width: 60.w,
+                                            height: 75.h,
                                             decoration: BoxDecoration(
                                               border: Border.all(
                                                 color: Colors.black12,
@@ -142,22 +144,22 @@ class _IdcardVerifyState extends State<IdcardVerify> {
                                     51,
                                     123,
                                   ),
-                                  minimumSize: const Size(250, 45),
+                                  minimumSize:  Size(250.r, 45.r),
                                   shape: RoundedRectangleBorder(
-                                    borderRadius: BorderRadius.circular(8),
+                                    borderRadius: BorderRadius.circular(8.r),
                                   ),
                                 ),
-                                child: const Text(
+                                child:  Text(
                                   'เปิดกล้องเพื่อสแกน',
                                   style: TextStyle(
                                     color: Colors.white,
-                                    fontSize: 16,
+                                    fontSize: 16.sp,
                                   ),
                                 ),
                               ),
                             ),
-
-                            const SizedBox(height: 40),
+      Text(PhoneCtrl.phoneNumber.value),
+                             SizedBox(height: 40.h),
 
                             Row(
                               mainAxisAlignment: MainAxisAlignment.end,
@@ -166,10 +168,10 @@ class _IdcardVerifyState extends State<IdcardVerify> {
                                   'ต่อไป',
                                   style: TextStyle(
                                     color: Colors.black.withOpacity(0.3),
-                                    fontSize: 16,
+                                    fontSize: 16.sp,
                                   ),
                                 ),
-                                const SizedBox(width: 10),
+                                 SizedBox(width: 10.w),
                                 ArrowFab(
                                   enabled: _image != null,
                                   onPressed: () {
@@ -178,7 +180,7 @@ class _IdcardVerifyState extends State<IdcardVerify> {
                                 ),
                               ],
                             ),
-                            const SizedBox(height: 20),
+                             SizedBox(height: 20.h),
                           ],
                         ),
                       ),

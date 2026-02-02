@@ -1,5 +1,7 @@
 import 'package:flutter/material.dart';
+import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:get/get.dart';
+import 'package:my_app/module/controller/auth_flow_controller.dart';
 import 'package:my_app/module/controller/header_text_controller.dart';
 import 'package:my_app/module/controller/phonenumber_controller.dart';
 import 'package:my_app/views/pages/Register/confirm_otp.dart';
@@ -16,22 +18,19 @@ class EnterPhonePage extends StatefulWidget {
   State<EnterPhonePage> createState() => _EnterPhonePageState();
 }
 
-
-
 class _EnterPhonePageState extends State<EnterPhonePage> {
   final PhonenumberController phonenumberController = Get.put(
-  PhonenumberController()
-);
-final HeaderTextController headerTextController = Get.put(
-  HeaderTextController(),
-);
+    PhonenumberController(),
+  );
+  final HeaderTextController headerTextController = Get.put(
+    HeaderTextController(),
+  );
   final _phoneCtrl = TextEditingController();
   final _formKey = GlobalKey<FormState>();
 
   @override
   void initState() {
     super.initState();
-
     WidgetsBinding.instance.addPostFrameCallback((_) {
       phonenumberController.reset();
       _phoneCtrl.clear();
@@ -81,27 +80,27 @@ final HeaderTextController headerTextController = Get.put(
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
-                const SizedBox(height: 30),
+                SizedBox(height: 30.h),
                 const BrandLogo(),
-                const SizedBox(height: 30),
-                const Padding(
-                  padding: EdgeInsets.symmetric(horizontal: 22),
+                SizedBox(height: 30.h),
+                Padding(
+                  padding: EdgeInsets.symmetric(horizontal: 22.w),
                   child: HeaderTexts(),
                 ),
-                const SizedBox(height: 20),
+                SizedBox(height: 20.h),
                 Expanded(
                   child: DataCard(
                     child: Form(
-                    key: _formKey  ,
+                      key: _formKey,
                       child: Column(
                         crossAxisAlignment: CrossAxisAlignment.start,
                         children: [
-                          const SizedBox(height: 16),
-                          const Text(
+                          SizedBox(height: 16.h),
+                          Text(
                             'กรอกเบอร์มือถือที่ต้องการใช้งาน NovaPay',
-                            style: TextStyle(fontSize: 14),
+                            style: TextStyle(fontSize: 14.sp),
                           ),
-                          const SizedBox(height: 16),
+                          SizedBox(height: 16.h),
                           TextFormField(
                             controller: _phoneCtrl,
                             keyboardType: TextInputType.phone,
@@ -128,7 +127,7 @@ final HeaderTextController headerTextController = Get.put(
                                   ),
                                 ),
                               ),
-                              const SizedBox(width: 10),
+                              SizedBox(width: 10.w),
                               // เปลี่ยน enabled มาอิงตาม phonenumberController.isLoading
                               Obx(
                                 () => ArrowFab(
@@ -139,7 +138,7 @@ final HeaderTextController headerTextController = Get.put(
                               ),
                             ],
                           ),
-                          const SizedBox(height: 16),
+                          SizedBox(height: 16.h),
                         ],
                       ),
                     ),

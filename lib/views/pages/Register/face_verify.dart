@@ -1,6 +1,7 @@
 import 'dart:io';
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
+import 'package:my_app/module/controller/phonenumber_controller.dart';
 import 'package:my_app/module/services/secure_storage.dart';
 import 'package:my_app/views/widgets/data_card.dart';
 import 'package:my_app/views/widgets/gradient_header.dart';
@@ -17,7 +18,7 @@ class FaceVerify extends StatefulWidget {
 class _FaceVerifyState extends State<FaceVerify> {
   final CameraService _cameraService = CameraService();
   File? _image;
-
+  final phoneCtrl = Get.find<PhonenumberController>();
   @override
   Widget build(BuildContext context) {
     // final HomeController homeController = Get.find<HomeController>();
@@ -175,27 +176,38 @@ class _FaceVerifyState extends State<FaceVerify> {
                           ArrowFab(
                             enabled: _image != null,
                             // ภายใน face_verify.dart ตรงปุ่ม ArrowFab
+                            // face_verify.dart
                             onPressed: () async {
                               final dynamic args = Get.arguments;
                               final Map<String, dynamic> currentArgs =
                                   (args is Map)
                                   ? Map<String, dynamic>.from(args)
                                   : {};
+                              String action =
+                                  currentArgs['action'] ??
+                                  'forgot_password_reset';
+                              // 1. ตรวจสอบว่าเป็นการสมัครใหม่หรือไม่
+                              bool isRegister =
+                                  currentArgs['action'] == 'register';
 
-                              // 🔍 ตรวจสอบเบอร์โทรศัพท์จากเครื่อง
-                              String? mobile = await storage.read(
-                                key: 'userMobile',
-                              );
+                              String? mobile;
 
-                              // 🚀 ส่งไปหน้า PIN พร้อมระบุ Action ลืมรหัสผ่านให้ชัดเจน
+                              if (isRegister) {
+                                // ✅ ถ้าเป็นสมัครใหม่ ให้ดึงเบอร์จาก Controller ที่กรอกไว้ตอนหน้าแรก
+                                mobile = phoneCtrl.phoneNumber.value;
+                              } else {
+                                // กรณีอื่นๆ (ลืมรหัส/ย้ายเครื่อง) ดึงจาก Storage
+                                mobile = await storage.read(key: 'userMobile');
+                              }
+
+                              // 2. ส่งไปหน้า PIN พร้อม Arguments ที่ถูกต้อง
                               Get.toNamed(
                                 '/pin_page',
                                 arguments: {
                                   ...currentArgs,
-                                  'action':
-                                      currentArgs['action'] ??
-                                      'forgot_password_reset', // บังคับให้เป็นลืมรหัสถ้าไม่มีค่า
-                                  'mobileNumber': mobile,
+                                  'action': action,
+                                  'mobileNumber':
+                                      mobile, // ✅ ตอนนี้จะมีค่าเบอร์โทรส่งไปแน่นอน
                                 },
                               );
                             },

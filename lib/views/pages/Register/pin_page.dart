@@ -9,6 +9,8 @@ class PinPage extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final PinController controller = Get.put(PinController());
+    // final PinController controller = Get.find<PinController>();
+
 
     return Scaffold(
       backgroundColor: Colors.white,
@@ -29,9 +31,12 @@ class PinPage extends StatelessWidget {
 
               if (action == 'change_device_flow') {
                 title = 'กรอกรหัสผ่านเดิม';
-              } else if (action == 'forgot_password_reset') {
+              } else if (action == 'forgot_password_reset') { 
                 title = confirmMode ? 'ยืนยันรหัสผ่านใหม่' : 'ตั้งรหัสผ่านใหม่';
-              } else {
+              } else if (action == 'register') {
+                title = confirmMode ? 'ยืนยันรหัสผ่าน' : 'สร้างรหัสผ่าน';
+              }
+              else {
                 title = confirmMode ? 'ยืนยันรหัสผ่าน' : 'กรุณาใส่รหัสผ่าน';
               }
 

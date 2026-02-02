@@ -13,7 +13,7 @@ class PhonenumberController extends GetxController {
     phoneNumber.value = number;
   }
 
-  void reset() {
+  void reset() {    
     phoneNumber.value = '';
     isLoading.value = false;
     refCode.value = '';

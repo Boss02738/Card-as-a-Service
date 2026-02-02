@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:get/get.dart'; // อย่าลืม import get
 import 'package:my_app/module/controller/home_controller.dart';
 
@@ -11,11 +12,11 @@ class AccountWidget extends StatelessWidget {
 
     return Obx(
       () => Container(
-        padding: const EdgeInsets.all(20),
-        height: 200,
+        padding: EdgeInsets.all(20.r),
+        height: 200.h,
         width: double.infinity,
         decoration: BoxDecoration(
-          borderRadius: BorderRadius.circular(20),
+          borderRadius: BorderRadius.circular(20.r),
           image: const DecorationImage(
             image: AssetImage('assets/images/account_banner.png'),
             fit: BoxFit.cover,
@@ -23,8 +24,8 @@ class AccountWidget extends StatelessWidget {
           boxShadow: [
             BoxShadow(
               color: Colors.black.withOpacity(0.1),
-              blurRadius: 10,
-              offset: const Offset(0, 5),
+              blurRadius: 10.r,
+              offset: Offset(0, 5.h),
             ),
           ],
         ),
@@ -37,9 +38,9 @@ class AccountWidget extends StatelessWidget {
               children: [
                 Text(
                   homeController.fullNameTh.value,
-                  style: const TextStyle(
+                  style: TextStyle(
                     color: Colors.white,
-                    fontSize: 18,
+                    fontSize: 18.sp,
                     fontWeight: FontWeight.bold,
                   ),
                 ),
@@ -57,10 +58,10 @@ class AccountWidget extends StatelessWidget {
               children: [
                 Text(
                   homeController.accountNumber.value,
-                  style: const TextStyle(color: Colors.white70, fontSize: 16),
+                  style: TextStyle(color: Colors.white70, fontSize: 16.sp),
                 ),
-                const SizedBox(height: 15),
-                const Text(
+                 SizedBox(height: 15.h),
+                 Text(
                   "ยอดเงินคงเหลือ (บาท)",
                   style: TextStyle(color: Colors.white70, fontSize: 14),
                 ),
@@ -71,9 +72,9 @@ class AccountWidget extends StatelessWidget {
                         RegExp(r'(\d{1,3})(?=(\d{3})+(?!\d))'),
                         (Match m) => '${m[1]},',
                       ),
-                  style: const TextStyle(
+                  style: TextStyle(
                     color: Colors.white,
-                    fontSize: 32,
+                    fontSize: 32.sp,
                     fontWeight: FontWeight.bold,
                   ),
                 ),

@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:get/get.dart';
 import 'package:pinput/pinput.dart';
 import 'package:my_app/module/controller/header_text_controller.dart';
@@ -47,7 +48,10 @@ class _Confirm_otpState extends State<Confirm_otp> {
 
   void _onConfirm() {
     if (_formKey.currentState!.validate()) {
-      Get.offNamed('/user_selection')?.then((value) {
+      Get.offNamed(
+        '/user_selection',
+        arguments: {'verifiedMobile': phonenumberController.phoneNumber.value},
+      )?.then((value) {
         // ล้างค่าเมื่อย้อนกลับมาถึงหน้าเดิม
         headerTextController.setHeaderText(
           'กรอกรหัสยืนยัน OTP',
@@ -61,12 +65,12 @@ class _Confirm_otpState extends State<Confirm_otp> {
   Widget build(BuildContext context) {
     // กำหนดดีไซน์ของกล่อง OTP
     final defaultPinTheme = PinTheme(
-      width: 45,
-      height: 50,
-      textStyle: const TextStyle(fontSize: 20, fontWeight: FontWeight.w600),
+      width: 52.w,
+      height: 60.h,
+      textStyle: TextStyle(fontSize: 24.sp, fontWeight: FontWeight.w600),
       decoration: BoxDecoration(
         border: Border.all(color: Colors.black26),
-        borderRadius: BorderRadius.circular(8),
+        borderRadius: BorderRadius.circular(8.r),
       ),
     );
 
@@ -79,14 +83,14 @@ class _Confirm_otpState extends State<Confirm_otp> {
               child: Column(
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
-                  const SizedBox(height: 30),
+                  SizedBox(height: 30.h),
                   const BrandLogo(),
-                  const SizedBox(height: 30),
-                  const Padding(
-                    padding: EdgeInsets.symmetric(horizontal: 22),
+                  SizedBox(height: 30.h),
+                  Padding(
+                    padding: EdgeInsets.symmetric(horizontal: 22.w),
                     child: HeaderTexts(),
                   ),
-                  const SizedBox(height: 20),
+                  SizedBox(height: 20.h),
                   Expanded(
                     child: DataCard(
                       child: Form(
@@ -94,7 +98,7 @@ class _Confirm_otpState extends State<Confirm_otp> {
                         child: Column(
                           crossAxisAlignment: CrossAxisAlignment.start,
                           children: [
-                            const SizedBox(height: 16),
+                            SizedBox(height: 16.h),
                             Row(
                               mainAxisAlignment: MainAxisAlignment.spaceBetween,
                               children: [
@@ -102,7 +106,7 @@ class _Confirm_otpState extends State<Confirm_otp> {
                                   () => Text(
                                     'เลขอ้างอิง: ${phonenumberController.refCode.value}',
                                     style: TextStyle(
-                                      fontSize: 14,
+                                      fontSize: 14.sp,
                                       fontWeight: FontWeight.bold,
                                       // color: Colors.blue[900],
                                     ),
@@ -125,14 +129,14 @@ class _Confirm_otpState extends State<Confirm_otp> {
                                         color: Colors.grey[600],
                                         size: 20,
                                       ),
-                                      const SizedBox(width: 4),
+                                      SizedBox(width: 4.w),
                                       const Text('ขอรหัสอีกครั้ง'),
                                     ],
                                   ),
                                 ),
                               ],
                             ),
-                            const SizedBox(height: 24),
+                            SizedBox(height: 24.h),
 
                             Center(
                               child: Pinput(
@@ -160,7 +164,7 @@ class _Confirm_otpState extends State<Confirm_otp> {
                                   decoration: BoxDecoration(
                                     color: Colors.red.withOpacity(0.05),
                                     border: Border.all(color: Colors.redAccent),
-                                    borderRadius: BorderRadius.circular(8),
+                                    borderRadius: BorderRadius.circular(8.r),
                                   ),
                                 ),
                               ),
@@ -180,7 +184,7 @@ class _Confirm_otpState extends State<Confirm_otp> {
                                     ),
                                   ),
                                 ),
-                                const SizedBox(width: 10),
+                                SizedBox(width: 10.w),
                                 Obx(
                                   () => ArrowFab(
                                     enabled:
@@ -191,7 +195,7 @@ class _Confirm_otpState extends State<Confirm_otp> {
                                 ),
                               ],
                             ),
-                            const SizedBox(height: 16),
+                            SizedBox(height: 16.h),
                           ],
                         ),
                       ),

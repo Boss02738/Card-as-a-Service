@@ -25,7 +25,7 @@ class InfoController extends GetxController {
   // ฟังก์ชันรวบรวมข้อมูลเตรียมยิง API
 Map<String, dynamic> toJson() {
   return {
-    "citizenId": idCardCtrl.text,
+    "citizenId": idCardCtrl.text.replaceAll('-', ''),
     "firstNameTh": firstNameThCtrl.text,
     "lastNameTh": lastNameThCtrl.text,
     "firstNameEn": firstNameEnCtrl.text,

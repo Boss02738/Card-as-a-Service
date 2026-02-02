@@ -1,9 +1,9 @@
 import 'package:flutter/material.dart';
+import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:get/get.dart';
 import 'package:my_app/module/controller/home_controller.dart';
 import 'package:my_app/views/widgets/account_widget.dart';
 import 'package:my_app/views/widgets/buildHeader.dart';
-import 'package:my_app/views/widgets/custom_bottom_nav_bar.dart';
 import 'package:my_app/views/widgets/exit_confirmation_dialog.dart';
 import 'package:my_app/views/widgets/gradient_header.dart';
 
@@ -16,7 +16,7 @@ class AccountPage extends StatefulWidget {
 
 class _AccountPageState extends State<AccountPage> {
   final HomeController homeController = Get.put(HomeController());
-  
+
   @override
   Widget build(BuildContext context) {
     return BackButtonInterceptor(
@@ -28,27 +28,27 @@ class _AccountPageState extends State<AccountPage> {
               child: SingleChildScrollView(
                 child: Column(
                   children: [
-                    const SizedBox(height: 20),
+                    SizedBox(height: 10.h),
                     const Buildheader(),
-                    const SizedBox(height: 20),
+                    SizedBox(height: 10.h),
                     Padding(
-                      padding: const EdgeInsets.symmetric(horizontal: 15),
+                      padding: EdgeInsets.symmetric(horizontal: 15.w),
                       child: AccountWidget(),
                     ),
-                    const SizedBox(height: 20),
+                    SizedBox(height: 20.h),
                     Padding(
-                      padding: const EdgeInsets.symmetric(horizontal: 20),
+                      padding: EdgeInsets.symmetric(horizontal: 20.w),
                       child: Container(
                         width: double.infinity,
                         clipBehavior: Clip.antiAlias,
                         decoration: BoxDecoration(
                           color: Colors.white, // ส่วนล่างเป็นสีขาว
-                          borderRadius: BorderRadius.circular(15),
+                          borderRadius: BorderRadius.circular(15.r),
                           boxShadow: [
-                             BoxShadow(
+                            BoxShadow(
                               color: Colors.black.withOpacity(0.1),
-                              blurRadius: 10,
-                              offset: const Offset(0, 5),
+                              blurRadius: 10.r,
+                              offset: Offset(0, 5.h),
                             ),
                           ],
                         ),
@@ -56,10 +56,13 @@ class _AccountPageState extends State<AccountPage> {
                           children: [
                             Container(
                               width: double.infinity,
-                              padding: const EdgeInsets.symmetric(vertical: 20),
+                              padding: EdgeInsets.symmetric(vertical: 20.h),
                               decoration: const BoxDecoration(
                                 gradient: LinearGradient(
-                                  colors: [Color(0xFF3B5BDB), Color(0xFF162E7A)],
+                                  colors: [
+                                    Color(0xFF3B5BDB),
+                                    Color(0xFF162E7A),
+                                  ],
                                   begin: Alignment.topLeft,
                                   end: Alignment.bottomRight,
                                 ),
@@ -68,29 +71,29 @@ class _AccountPageState extends State<AccountPage> {
                                 children: [
                                   Text(
                                     homeController.fullNameTh.value,
-                                    style: const TextStyle(
+                                    style: TextStyle(
                                       color: Colors.white,
-                                      fontSize: 18,
+                                      fontSize: 18.sp,
                                       fontWeight: FontWeight.bold,
                                     ),
                                   ),
-                                  const SizedBox(height: 5),
+                                  SizedBox(height: 5.h),
                                   Row(
                                     mainAxisAlignment: MainAxisAlignment.center,
                                     children: [
                                       Text(
                                         homeController.accountType.value,
-                                        style: const TextStyle(
+                                        style: TextStyle(
                                           color: Colors.white70,
-                                          fontSize: 14,
+                                          fontSize: 14.sp,
                                         ),
                                       ),
-                                      const SizedBox(width: 10),
+                                      SizedBox(width: 10.w),
                                       Text(
                                         homeController.accountNumber.value,
-                                        style: const TextStyle(
+                                        style: TextStyle(
                                           color: Colors.white70,
-                                          fontSize: 14,
+                                          fontSize: 14.sp,
                                         ),
                                       ),
                                     ],
@@ -99,7 +102,7 @@ class _AccountPageState extends State<AccountPage> {
                               ),
                             ),
                             Padding(
-                              padding: const EdgeInsets.all(20.0),
+                              padding: EdgeInsets.all(20.0.r),
                               child: Column(
                                 children: [
                                   _buildRow(
@@ -115,13 +118,15 @@ class _AccountPageState extends State<AccountPage> {
                                     'วันที่เปิดบัญชี',
                                     homeController.createdAt.value,
                                   ),
-                                  const SizedBox(height: 20),
+                                  SizedBox(height: 20.h),
                                   _buildRow(
                                     'ยอดเงินคงเหลือ',
                                     homeController.balance.value
                                         .toStringAsFixed(2)
                                         .replaceAllMapped(
-                                          RegExp(r'(\d{1,3})(?=(\d{3})+(?!\d))'),
+                                          RegExp(
+                                            r'(\d{1,3})(?=(\d{3})+(?!\d))',
+                                          ),
                                           (Match m) => '${m[1]},',
                                         ),
                                     isBoldValue: true,
@@ -131,7 +136,9 @@ class _AccountPageState extends State<AccountPage> {
                                     homeController.balance.value
                                         .toStringAsFixed(2)
                                         .replaceAllMapped(
-                                          RegExp(r'(\d{1,3})(?=(\d{3})+(?!\d))'),
+                                          RegExp(
+                                            r'(\d{1,3})(?=(\d{3})+(?!\d))',
+                                          ),
                                           (Match m) => '${m[1]},',
                                         ),
                                     isBoldValue: true,
@@ -147,7 +154,6 @@ class _AccountPageState extends State<AccountPage> {
                 ),
               ),
             ),
-            
           ],
         ),
       ),
@@ -161,18 +167,20 @@ class _AccountPageState extends State<AccountPage> {
     bool isBoldValue = false,
   }) {
     return Container(
-      padding: const EdgeInsets.symmetric(vertical: 15, horizontal: 0),
-      decoration: const BoxDecoration(
-        border: Border(bottom: BorderSide(color: Color(0xFFF0F0F0), width: 1)),
+      padding: EdgeInsets.symmetric(vertical: 15.h, horizontal: 0.w),
+      decoration: BoxDecoration(
+        border: Border(
+          bottom: BorderSide(color: Color(0xFFF0F0F0), width: 1.w),
+        ),
       ),
       child: Row(
         mainAxisAlignment: MainAxisAlignment.spaceBetween,
         children: [
           Text(
             label,
-            style: const TextStyle(
+            style: TextStyle(
               color: Color.fromARGB(255, 77, 77, 77),
-              fontSize: 14,
+              fontSize: 14.sp,
             ),
           ),
           Row(
@@ -180,9 +188,9 @@ class _AccountPageState extends State<AccountPage> {
               Text(
                 value,
                 style: TextStyle(
-                  fontSize: 14,
+                  fontSize: 14.sp,
                   fontWeight: isBoldValue ? FontWeight.bold : FontWeight.normal,
-                  color: valueColor ??  Colors.black87,
+                  color: valueColor ?? Colors.black87,
                 ),
               ),
             ],

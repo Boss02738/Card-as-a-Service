@@ -67,9 +67,23 @@ class SuccessRegisterPage extends StatelessWidget {
                     width: double.infinity,
                     height: 55,
                     child: ElevatedButton(
+                      // success_register_page.dart
                       onPressed: () {
-                        Get.find<MainTabController>().changeTab(0);
+                        try {
+                          // พยายามหา ถ้าเจอให้เปลี่ยน Tab
+                          Get.find<MainTabController>().changeTab(0);
+                          Get.offAllNamed(
+                            '/main_tab_page',
+                          ); // ชื่อ Route ของหน้าที่รวม Tab ไว้
+                        } catch (e) {
+                          // 🛡️ ถ้าไม่เจอ (Error ที่คุณเจออยู่) ให้สร้างใหม่แล้วค่อยย้ายหน้า
+                          Get.put(MainTabController());
+                          Get.offAllNamed('/main_tab_page');
+                        }
                       },
+                      // onPressed: () {
+                      //   Get.offAllNamed('/login-pin');
+                      // },
                       style: ElevatedButton.styleFrom(
                         backgroundColor: const Color(0xFF17337B),
                         minimumSize: const Size(280, 48),

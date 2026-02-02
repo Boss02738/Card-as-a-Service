@@ -71,7 +71,6 @@ class _MyCardDetailState extends State<MyCardDetail> {
                 ),
                 child: _buildCard(card, ownerEn, Cardname),
               ),
-              const SizedBox(height: 20),
 
               const Text(
                 "รายละเอียดบัตร",
@@ -86,20 +85,31 @@ class _MyCardDetailState extends State<MyCardDetail> {
                 ),
                 _buildRow("ผูกกับบัญชี", homeController.accountNumber.value),
                 InkWell(
-                  onTap: () => Get.toNamed(
-                    '/pin_verify_page',
-                    arguments: {
-                      'action': 'view_sensitive',
-                      'card': card,
-                      'card_id':
-                          card['card_id'], // ✅ ส่ง card_id ไปด้วยเพื่อให้ API ทำงานได้
-                      'ownerName': ownerEn,
-                    },
+                  // ตรวจสอบเงื่อนไข: ถ้าเป็นบัตร Physical และสถานะ inactive จะให้ onTap เป็น null (กดไม่ได้)
+                  onTap:
+                      (card['virtual'] == false && card['status'] == 'inactive')
+                      ? null
+                      : () => Get.toNamed(
+                          '/pin_verify_page',
+                          arguments: {
+                            'action': 'view_sensitive',
+                            'card': card,
+                            'card_id': card['card_id'],
+                            'ownerName': ownerEn,
+                          },
+                        ),
+                  child: _buildRow(
+                    "ดูเลขบัตร",
+                    (card['virtual'] == false && card['status'] == 'inactive')
+                        ? "ต้องเปิดใช้งานก่อน"
+                        : "",
+                    // ถ้ากดไม่ได้ อาจจะซ่อนลูกศรด้วยเพื่อสื่อสารกับผู้ใช้ว่ากดไม่ได้
+                    showArrow:
+                        !(card['virtual'] == false &&
+                            card['status'] == 'inactive'),
                   ),
-                  child: _buildRow("ดูเลขบัตร", "", showArrow: true),
                 ),
               ]),
-
               _buildSectionHeader("วงเงิน"),
               _buildDetailSection([
                 _buildRow(
@@ -147,7 +157,6 @@ class _MyCardDetailState extends State<MyCardDetail> {
                   ),
                 ),
               ]),
-              //
               if ((card['is_physical_requested'] == false &&
                       card['virtual'] == true) ||
                   (card['virtual'] == false && card['status'] == 'inactive'))
@@ -167,7 +176,10 @@ class _MyCardDetailState extends State<MyCardDetail> {
                     ),
                     child: _buildRow("ขอบัตร Physical", "", showArrow: true),
                   ),
-                if (card['virtual'] == false && card['status'] == 'inactive' && detailController.trackingData['delivery_status'] == 'success')
+                if (card['virtual'] == false &&
+                    card['status'] == 'inactive' &&
+                    detailController.trackingData['delivery_status'] ==
+                        'success')
                   InkWell(
                     onTap: () => Get.toNamed(
                       '/activate_physical',
@@ -180,14 +192,7 @@ class _MyCardDetailState extends State<MyCardDetail> {
                     ),
                   ),
               ]),
-              // if (card['virtual'] == false && card['status'] == 'inactive')
-              //   _buildDetailSection([
-              //     _buildRow(
-              //       "สถานะขนส่งบัตร",
-              //       "${card['current_spending_limit'].toString().replaceAllMapped(RegExp(r'(\d{1,3})(?=(\d{3})+(?!\d))'), (Match m) => '${m[1]},')} บาท",
-              //       isBoldValue: true,
-              //     ),
-              //   ]),
+
               if (card['virtual'] == false && card['status'] == 'inactive') ...[
                 _buildDetailSection([
                   _buildRow(

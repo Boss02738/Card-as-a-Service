@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:flutter_screenutil/flutter_screenutil.dart';
 
 class DataCard extends StatelessWidget {
   final Widget child;
@@ -8,12 +9,12 @@ class DataCard extends StatelessWidget {
   Widget build(BuildContext context) {
     return Container(
       // height: double.infinity,
-      padding: const EdgeInsets.symmetric(horizontal: 18),
-      decoration: const BoxDecoration(
+      padding: EdgeInsets.symmetric(horizontal: 18.w),
+      decoration: BoxDecoration(
         color: Colors.white,
         borderRadius: BorderRadius.only(
-          topLeft: Radius.circular(14),
-          topRight: Radius.circular(14),
+          topLeft: Radius.circular(14.r),
+          topRight: Radius.circular(14.r),
         ),
       ),
       child: child,

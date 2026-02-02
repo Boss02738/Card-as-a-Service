@@ -1,11 +1,14 @@
 import 'package:flutter/material.dart';
+import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:get/get.dart';
+import 'package:my_app/core/enum/auth_flow.dart';
+import 'package:my_app/module/controller/auth_flow_controller.dart';
 import 'package:my_app/views/widgets/brand_logo.dart';
 import 'package:my_app/views/widgets/data_card.dart';
 import 'package:my_app/views/widgets/gradient_header.dart';
 
 class UserSelectionPage extends StatelessWidget {
-  const UserSelectionPage({super.key});
+  UserSelectionPage({super.key});
 
   @override
   Widget build(BuildContext context) {
@@ -16,9 +19,9 @@ class UserSelectionPage extends StatelessWidget {
           SafeArea(
             child: Column(
               children: [
-                const SizedBox(height: 50),
+                SizedBox(height: 50.h),
                 const BrandLogo(),
-                const SizedBox(height: 50),
+                SizedBox(height: 50.h),
                 Expanded(
                   child: DataCard(
                     child: Column(
@@ -26,16 +29,33 @@ class UserSelectionPage extends StatelessWidget {
                       children: [
                         _selectionTile(
                           title: 'เปิดใช้งานบัญชีใหม่ NovaPay',
-                          subtitle: 'เบอร์ใหม่ ไม่เคยมีบัญชี หรือต้องการสมัครใหม่',
+                          subtitle:
+                              'เบอร์ใหม่ ไม่เคยมีบัญชี หรือต้องการสมัครใหม่',
                           icon: Icons.person_add_alt_1,
-                          onTap: () => Get.toNamed('/idcard_verify'), // Flow สมัครใหม่เดิม
+
+                          // onTap: () => Get.toNamed('/idcard_verify'), // Flow สมัครใหม่เดิม?
+                          onTap: () => Get.toNamed(
+                            '/idcard_verify',
+                            arguments: {
+                              'action': 'register',
+                              'mobileNumber': Get.arguments['verifiedMobile'],
+                            },
+                          ),
                         ),
-                        const SizedBox(height: 24),
+                        SizedBox(height: 24.h),
                         _selectionTile(
                           title: 'เข้าสู่ระบบบัญชีเดิม',
-                          subtitle: 'มีบัญชีอยู่แล้ว ต้องการย้ายเครื่องหรือติดตั้งแอปใหม่',
+                          subtitle:
+                              'มีบัญชีอยู่แล้ว ต้องการย้ายเครื่องหรือติดตั้งแอปใหม่',
                           icon: Icons.app_registration_rounded,
-                          onTap: () => Get.toNamed('/change_device'), // ไป Flow เปลี่ยนเครื่อง
+                          onTap: () => Get.toNamed(
+                            '/change_device',
+                            arguments: {
+                              'action':
+                                  'change_device_flow', // ✅ กำหนดเป็นย้ายเครื่องเฉพาะเมื่อกดปุ่มนี้
+                              'mobileNumber': Get.arguments['verifiedMobile'],
+                            },
+                          ), // ไป Flow เปลี่ยนเครื่อง
                         ),
                       ],
                     ),
@@ -49,28 +69,44 @@ class UserSelectionPage extends StatelessWidget {
     );
   }
 
-  Widget _selectionTile({required String title, required String subtitle, required IconData icon, required VoidCallback onTap}) {
+  Widget _selectionTile({
+    required String title,
+    required String subtitle,
+    required IconData icon,
+    required VoidCallback onTap,
+  }) {
     return InkWell(
       onTap: onTap,
       child: Container(
-        padding: const EdgeInsets.all(20),
+        padding: EdgeInsets.all(20.r),
         decoration: BoxDecoration(
           color: Colors.white,
-          borderRadius: BorderRadius.circular(12),
+          borderRadius: BorderRadius.circular(1.r),
           border: Border.all(color: Colors.blue.shade100),
-          boxShadow: [BoxShadow(color: Colors.black.withOpacity(0.05), blurRadius: 10)],
+          boxShadow: [
+            BoxShadow(color: Colors.black.withOpacity(0.05), blurRadius: 10),
+          ],
         ),
         child: Row(
           children: [
             Icon(icon, size: 40, color: const Color(0xFF17337B)),
-            const SizedBox(width: 15),
+            SizedBox(width: 15.w),
             Expanded(
               child: Column(
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
-                  Text(title, style: const TextStyle(fontWeight: FontWeight.bold, fontSize: 16)),
+                  Text(
+                    title,
+                    style: const TextStyle(
+                      fontWeight: FontWeight.bold,
+                      fontSize: 16,
+                    ),
+                  ),
                   const SizedBox(height: 4),
-                  Text(subtitle, style: const TextStyle(fontSize: 12, color: Colors.grey)),
+                  Text(
+                    subtitle,
+                    style: TextStyle(fontSize: 12.sp, color: Colors.grey),
+                  ),
                 ],
               ),
             ),

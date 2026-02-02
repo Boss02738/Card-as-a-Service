@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:get/get.dart';
 import 'package:my_app/module/controller/my_cards_controller.dart';
 import 'package:my_app/module/controller/home_controller.dart';
@@ -30,18 +31,18 @@ class _MyCardPageState extends State<MyCardPage> {
               SafeArea(
                 child: Column(
                   children: [
-                    const SizedBox(height: 20),
-                    const Buildheader(),
-                    const SizedBox(height: 20),
+                     SizedBox(height: 10.h),
+                     Buildheader(),
+                     SizedBox(height: 10.h),
       
                     // ส่วนของ TabBar และรายการบัตร
                     Expanded(
                       child: Container(
-                        margin: const EdgeInsets.symmetric(horizontal: 15),
-                        padding: const EdgeInsets.all(10),
+                        margin: EdgeInsets.symmetric(horizontal: 15.w),
+                        padding: EdgeInsets.all(10.r),
                         decoration: BoxDecoration(
                           color: const Color.fromARGB(220, 255, 255, 255),
-                          borderRadius: BorderRadius.circular(15),
+                          borderRadius: BorderRadius.circular(15.r),
                         ),
                         child: Column(
                           children: [
@@ -57,7 +58,7 @@ class _MyCardPageState extends State<MyCardPage> {
                                 Tab(text: 'ระงับชั่วคราว'),
                               ],
                             ),
-                            const SizedBox(height: 15),
+                             SizedBox(height: 15.h),
       
                             // แสดงรายการบัตรตามสถานะ
                             Expanded(
@@ -94,23 +95,23 @@ class _MyCardPageState extends State<MyCardPage> {
       
                             // ปุ่มสมัครบัตรด้านล่าง
                             Padding(
-                              padding: const EdgeInsets.symmetric(vertical: 10),
+                              padding: EdgeInsets.symmetric(vertical: 10.h),
                               child: SizedBox(
                                 width: double.infinity,
-                                height: 50,
+                                height: 50.h,
                                 child: ElevatedButton(
                                   onPressed: () => Get.toNamed('/type_cards'),
                                   style: ElevatedButton.styleFrom(
                                     backgroundColor: const Color(0xFF264FAD),
                                     shape: RoundedRectangleBorder(
-                                      borderRadius: BorderRadius.circular(10),
+                                      borderRadius: BorderRadius.circular(10.r),
                                     ),
                                   ),
-                                  child: const Text(
+                                  child: Text(
                                     'สมัครบัตรเดบิต',
                                     style: TextStyle(
                                       color: Colors.white,
-                                      fontSize: 18,
+                                      fontSize: 18.sp,
                                     ),
                                   ),
                                 ),
@@ -120,7 +121,7 @@ class _MyCardPageState extends State<MyCardPage> {
                         ),
                       ),
                     ),
-                    const SizedBox(height: 10), // เว้นที่ให้ NavBar
+                     SizedBox(height: 10.h), // เว้นที่ให้ NavBar
                   ],
                 ),
               ),
@@ -150,7 +151,7 @@ class _MyCardPageState extends State<MyCardPage> {
             );
           },
           child: Padding(
-            padding: const EdgeInsets.only(bottom: 15),
+            padding: EdgeInsets.only(bottom: 15.h),
             child: _buildVerticalCardItem(card, ownerName),
           ),
         );
@@ -162,9 +163,9 @@ class _MyCardPageState extends State<MyCardPage> {
     bool isActive = card['status'] == 'active'; // เช็คสถานะจาก API
 
     return Container(
-      padding: const EdgeInsets.all(20),
+      padding:  EdgeInsets.all(20.r),
       decoration: BoxDecoration(
-        borderRadius: BorderRadius.circular(20),
+        borderRadius: BorderRadius.circular(20.r),
         gradient: const LinearGradient(
           colors: [Color(0xFF264FAD), Color(0xFF162E7A)],
           begin: Alignment.topLeft,
@@ -179,13 +180,13 @@ class _MyCardPageState extends State<MyCardPage> {
             children: [
                Text(
                 card['card_name'] ?? 'Novapay',
-                style: TextStyle(color: Colors.white, fontSize: 18),
+                style: TextStyle(color: Colors.white, fontSize: 18.sp),
               ),
               // ป้ายสถานะ (Badge)
               Container(
-                padding: const EdgeInsets.symmetric(
-                  horizontal: 10,
-                  vertical: 4,
+                padding: EdgeInsets.symmetric(
+                  horizontal: 10.w,
+                  vertical: 4.h,
                 ),
                 decoration: BoxDecoration(
                   color: Colors.white,
@@ -196,37 +197,37 @@ class _MyCardPageState extends State<MyCardPage> {
                   style: TextStyle(
                     color: isActive ? Colors.green : Colors.red,
                     fontWeight: FontWeight.bold,
-                    fontSize: 12,
+                    fontSize: 12.sp,
                   ),
                 ),
               ),
             ],
           ),
-          const SizedBox(height: 40),
+         SizedBox(height: 40.h),
           Text(
             ownerName.toUpperCase(),
-            style: const TextStyle(color: Colors.white, fontSize: 14),
+            style: TextStyle(color: Colors.white, fontSize: 14.sp),
           ),
-          const SizedBox(height: 5),
+           SizedBox(height: 5.h),
           Text(
             '**** **** **** ${card['last_digits'] ?? '****'}', // ดึงเลขท้ายจาก API
-            style: const TextStyle(
+            style: TextStyle(
               color: Colors.white,
-              fontSize: 18,
+              fontSize: 18.sp,
               letterSpacing: 2,
             ),
           ),
-          const SizedBox(height: 10),
+         SizedBox(height: 10.h),
           Row(
             mainAxisAlignment: MainAxisAlignment.spaceBetween,
             children: [
               Text(
                 card['virtual'] == true ? "Virtual Card" : "Physical Card",
-                style: const TextStyle(color: Colors.white70, fontSize: 12),
+                style: TextStyle(color: Colors.white70, fontSize: 12.sp),
               ),
               Image.network(
                 'https://upload.wikimedia.org/wikipedia/commons/thumb/2/2a/Mastercard-logo.svg/1280px-Mastercard-logo.svg.png',
-                width: 35,
+                width: 35.w,
               ),
             ],
           ),

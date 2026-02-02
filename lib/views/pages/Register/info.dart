@@ -75,7 +75,7 @@ class _InfoState extends State<Info> {
                                 hintText: 'กรอกหมายเลขบัตรประชาชน',
                               ),
                               keyboardType: TextInputType.number,
-                            ), 
+                            ),
                             SizedBox(height: 20),
                             Text(
                               'วัน/เดือน/ปีเกิด',
@@ -88,7 +88,8 @@ class _InfoState extends State<Info> {
                               type: DateFormatType.type2,
                               onComplete: (date) {
                                 if (date != null) {
-                                  infoController.birthdayDateCtrl.text = "${date.day}/${date.month}/${date.year}";
+                                  infoController.birthdayDateCtrl.text =
+                                      "${date.day}/${date.month}/${date.year}";
                                 }
                               },
                             ),
@@ -160,7 +161,10 @@ class _InfoState extends State<Info> {
                                 ArrowFab(
                                   enabled: true,
                                   onPressed: () {
-                                    Get.to(() => const FaceVerify());
+                                    Get.to(
+                                      () => const FaceVerify(),
+                                      arguments: Get.arguments,
+                                    );
                                   },
                                 ),
                               ],
