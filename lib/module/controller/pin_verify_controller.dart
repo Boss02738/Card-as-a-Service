@@ -12,7 +12,14 @@ class PinVerifyController extends GetxController {
 
   // รับข้อมูลบัตรที่ส่งมาจากหน้า Confirm
   final dynamic cardData = Get.arguments;
-  final dynamic args = Get.arguments;
+  // final dynamic args = Get.arguments;
+  late Map<String, dynamic> args;
+  @override
+  void onInit() {
+    super.onInit();
+    // ดึง arguments มาเก็บไว้ในรูป Map
+    args = Get.arguments is Map ? Map<String, dynamic>.from(Get.arguments) : {};
+  }
 
   void addNumber(int number) {
     if (enteredPin.value.length < 6) {
@@ -34,7 +41,7 @@ class PinVerifyController extends GetxController {
     }
   }
 
-  // ✅ ฟังก์ชันใหม่สำหรับตรวจสอบ PIN แอปก่อนตั้งรหัสบัตร
+  //  ฟังก์ชันใหม่สำหรับตรวจสอบ PIN แอปก่อนตั้งรหัสบัตร
   // // ในไฟล์ pin_verify_controller.dart
   Future<void> processFinalActivate(
     String newCardPin,
@@ -52,13 +59,12 @@ class PinVerifyController extends GetxController {
         "expiry": originalArgs['input_data']['expiry'],
         "cvv": originalArgs['input_data']['cvv'],
         "newCardPin": newCardPin, // รหัส ATM 6 หลักที่ตั้งใหม่
-        "card_id": originalArgs['card']['card_id'], // ✅ เพิ่มบรรทัดนี้เพื่อให้ API รู้ว่าเปิดใบไหน
+        "card_id":
+            originalArgs['card']['card_id'], // ✅ เพิ่มบรรทัดนี้เพื่อให้ API รู้ว่าเปิดใบไหน
       };
 
       final response = await http.post(
-        Uri.parse(
-          "${ApiConstants.baseUrl}${ApiConstants.activatecard}",
-        ),
+        Uri.parse("${ApiConstants.baseUrl}${ApiConstants.activatecard}"),
         headers: {
           "Content-Type": "application/json",
           "Authorization": "Bearer $token",
@@ -89,46 +95,39 @@ class PinVerifyController extends GetxController {
     }
   }
 
-  Future<void> verifyAppPinForActivation() async {
-    try {
-      isLoading.value = true;
-      String? token = await storage.read(key: 'accessToken');
-      String? deviceId = await getDeviceId();
+Future<void> verifyAppPinForActivation() async {
+  try {
+    isLoading.value = true;
+    String? deviceId = await getDeviceId();
+    String? mobile = await storage.read(key: 'userMobile');
 
-      final response = await http.post(
-        Uri.parse("${ApiConstants.baseUrl}${ApiConstants.sensitive}"),
-        headers: {
-          "Content-Type": "application/json",
-          "Authorization": "Bearer $token",
-        },
-        body: jsonEncode({
-          "pin": enteredPin.value,
-          "deviceId": deviceId,
-          "card_id": args['card']['card_id']
-        }),
+    final response = await http.post(
+      Uri.parse("${ApiConstants.baseUrl}${ApiConstants.login}"),
+      headers: {"Content-Type": "application/json"},
+      body: jsonEncode({
+        "mobileNumber": mobile,
+        "pin": enteredPin.value,
+        "deviceId": deviceId,
+      }),
+    );
+
+    if (response.statusCode == 200) {
+      Get.toNamed(
+        '/set_card_pin',
+        arguments: {...args, 'app_pin': enteredPin.value},
       );
-
-      if (response.statusCode == 200) {
-
-        Get.toNamed(
-          '/set_card_pin',
-          arguments: {
-            ...args,
-            'app_pin': enteredPin.value,
-          },
-        );
-      } else {
-        // ❌ PIN ผิด (ตามที่ Backend ตอบกลับ)
-        Get.snackbar('ผิดพลาด', 'รหัสผ่านไม่ถูกต้อง');
-        enteredPin.value = '';
-      }
-    } catch (e) {
-      Get.snackbar('Error', 'เกิดข้อผิดพลาดในการเชื่อมต่อ');
+    } else {
+      Get.snackbar('ผิดพลาด', 'รหัสผ่านไม่ถูกต้อง');
       enteredPin.value = '';
-    } finally {
-      isLoading.value = false;
     }
+  } catch (e) {
+    Get.snackbar('Error', 'เชื่อมต่อเซิร์ฟเวอร์ไม่ได้');
+    enteredPin.value = '';
+  } finally {
+    isLoading.value = false;
   }
+}
+
 
   void deleteNumber() {
     if (enteredPin.value.isNotEmpty) {
@@ -261,65 +260,56 @@ class PinVerifyController extends GetxController {
     }
   }
 
-Future<void> processRequestPhysical(cardId) async {
-  try {
-    isLoading.value = true;
-    String? token = await storage.read(key: 'accessToken');
-    String? deviceId = await getDeviceId();
+  Future<void> processRequestPhysical(cardId) async {
+    try {
+      isLoading.value = true;
+      String? token = await storage.read(key: 'accessToken');
+      String? deviceId = await getDeviceId();
 
-    // 📦 1. ดึงข้อมูลที่อยู่จาก arguments ที่ส่งมาจากหน้าก่อนหน้า
-    Map<String, dynamic> addressInfo = args['addressData'];
+      // 📦 1. ดึงข้อมูลที่อยู่จาก arguments ที่ส่งมาจากหน้าก่อนหน้า
+      Map<String, dynamic> addressInfo = args['addressData'];
+      Map<String, dynamic> requestBody = {
+        "address": addressInfo['address'],
+        "subdistrict": addressInfo['subdistrict'],
+        "district": addressInfo['district'],
+        "province": addressInfo['province'],
+        "zipcode": addressInfo['zipcode'],
+        "pin": enteredPin.value, // PIN 6 หลักที่ User เพิ่งกรอก
+        "deviceId": deviceId,
+        "card_id": args['card']['card_id'], // ✅ ใส่ card_id รวมเข้าไปในนี้
+      };
 
-    // 📦 2. รวมข้อมูลทั้งหมด (ที่อยู่ + PIN + DeviceID + CardID) เข้าเป็นก้อนเดียว
-    // ให้ตรงตามโครงสร้างใน Postman
-    // Map<String, dynamic> requestBody = {
-    //   ...addressInfo,        
-    //   "pin": enteredPin.value, 
-    //   "deviceId": deviceId,    
-    //   "card_id": cardId,     
-    // };
-    Map<String, dynamic> requestBody = {
-      "address": addressInfo['address'],
-      "subdistrict": addressInfo['subdistrict'],
-      "district": addressInfo['district'],
-      "province": addressInfo['province'],
-      "zipcode": addressInfo['zipcode'],
-      "pin": enteredPin.value, // PIN 6 หลักที่ User เพิ่งกรอก
-      "deviceId": deviceId,
-      "card_id": args['card']['card_id'], // ✅ ใส่ card_id รวมเข้าไปในนี้
-    };
-
-    // 🚀 3. ยิง API โดยใช้ Body ที่รวมข้อมูลครบแล้ว
-    final response = await http.post(
-      Uri.parse("${ApiConstants.baseUrl}${ApiConstants.requestphysicalcard}"),
-      headers: {
-        "Content-Type": "application/json",
-        "Authorization": "Bearer $token",
-      },
-      body: jsonEncode(requestBody), 
-    );
-
-    if (response.statusCode == 200) {
-      Get.offAllNamed(
-        '/success_page',
-        arguments: {
-          "title": "ขอบัตรแข็งสำเร็จ!",
-          "subtitle": "ระบบกำลังจัดส่งบัตรไปยังที่อยู่ของคุณ",
+      // 🚀 3. ยิง API โดยใช้ Body ที่รวมข้อมูลครบแล้ว
+      final response = await http.post(
+        Uri.parse("${ApiConstants.baseUrl}${ApiConstants.requestphysicalcard}"),
+        headers: {
+          "Content-Type": "application/json",
+          "Authorization": "Bearer $token",
         },
+        body: jsonEncode(requestBody),
       );
-    } else {
-      final errorData = jsonDecode(utf8.decode(response.bodyBytes));
-      Get.snackbar(
-        'ผิดพลาด',
-        errorData['message'] ?? 'ไม่สามารถดำเนินการได้',
-      );
+
+      if (response.statusCode == 200) {
+        Get.offAllNamed(
+          '/success_page',
+          arguments: {
+            "title": "ขอบัตรแข็งสำเร็จ!",
+            "subtitle": "ระบบกำลังจัดส่งบัตรไปยังที่อยู่ของคุณ",
+          },
+        );
+      } else {
+        final errorData = jsonDecode(utf8.decode(response.bodyBytes));
+        Get.snackbar(
+          'ผิดพลาด',
+          errorData['message'] ?? 'ไม่สามารถดำเนินการได้',
+        );
+        enteredPin.value = '';
+      }
+    } catch (e) {
+      Get.snackbar('Error', 'เกิดข้อผิดพลาดในการเชื่อมต่อ');
       enteredPin.value = '';
+    } finally {
+      isLoading.value = false;
     }
-  } catch (e) {
-    Get.snackbar('Error', 'เกิดข้อผิดพลาดในการเชื่อมต่อ');
-    enteredPin.value = '';
-  } finally {
-    isLoading.value = false;
   }
-}
 }

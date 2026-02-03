@@ -44,26 +44,23 @@ class _ActivatePhysicalState extends State<ActivatePhysical> {
 
   // ไฟล์: activate_physical.dart
 
-  void proceedToVerifyPin() {
-    // ดึงเลข 4 หลักจากช่อง digitCtrls
-    String inputLastFour = digitCtrls.map((e) => e.text).join();
+void proceedToVerifyPin() {
+  String inputLastFour = digitCtrls.map((e) => e.text).join();
 
-    // 🚀 ส่งข้อมูลทึ่ User กรอกไปที่หน้า PIN ทันที
-    Get.toNamed(
-      '/pin_verify_page',
-      arguments: {
-        'action': 'activate_physical_flow', // ตั้งชื่อ action ใหม่
-        'card': args['card'], // ข้อมูลบัตรเดิมที่มี card_id
-        'ownerName': args['ownerName'],
-        'input_data': {
-          'last_digits': inputLastFour,
-          'expiry': expiryCtrl.text, // เช่น "01/29"
-          'cvv': cvvCtrl.text,
-        },
+  Get.toNamed(
+    '/pin_verify_page',
+    arguments: {
+      'action': 'activate_physical_flow',
+      'card': args['card'], // ✅ มั่นใจว่าในนี้มี card_id
+      'ownerName': args['ownerName'],
+      'input_data': {
+        'last_digits': inputLastFour,
+        'expiry': expiryCtrl.text,
+        'cvv': cvvCtrl.text,
       },
-    );
-  }
-
+    },
+  );
+}
   @override
   Widget build(BuildContext context) {
     final dynamic card = args['card'];
@@ -202,9 +199,9 @@ class _ActivatePhysicalState extends State<ActivatePhysical> {
                     if (val.isEmpty && index > 0)
                       focusNodes[index - 1].requestFocus();
                   },
-                ),
+                ), 
               ),
-            ),
+            ),   
           ],
         ),
       ),
