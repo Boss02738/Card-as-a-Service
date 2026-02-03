@@ -303,7 +303,7 @@ Widget _buildActiveCardItem(dynamic card, String ownerName) {
     onTap: () {
       Get.toNamed(
         '/my_card_detail',
-        arguments: {'card': card, 'ownerName': ownerName},
+        arguments: {'card_id': card['card_id'], 'ownerName': ownerName},
       );
     },
     child: Container(
