@@ -1,8 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:get/get.dart';
-import 'package:my_app/core/enum/auth_flow.dart';
-import 'package:my_app/module/controller/auth_flow_controller.dart';
+
 import 'package:my_app/views/widgets/brand_logo.dart';
 import 'package:my_app/views/widgets/data_card.dart';
 import 'package:my_app/views/widgets/gradient_header.dart';

@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:get/get.dart';
 import 'package:my_app/module/controller/mainTab_Controller%20.dart';
 import 'package:my_app/views/widgets/brand_logo.dart';
@@ -18,9 +19,9 @@ class SettingTabPage extends StatelessWidget {
             const GradientHeader(),
             ListView(
               children: [
-                SizedBox(height: 20),
+                SizedBox(height: 10.h),
                 const Buildheader(),
-                SizedBox(height: 20),
+                SizedBox(height: 20.h),
                 ListTile(
                   leading: const Icon(
                     Icons.person,
@@ -48,19 +49,19 @@ class SettingTabPage extends StatelessWidget {
                   },
                 ),
                 ListTile(
-                  leading: const Icon(
+                  leading: Icon(
                     Icons.credit_card,
                     color: Color.fromARGB(255, 255, 255, 255),
                   ),
       
-                  title: const Text(
+                  title:  Text(
                     'จัดการบัตรเดบิต',
                     style: TextStyle(
                       fontSize: 16,
                       color: Color.fromARGB(255, 255, 255, 255),
                     ),
                   ),
-                  subtitle: const Text(
+                  subtitle: Text(
                     'ปรับวงเงิน,เปิด/ปิดใช้งานบัตร,ดูเลขบัตร,ขอบัตรจริง',
                     style: TextStyle(
                       fontSize: 12,

@@ -3,9 +3,10 @@ import 'package:flutter_prevent_screenshot/disablescreenshot.dart';
 import 'package:flutter/services.dart';
 import 'package:get/get.dart';
 import 'package:my_app/module/binding/main_tab_binding.dart';
-import 'package:my_app/module/controller/auth_flow_controller.dart';
 import 'package:my_app/module/controller/header_text_controller.dart';
+import 'package:my_app/module/controller/home_controller.dart';
 import 'package:my_app/module/controller/mainTab_Controller%20.dart';
+import 'package:my_app/module/controller/my_cards_controller.dart';
 import 'package:my_app/module/controller/phonenumber_controller.dart';
 import 'package:my_app/views/pages/Register/change_device_page.dart';
 import 'package:my_app/views/pages/Register/enter_phone_page.dart';
@@ -36,7 +37,6 @@ import 'package:my_app/views/pages/Create_cards/type_cards.dart';
 import 'package:my_app/views/pages/Create_cards/card_confirm_page.dart';
 import 'package:my_app/views/pages/profile.dart';
 import 'package:my_app/views/pages/setting_page.dart';
-import 'package:my_app/views/test.dart';
 import 'package:my_app/views/widgets/custom_bottom_nav_bar.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
 
@@ -80,8 +80,10 @@ class _NovaPayAppState extends State<NovaPayApp> {
           initialBinding: BindingsBuilder(() {
             Get.lazyPut(() => PhonenumberController(), fenix: true);
             Get.lazyPut(() => HeaderTextController(), fenix: true);
+            Get.lazyPut(() => HomeController(), fenix: true);
+            Get.lazyPut(() => MyCardsController(), fenix: true);
           }),
-          
+
           getPages: [
             GetPage(
               name: "/main",
@@ -144,8 +146,6 @@ class _NovaPayAppState extends State<NovaPayApp> {
               page: () => const ChangeDevicePage(),
             ),
             GetPage(name: '/idcard_verify', page: () => const IdcardVerify()),
-
-            GetPage(name: '/test', page: () => const VueScreen()),
           ],
         );
       },

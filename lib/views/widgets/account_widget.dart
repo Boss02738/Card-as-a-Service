@@ -37,7 +37,7 @@ class AccountWidget extends StatelessWidget {
               mainAxisAlignment: MainAxisAlignment.spaceBetween,
               children: [
                 Text(
-                  homeController.fullNameTh.value,
+                  "คุณ ${homeController.fullNameTh.value}",
                   style: TextStyle(
                     color: Colors.white,
                     fontSize: 18.sp,

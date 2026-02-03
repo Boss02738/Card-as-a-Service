@@ -7,6 +7,7 @@ import 'package:my_app/views/widgets/exit_confirmation_dialog.dart';
 import 'package:my_app/views/widgets/gradient_header.dart';
 import 'package:my_app/module/controller/home_controller.dart';
 import 'package:my_app/module/controller/my_cards_controller.dart';
+import 'package:my_app/views/widgets/account_widget.dart';
 
 class HomePage extends StatefulWidget {
   const HomePage({super.key});
@@ -44,7 +45,7 @@ class _HomePageState extends State<HomePage> {
                       SizedBox(height: 10.h),
                       Padding(
                         padding: EdgeInsets.symmetric(horizontal: 15.w),
-                        child: _buildAccount(homeController),
+                        child: const AccountWidget(),
                       ),
                       SizedBox(height: 10.h),
                       _buildOffersSection(), // ส่วนข้อเสนอพิเศษ
@@ -63,87 +64,6 @@ class _HomePageState extends State<HomePage> {
       ),
     );
   }
-
-  // account
-  Widget _buildAccount(HomeController homeController) {
-    return Container(
-      padding: EdgeInsets.all(20.r),
-      height: 200.h,
-      width: double.infinity,
-      decoration: BoxDecoration(
-        borderRadius: BorderRadius.circular(20.r),
-        image: const DecorationImage(
-          image: AssetImage('assets/images/account_banner.png'),
-          fit: BoxFit.cover, // ให้รูปภาพขยายเต็มพื้นที่ Container
-        ),
-        boxShadow: [
-          BoxShadow(
-            color: Colors.black.withOpacity(0.1),
-            blurRadius: 10.r,
-            offset: Offset(0, 5.h),
-          ),
-        ],
-      ),
-      child: Column(
-        crossAxisAlignment: CrossAxisAlignment.start,
-        mainAxisAlignment: MainAxisAlignment.spaceBetween,
-        children: [
-          Row(
-            mainAxisAlignment: MainAxisAlignment.spaceBetween,
-            children: [
-              Text(
-                homeController.fullNameTh.value,
-                style: TextStyle(
-                  color: Colors.white,
-                  fontSize: 18.sp,
-                  fontWeight: FontWeight.bold,
-                ),
-              ),
-              Text(
-                homeController.accountType.value,
-                style: const TextStyle(
-                  color: Colors.white70,
-                  fontWeight: FontWeight.w600,
-                ),
-              ),
-            ],
-          ),
-
-          Column(
-            crossAxisAlignment: CrossAxisAlignment.start,
-            children: [
-              // แสดงเลขบัญชีแบบ Mask
-              Text(
-                homeController.accountNumber.value.length > 4
-                    ? "xxx-x-xx${homeController.accountNumber.value.replaceAll('-', '').substring(homeController.accountNumber.value.replaceAll('-', '').length - 4)}"
-                    : homeController.accountNumber.value,
-                style: TextStyle(color: Colors.white70, fontSize: 16.sp),
-              ),
-              SizedBox(height: 15.h),
-              Text(
-                "ยอดเงินคงเหลือ (บาท)",
-                style: TextStyle(color: Colors.white70, fontSize: 14.sp),
-              ),
-              // ยอดเงิน (Format ให้มีคอมม่า)
-              Text(
-                homeController.balance.value
-                    .toStringAsFixed(2)
-                    .replaceAllMapped(
-                      RegExp(r'(\d{1,3})(?=(\d{3})+(?!\d))'),
-                      (Match m) => '${m[1]},',
-                    ),
-                style: TextStyle(
-                  color: Colors.white,
-                  fontSize: 32.sp,
-                  fontWeight: FontWeight.bold,
-                ),
-              ),
-            ],
-          ),
-        ],
-      ),
-    );
-  }
 }
 
 // กล่องแสดงผลเมื่อยังไม่มีบัตร (Empty State)
@@ -153,12 +73,12 @@ Widget _buildEmptyCardSlot() {
     margin: EdgeInsets.symmetric(horizontal: 15.w),
     height: 160.h,
     decoration: BoxDecoration(
-      color: Colors.white.withOpacity(0.05), // พื้นหลังจางๆ แบบ Glassmorphism
+      color: Colors.white.withOpacity(0.05),
       borderRadius: BorderRadius.circular(20.r),
       border: Border.all(color: Colors.white12),
     ),
     child: InkWell(
-      onTap: () => Get.toNamed('/type_cards'), // กดแล้วไปหน้าสมัครบัตร
+      onTap: () => Get.toNamed('/type_cards'), 
       borderRadius: BorderRadius.circular(20.r),
       child: Column(
         mainAxisAlignment: MainAxisAlignment.center,
@@ -255,12 +175,12 @@ Widget _buildOffersSection() {
       ),
       SizedBox(height: 10.h),
       SizedBox(
-        height: 150.h,
+        height: 180.h,
         child: ListView(
           scrollDirection: Axis.horizontal,
           padding: EdgeInsets.symmetric(horizontal: 15.w),
           children: [
-            // ✅ กำหนดให้ promo1 กดแล้วไปหน้า /type_cards
+            // กำหนดให้ promo1 กดแล้วไปหน้า /type_cards
             _buildOfferItem(
               'assets/images/promo1.png',
               onTap: () => Get.toNamed('/type_cards'),
@@ -279,8 +199,8 @@ Widget _buildOfferItem(String imagePath, {required VoidCallback onTap}) {
     onTap: onTap, //  รับค่า Action มาทำงาน
     borderRadius: BorderRadius.circular(15.r),
     child: Container(
-      width: 250.w,
-      margin: EdgeInsets.only(right: 15.r),
+      width: 0.7.sw,
+      margin: EdgeInsets.only(right: 15.w),
       decoration: BoxDecoration(
         borderRadius: BorderRadius.circular(15.r),
         image: DecorationImage(image: AssetImage(imagePath), fit: BoxFit.cover),
@@ -387,7 +307,7 @@ Widget _buildActiveCardItem(dynamic card, String ownerName) {
       );
     },
     child: Container(
-      width: 275.w,
+      width: 300.w,
       margin: EdgeInsets.only(right: 15.r),
       padding: EdgeInsets.all(20.r),
       decoration: BoxDecoration(

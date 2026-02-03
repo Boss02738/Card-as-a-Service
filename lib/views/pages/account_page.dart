@@ -37,13 +37,13 @@ class _AccountPageState extends State<AccountPage> {
                     ),
                     SizedBox(height: 20.h),
                     Padding(
-                      padding: EdgeInsets.symmetric(horizontal: 20.w),
+                      padding: EdgeInsets.symmetric(horizontal: 20.r),
                       child: Container(
                         width: double.infinity,
                         clipBehavior: Clip.antiAlias,
                         decoration: BoxDecoration(
                           color: Colors.white, // ส่วนล่างเป็นสีขาว
-                          borderRadius: BorderRadius.circular(15.r),
+                          borderRadius: BorderRadius.circular(20.r),
                           boxShadow: [
                             BoxShadow(
                               color: Colors.black.withOpacity(0.1),
@@ -70,14 +70,14 @@ class _AccountPageState extends State<AccountPage> {
                               child: Column(
                                 children: [
                                   Text(
-                                    homeController.fullNameTh.value,
+                                    "คุณ ${homeController.fullNameTh.value}",
                                     style: TextStyle(
                                       color: Colors.white,
                                       fontSize: 18.sp,
                                       fontWeight: FontWeight.bold,
                                     ),
                                   ),
-                                  SizedBox(height: 5.h),
+                                  // SizedBox(height: 5.h),
                                   Row(
                                     mainAxisAlignment: MainAxisAlignment.center,
                                     children: [
@@ -107,7 +107,7 @@ class _AccountPageState extends State<AccountPage> {
                                 children: [
                                   _buildRow(
                                     'ชื่อบัญชี',
-                                    homeController.fullNameTh.value,
+                                    "คุณ ${homeController.fullNameTh.value}" ,
                                   ),
                                   _buildRow(
                                     'ประเภทบัญชี',

@@ -9,7 +9,7 @@ class BrandLogo extends StatelessWidget {
     return Center(
       child: Image.asset(
         'assets/images/novapay_logo.png',
-        width: 70.w,
+        width: 50.w,
       ),
     );
   }

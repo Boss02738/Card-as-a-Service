@@ -1,3 +1,5 @@
+import 'dart:convert';
+
 import 'package:flutter/material.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:get/get.dart';
@@ -159,80 +161,110 @@ class _MyCardPageState extends State<MyCardPage> {
     );
   }
 
-  Widget _buildVerticalCardItem(dynamic card, String ownerName) {
-    bool isActive = card['status'] == 'active'; // เช็คสถานะจาก API
+// ภายในไฟล์ my_card_page.dart
 
-    return Container(
-      padding:  EdgeInsets.all(20.r),
+Widget _buildVerticalCardItem(dynamic card, String ownerName) {
+  bool isActive = card['status'] == 'active';
+
+  return AspectRatio(
+    aspectRatio: 1.58, // ✅ กำหนดสัดส่วนให้เท่ากับหน้า MyCardDetail
+    child: Container(
+      padding: EdgeInsets.all(20.r),
       decoration: BoxDecoration(
         borderRadius: BorderRadius.circular(20.r),
-        gradient: const LinearGradient(
-          colors: [Color(0xFF264FAD), Color(0xFF162E7A)],
-          begin: Alignment.topLeft,
-          end: Alignment.bottomRight,
-        ),
+        // ✅ ตรวจสอบรูปภาพบัตร (ถ้ามีจาก API ให้โชว์รูปเหมือนหน้า Detail)
+        image: card['card_image'] != null
+            ? DecorationImage(
+                image: MemoryImage(base64Decode(card['card_image'])),
+                fit: BoxFit.cover,
+              )
+            : null,
+        gradient: card['card_image'] == null
+            ? const LinearGradient(
+                colors: [Color(0xFF264FAD), Color(0xFF162E7A)],
+                begin: Alignment.topLeft,
+                end: Alignment.bottomRight,
+              )
+            : null,
+        boxShadow: [
+          BoxShadow(
+            color: Colors.black.withOpacity(0.1),
+            blurRadius: 10.r,
+            offset: Offset(0, 5.h),
+          ),
+        ],
       ),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
+        mainAxisAlignment: MainAxisAlignment.spaceBetween, // ✅ กระจายเนื้อหาให้เต็มบัตร
         children: [
           Row(
             mainAxisAlignment: MainAxisAlignment.spaceBetween,
             children: [
-               Text(
+              Text(
                 card['card_name'] ?? 'Novapay',
-                style: TextStyle(color: Colors.white, fontSize: 18.sp),
+                style: TextStyle(color: Colors.white, fontSize: 16.sp, fontWeight: FontWeight.bold),
               ),
-              // ป้ายสถานะ (Badge)
+              // ป้ายสถานะ
               Container(
-                padding: EdgeInsets.symmetric(
-                  horizontal: 10.w,
-                  vertical: 4.h,
-                ),
+                padding: EdgeInsets.symmetric(horizontal: 10.w, vertical: 4.h),
                 decoration: BoxDecoration(
                   color: Colors.white,
-                  borderRadius: BorderRadius.circular(15),
+                  borderRadius: BorderRadius.circular(15.r),
                 ),
                 child: Text(
                   isActive ? "เปิดใช้งาน" : "ระงับชั่วคราว",
                   style: TextStyle(
                     color: isActive ? Colors.green : Colors.red,
                     fontWeight: FontWeight.bold,
-                    fontSize: 12.sp,
+                    fontSize: 10.sp, // ปรับขนาด Badge ให้เล็กลงหน่อยเพื่อความสวยงาม
                   ),
                 ),
               ),
             ],
           ),
-         SizedBox(height: 40.h),
-          Text(
-            ownerName.toUpperCase(),
-            style: TextStyle(color: Colors.white, fontSize: 14.sp),
+          
+          // ส่วนกลางบัตร (เว้นว่างไว้เหมือนหน้า Detail)
+          const Spacer(), 
+
+          Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              Text(
+                ownerName.toUpperCase(),
+                style: TextStyle(color: Colors.white, fontSize: 14.sp, fontWeight: FontWeight.w500),
+              ),
+              SizedBox(height: 5.h),
+              Text(
+                '**** **** **** ${card['last_digits'] ?? '****'}',
+                style: TextStyle(
+                  color: Colors.white,
+                  fontSize: 18.sp,
+                  letterSpacing: 2.w, // ✅ ใช้ .w เพื่อความสม่ำเสมอ
+                  fontWeight: FontWeight.bold,
+                ),
+              ),
+            ],
           ),
-           SizedBox(height: 5.h),
-          Text(
-            '**** **** **** ${card['last_digits'] ?? '****'}', // ดึงเลขท้ายจาก API
-            style: TextStyle(
-              color: Colors.white,
-              fontSize: 18.sp,
-              letterSpacing: 2,
-            ),
-          ),
-         SizedBox(height: 10.h),
+          
+          SizedBox(height: 10.h),
+          
           Row(
             mainAxisAlignment: MainAxisAlignment.spaceBetween,
             children: [
               Text(
                 card['virtual'] == true ? "Virtual Card" : "Physical Card",
-                style: TextStyle(color: Colors.white70, fontSize: 12.sp),
+                style: TextStyle(color: Colors.white70, fontSize: 11.sp),
               ),
               Image.network(
                 'https://upload.wikimedia.org/wikipedia/commons/thumb/2/2a/Mastercard-logo.svg/1280px-Mastercard-logo.svg.png',
-                width: 35.w,
+                width: 35.w, // ✅ ขนาดโลโก้เท่าหน้า Detail
               ),
             ],
           ),
         ],
       ),
-    );
-  }
+    ),
+  );
+}
 }

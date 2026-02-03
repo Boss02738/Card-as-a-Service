@@ -1,7 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:get/get.dart';
-import 'package:my_app/module/controller/auth_flow_controller.dart';
 import 'package:my_app/module/controller/header_text_controller.dart';
 import 'package:my_app/module/controller/phonenumber_controller.dart';
 import 'package:my_app/views/pages/Register/confirm_otp.dart';
