@@ -1,7 +1,10 @@
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
-import 'package:my_app/module/controller/pin_verify_controller.dart'; // ใช้ Controller ตัวเดิมหรือสร้างใหม่ก็ได้
-import 'package:my_app/views/widgets/brand_logo.dart';
+import 'package:my_app/module/controller/pin_verify_controller.dart';
+// ✅ Import ชุด Widget PIN สำเร็จรูป
+import 'package:my_app/views/widgets/pin/pin_dots.dart';
+import 'package:my_app/views/widgets/pin/pin_keypad.dart';
+import 'package:my_app/views/widgets/pin/pin_layout.dart';
 
 class SetpinPhysical extends StatefulWidget {
   const SetpinPhysical({super.key});
@@ -15,6 +18,9 @@ class _SetpinPhysicalState extends State<SetpinPhysical> {
   String firstPin = "";
   String secondPin = "";
   bool isConfirming = false;
+
+  // ดึง Controller มาเพื่อใช้ยิง API ในขั้นตอนสุดท้าย
+  final PinVerifyController controller = Get.find<PinVerifyController>();
 
   void handlePress(int n) {
     setState(() {
@@ -35,13 +41,26 @@ class _SetpinPhysicalState extends State<SetpinPhysical> {
     });
   }
 
+  void handleDelete() {
+    setState(() {
+      if (isConfirming) {
+        if (secondPin.isNotEmpty) {
+          secondPin = secondPin.substring(0, secondPin.length - 1);
+        }
+      } else {
+        if (firstPin.isNotEmpty) {
+          firstPin = firstPin.substring(0, firstPin.length - 1);
+        }
+      }
+    });
+  }
+
   void _verifyAndActivate() {
     if (firstPin == secondPin) {
-      // ✅ รหัสตรงกัน ยิง API ทันที
-      final PinVerifyController controller = Get.find<PinVerifyController>();
+      //  รหัสตรงกัน เรียกฟังก์ชัน activate บัตรแข็ง
       controller.processFinalActivate(firstPin, args);
     } else {
-      // ❌ รหัสไม่ตรงกัน ให้เริ่มใหม่
+      //  รหัสไม่ตรงกัน ล้างค่าและเริ่มใหม่
       Get.snackbar("ผิดพลาด", "รหัสผ่านไม่ตรงกัน กรุณาตั้งรหัสใหม่อีกครั้ง");
       setState(() {
         firstPin = "";
@@ -53,89 +72,37 @@ class _SetpinPhysicalState extends State<SetpinPhysical> {
 
   @override
   Widget build(BuildContext context) {
+    // เลือก PIN ที่จะแสดงตามสถานะปัจจุบัน
     String currentPin = isConfirming ? secondPin : firstPin;
 
     return Scaffold(
       backgroundColor: Colors.white,
-      appBar: AppBar(
-        backgroundColor: Colors.transparent,
-        elevation: 0,
-        leading: IconButton(
-          icon: const Icon(Icons.arrow_back_ios, color: Colors.black),
-          onPressed: () => Get.back(),
+      //  ใช้ PinLayout คุมโครงสร้างหน้า
+      body: PinLayout(
+        title: isConfirming ? "ยืนยันรหัสบัตรเดบิต" : "สร้างรหัสบัตรเดบิต",
+        isLoading: controller.isLoading.value, //  จัดการหน้าจอโหลดอัตโนมัติ
+        //  ใช้ PinDots แสดงวงกลมรหัสผ่าน
+        dots: PinDots(
+          length: currentPin.length,
         ),
-      ),
-      body: Column(
-        children: [
-          const BrandLogo(),
-          const SizedBox(height: 30),
-          Text(
-            isConfirming ? "ยืนยันรหัสบัตรเดบิต" : "สร้างรหัสบัตรเดบิต",
-            style: const TextStyle(fontSize: 22, fontWeight: FontWeight.bold),
-          ),
-          const SizedBox(height: 10),
-          const Text("ระบุรหัส 6 หลักที่ต้องการเพื่อใช้กับบัตรใบนี้", style: TextStyle(color: Colors.grey)),
-          const SizedBox(height: 40),
-          
-          // จุดแสดงผล PIN
-          Row(
-            mainAxisAlignment: MainAxisAlignment.center,
-            children: List.generate(6, (index) => Container(
-              margin: const EdgeInsets.symmetric(horizontal: 10),
-              width: 15, height: 15,
-              decoration: BoxDecoration(
-                shape: BoxShape.circle,
-                color: index < currentPin.length ? const Color(0xFF264FAD) : Colors.grey.shade300,
-              ),
-            )),
-          ),
-          
-          const Spacer(),
-          _buildKeypad(),
-          const SizedBox(height: 50),
-        ],
-      ),
-    );
-  }
-
-  Widget _buildKeypad() {
-    // ใช้โครงสร้าง Keypad เหมือนหน้า PinVerifyPage เพื่อความคุ้นเคยของผู้ใช้
-    return Column(
-      children: [
-        for (var row in [[1, 2, 3], [4, 5, 6], [7, 8, 9]])
-          Row(
-            mainAxisAlignment: MainAxisAlignment.spaceEvenly,
-            children: row.map((n) => _keypadButton(n.toString(), () => handlePress(n))).toList(),
-          ),
-        Row(
-          mainAxisAlignment: MainAxisAlignment.spaceEvenly,
-          children: [
-            const SizedBox(width: 80),
-            _keypadButton("0", () => handlePress(0)),
-            IconButton(
-              icon: const Icon(Icons.backspace_outlined, size: 30),
-              onPressed: () => setState(() {
-                if (isConfirming && secondPin.isNotEmpty) {
-                  secondPin = secondPin.substring(0, secondPin.length - 1);
-                } else if (!isConfirming && firstPin.isNotEmpty) {
-                  firstPin = firstPin.substring(0, firstPin.length - 1);
-                }
-              }),
-            ),
-          ],
+        //  ใช้ PinKeypad สำหรับรับค่าตัวเลข
+        keypad: PinKeypad(
+          onNumber: handlePress,
+          onDelete: handleDelete,
+          // ปุ่มฝั่งซ้ายของเลข 0 (ถ้ากำลังยืนยัน ให้โชว์ปุ่มย้อนกลับไปแก้ไข)
+          leftWidget: isConfirming 
+            ? TextButton(
+                onPressed: () => setState(() {
+                  isConfirming = false;
+                  secondPin = "";
+                }),
+                child: const Text(
+                  "ย้อนกลับ",
+                  style: TextStyle(color: Colors.black54, fontSize: 16),
+                ),
+              )
+            : const SizedBox(width: 80),
         ),
-      ],
-    );
-  }
-
-  Widget _keypadButton(String label, VoidCallback onTap) {
-    return InkWell(
-      onTap: onTap,
-      borderRadius: BorderRadius.circular(40),
-      child: Container(
-        width: 80, height: 80,
-        alignment: Alignment.center,
-        child: Text(label, style: const TextStyle(fontSize: 28, fontWeight: FontWeight.w500)),
       ),
     );
   }
