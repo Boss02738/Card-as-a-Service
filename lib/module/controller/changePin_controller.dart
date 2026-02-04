@@ -51,7 +51,17 @@ class ChangePinController extends GetxController {
       }
     }
   }
-
+void handleBackStep() {
+    if (currentStep.value == ChangePinStep.newPin) {
+      currentStep.value = ChangePinStep.current;
+      enteredPin.value = '';
+    } else if (currentStep.value == ChangePinStep.confirm) {
+      currentStep.value = ChangePinStep.newPin;
+      enteredPin.value = '';
+    } else {
+      Get.back(); // ถ้าอยู่หน้าแรกสุด ให้ปิดหน้านี้ไป
+    }
+  }
   Future<void> _processChangePin() async {
     try {
       isLoading.value = true;
