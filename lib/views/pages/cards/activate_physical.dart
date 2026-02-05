@@ -1,4 +1,6 @@
+import 'dart:convert';
 import 'package:flutter/material.dart';
+import 'package:flutter_screenutil/flutter_screenutil.dart'; // ✅ สำหรับ Responsive
 import 'package:get/get.dart';
 import 'package:my_app/views/widgets/arrow_fab.dart';
 
@@ -26,7 +28,6 @@ class _ActivatePhysicalState extends State<ActivatePhysical> {
   @override
   void initState() {
     super.initState();
-    // ตรวจสอบความถูกต้องทุกครั้งที่กรอก
     for (var ctrl in digitCtrls) {
       ctrl.addListener(_validateForm);
     }
@@ -42,74 +43,68 @@ class _ActivatePhysicalState extends State<ActivatePhysical> {
         cvvCtrl.text.length == 3;
   }
 
-  // ไฟล์: activate_physical.dart
-
-void proceedToVerifyPin() {
-  String inputLastFour = digitCtrls.map((e) => e.text).join();
-
-  Get.toNamed(
-    '/pin_verify_page',
-    arguments: {
-      'action': 'activate_physical_flow',
-      'card': args['card'], // ✅ มั่นใจว่าในนี้มี card_id
-      'ownerName': args['ownerName'],
-      'input_data': {
-        'last_digits': inputLastFour,
-        'expiry': expiryCtrl.text,
-        'cvv': cvvCtrl.text,
+  void proceedToVerifyPin() {
+    String inputLastFour = digitCtrls.map((e) => e.text).join();
+    Get.toNamed(
+      '/pin_verify_page',
+      arguments: {
+        'action': 'activate_physical_flow',
+        'card': args['card'],
+        'ownerName': args['ownerName'],
+        'input_data': {
+          'last_digits': inputLastFour,
+          'expiry': expiryCtrl.text,
+          'cvv': cvvCtrl.text,
+        },
       },
-    },
-  );
-}
+    );
+  }
+
   @override
   Widget build(BuildContext context) {
     final dynamic card = args['card'];
     final String ownerName = args['ownerName'];
-    final dynamic sensitive = args['sensitive'] ?? {};
-    final String fullPan = sensitive['encrypted_pan'] ?? "XXXXXXXXXXXXXXXX";
 
-    // จัดรูปแบบเลขหน้า 12 หลัก: 1234 - 6922 - 3772 -
-    String prefix = "XXXX - XXXX - XXXX - ";
-    if (fullPan.length >= 12) {
-      prefix =
-          "${fullPan.substring(0, 4)} - ${fullPan.substring(4, 8)} - ${fullPan.substring(8, 12)} - ";
-    }
     return Scaffold(
       backgroundColor: Colors.white,
       appBar: AppBar(
-        title: const Text(
+        title: Text(
           'เปิดใช้งานบัตร',
-          style: TextStyle(color: Colors.white),
+          style: TextStyle(color: Colors.white, fontSize: 18.sp),
         ),
         centerTitle: true,
         backgroundColor: const Color(0xFF264FAD),
         elevation: 0,
         leading: IconButton(
-          icon: const Icon(Icons.arrow_back_ios, color: Colors.white, size: 20),
+          icon: Icon(Icons.arrow_back_ios, color: Colors.white, size: 20.r),
           onPressed: () => Get.back(),
         ),
       ),
       body: SingleChildScrollView(
+        physics: const BouncingScrollPhysics(),
         child: Column(
           children: [
-            _buildHeader(card, ownerName),
+            // ✅ ส่วน Header ที่แสดงรูปบัตรจริง
+            _buildResponsiveHeader(card, ownerName),
+
             Padding(
-              padding: const EdgeInsets.all(25.0),
+              padding: EdgeInsets.all(25.r),
               child: Column(
                 children: [
-                  const Text(
-                    "กรอกเลขบัตรเดบิต",
+                  Text(
+                    "กรอกข้อมูลบัตรเดบิต",
                     style: TextStyle(
-                      fontSize: 16,
-                      color: Colors.black54,
+                      fontSize: 16.sp,
+                      color: Colors.black87,
                       fontWeight: FontWeight.bold,
                     ),
                   ),
-                  const SizedBox(height: 20),
+                  SizedBox(height: 25.h),
 
-                  _buildFigmaInputRow(prefix),
+                  // ✅ ส่วนกรอกเลขบัตรที่จัด Layout ใหม่ให้สมดุล
+                  _buildFigmaInputRow(card['last_digits'] ?? "****"),
 
-                  const SizedBox(height: 35),
+                  SizedBox(height: 35.h),
                   Row(
                     children: [
                       Expanded(
@@ -120,11 +115,11 @@ void proceedToVerifyPin() {
                           5,
                         ),
                       ),
-                      const SizedBox(width: 20),
+                      SizedBox(width: 20.w),
                       Expanded(
                         child: _buildLabelInput(
-                          "cvv/cvc",
-                          "ระบุเลข",
+                          "CVV/CVC",
+                          "ระบุเลข 3 หลัก",
                           cvvCtrl,
                           3,
                         ),
@@ -141,67 +136,116 @@ void proceedToVerifyPin() {
     );
   }
 
-  // Widget ช่องกรอก 4 หลักแบบสี่เหลี่ยมแยก
-  Widget _buildFigmaInputRow(String prefix) {
+  // ✅ ส่วนแสดงหัวข้อพร้อมรูปบัตรแบบย่อส่วน
+  Widget _buildResponsiveHeader(dynamic card, String ownerName) {
     return Container(
-      padding: const EdgeInsets.symmetric(
-        vertical: 15,
-        horizontal: 8,
-      ), // ลด padding
+      width: double.infinity,
+      padding: EdgeInsets.symmetric(vertical: 25.h, horizontal: 40.w),
+      decoration: const BoxDecoration(
+        gradient: LinearGradient(
+          colors: [Color(0xFF3B5BDB), Color(0xFF162E7A)],
+          begin: Alignment.topCenter,
+          end: Alignment.bottomCenter,
+        ),
+      ),
+      child: Column(
+        children: [
+          // ย่อส่วนบัตรมาโชว์เพื่อให้ User มั่นใจว่าเปิดถูกใบ
+          AspectRatio(
+            aspectRatio: 1.58,
+            child: Container(
+              decoration: BoxDecoration(
+                borderRadius: BorderRadius.circular(12.r),
+                image: card['card_image'] != null
+                    ? DecorationImage(
+                        image: MemoryImage(base64Decode(card['card_image'])),
+                        fit: BoxFit.cover,
+                      )
+                    : null,
+                color: Colors.white12,
+              ),
+            ),
+          ),
+          SizedBox(height: 15.h),
+          Text(
+            "NovaPay Debit Card",
+            style: TextStyle(
+              color: Colors.white,
+              fontSize: 16.sp,
+              fontWeight: FontWeight.bold,
+            ),
+          ),
+          Text(
+            "หมายเลข: **** **** **** ${card['last_digits']}",
+            style: TextStyle(color: Colors.white70, fontSize: 14.sp),
+          ),
+        ],
+      ),
+    );
+  }
+
+  Widget _buildFigmaInputRow(String lastFour) {
+    return Container(
+      padding: EdgeInsets.symmetric(vertical: 18.h, horizontal: 12.w),
       decoration: BoxDecoration(
-        color: Colors.grey[100],
-        borderRadius: BorderRadius.circular(12),
+        color: const Color(0xFFF8F9FA),
+        borderRadius: BorderRadius.circular(12.r),
+        border: Border.all(color: Colors.grey.shade200),
       ),
       child: FittedBox(
-        // 👈 เพิ่ม FittedBox เพื่อป้องกันการ Overflow ทุกขนาดหน้าจอ
         fit: BoxFit.scaleDown,
         child: Row(
           mainAxisAlignment: MainAxisAlignment.center,
           children: [
             Text(
-              prefix,
-              style: const TextStyle(
-                fontSize: 15,
-                fontWeight: FontWeight.w900,
-                letterSpacing: 1.0,
+              "XXXX - XXXX - XXXX - ",
+              style: TextStyle(
+                fontSize: 16.sp,
+                fontWeight: FontWeight.bold,
+                color: Colors.grey.shade500,
+                letterSpacing: 1.2,
               ),
             ),
-            ...List.generate(
-              4,
-              (index) => Container(
-                margin: const EdgeInsets.symmetric(
-                  horizontal: 2,
-                ), // ลดระยะห่างระหว่างช่อง
-                width: 28,
-                height: 38, // ลดขนาดช่องสี่เหลี่ยมลงเล็กน้อย
-                decoration: BoxDecoration(
-                  color: Colors.white,
-                  border: Border.all(color: Colors.grey.shade400),
-                  borderRadius: BorderRadius.circular(6),
+            // ✅ ช่องกรอก 4 หลักสุดท้ายที่จัดช่องไฟใหม่
+            Row(
+              children: List.generate(
+                4,
+                (index) => Container(
+                  margin: EdgeInsets.symmetric(horizontal: 4.w),
+                  width: 32.w,
+                  height: 42.h,
+                  decoration: BoxDecoration(
+                    color: Colors.white,
+                    border: Border.all(
+                      color: const Color(0xFF264FAD),
+                      width: 1.5,
+                    ),
+                    borderRadius: BorderRadius.circular(8.r),
+                  ),
+                  child: TextField(
+                    controller: digitCtrls[index],
+                    focusNode: focusNodes[index],
+                    textAlign: TextAlign.center,
+                    keyboardType: TextInputType.number,
+                    maxLength: 1,
+                    style: TextStyle(
+                      fontSize: 18.sp,
+                      fontWeight: FontWeight.bold,
+                    ),
+                    decoration: const InputDecoration(
+                      counterText: "",
+                      border: InputBorder.none,
+                    ),
+                    onChanged: (val) {
+                      if (val.isNotEmpty && index < 3)
+                        focusNodes[index + 1].requestFocus();
+                      if (val.isEmpty && index > 0)
+                        focusNodes[index - 1].requestFocus();
+                    },
+                  ),
                 ),
-                child: TextField(
-                  controller: digitCtrls[index],
-                  focusNode: focusNodes[index],
-                  textAlign: TextAlign.center,
-                  keyboardType: TextInputType.number,
-                  maxLength: 1,
-                  style: const TextStyle(
-                    fontSize: 18,
-                    fontWeight: FontWeight.bold,
-                  ),
-                  decoration: const InputDecoration(
-                    counterText: "",
-                    border: InputBorder.none,
-                  ),
-                  onChanged: (val) {
-                    if (val.isNotEmpty && index < 3)
-                      focusNodes[index + 1].requestFocus();
-                    if (val.isEmpty && index > 0)
-                      focusNodes[index - 1].requestFocus();
-                  },
-                ), 
               ),
-            ),   
+            ),
           ],
         ),
       ),
@@ -219,21 +263,36 @@ void proceedToVerifyPin() {
       children: [
         Text(
           label,
-          style: const TextStyle(
-            color: Colors.grey,
-            fontSize: 14,
+          style: TextStyle(
+            color: Colors.black54,
+            fontSize: 13.sp,
             fontWeight: FontWeight.bold,
           ),
         ),
+        SizedBox(height: 8.h),
         TextField(
           controller: ctrl,
           keyboardType: TextInputType.number,
           maxLength: max,
+          style: TextStyle(fontSize: 15.sp),
           decoration: InputDecoration(
             hintText: hint,
+            hintStyle: TextStyle(color: Colors.grey.shade400, fontSize: 13.sp),
             counterText: "",
-            enabledBorder: const UnderlineInputBorder(
-              borderSide: BorderSide(color: Colors.grey),
+            contentPadding: EdgeInsets.symmetric(
+              vertical: 12.h,
+              horizontal: 10.w,
+            ),
+            enabledBorder: OutlineInputBorder(
+              borderSide: BorderSide(color: Colors.grey.shade300),
+              borderRadius: BorderRadius.circular(10.r),
+            ),
+            focusedBorder: OutlineInputBorder(
+              borderSide: const BorderSide(
+                color: Color(0xFF264FAD),
+                width: 1.5,
+              ),
+              borderRadius: BorderRadius.circular(10.r),
             ),
           ),
         ),
@@ -241,50 +300,10 @@ void proceedToVerifyPin() {
     );
   }
 
-  Widget _buildHeader(dynamic card, String ownerName) {
-    return Container(
-      width: double.infinity,
-      padding: const EdgeInsets.symmetric(vertical: 35),
-      decoration: const BoxDecoration(
-        gradient: LinearGradient(
-          colors: [Color(0xFF3B5BDB), Color(0xFF162E7A)],
-          begin: Alignment.topCenter,
-          end: Alignment.bottomCenter,
-        ),
-      ),
-      child: Column(
-        children: [
-          const Icon(Icons.credit_card, color: Colors.white54, size: 50),
-          const SizedBox(height: 15),
-          const Text(
-            "NovaPay Debit Card",
-            style: TextStyle(
-              color: Colors.white,
-              fontSize: 18,
-              fontWeight: FontWeight.bold,
-            ),
-          ),
-          Text(
-            "ชื่อหน้าบัตร: ${ownerName.toUpperCase()}",
-            style: const TextStyle(color: Colors.white70),
-          ),
-          Text(
-            "หมายเลข: **** **** **** ${card['last_digits']}",
-            style: const TextStyle(
-              color: Colors.white,
-              fontSize: 18,
-              letterSpacing: 1.5,
-            ),
-          ),
-        ],
-      ),
-    );
-  }
-
   Widget _buildBottomNav() {
     return SafeArea(
       child: Padding(
-        padding: const EdgeInsets.all(25),
+        padding: EdgeInsets.all(25.r),
         child: ValueListenableBuilder<bool>(
           valueListenable: isFormValid,
           builder: (context, isValid, child) {
@@ -292,14 +311,13 @@ void proceedToVerifyPin() {
               mainAxisAlignment: MainAxisAlignment.end,
               children: [
                 Text(
-                  "ยืนยัน",
+                  "ถัดไป",
                   style: TextStyle(
-                    fontSize: 18,
-                    fontWeight: FontWeight.bold,
+                    fontSize: 18.sp,
                     color: isValid ? const Color(0xFF264FAD) : Colors.grey,
                   ),
                 ),
-                const SizedBox(width: 15),
+                SizedBox(width: 15.w),
                 ArrowFab(
                   onPressed: isValid ? proceedToVerifyPin : () {},
                   enabled: isValid,
@@ -310,18 +328,5 @@ void proceedToVerifyPin() {
         ),
       ),
     );
-  }
-
-  @override
-  void dispose() {
-    for (var c in digitCtrls) {
-      c.dispose();
-    }
-    for (var f in focusNodes) {
-      f.dispose();
-    }
-    expiryCtrl.dispose();
-    cvvCtrl.dispose();
-    super.dispose();
   }
 }

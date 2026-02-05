@@ -189,16 +189,17 @@ class _RequestPhysicaState extends State<RequestPhysical> {
         child: Row(
           mainAxisAlignment: MainAxisAlignment.spaceBetween,
           children: [
-            GestureDetector(
+                GestureDetector(
               onTap: () => Get.back(),
-              child: const Row(
+              child: Row(
                 children: [
-                  Icon(Icons.cancel, color: Colors.red, size: 30),
-                  SizedBox(width: 10),
-                  Text(
-                    'ยกเลิก',
-                    style: TextStyle(color: Colors.grey, fontSize: 18),
+                  Container(
+                    padding: const EdgeInsets.all(12),
+                    decoration: const BoxDecoration(color: Colors.red, shape: BoxShape.circle),
+                    child: const Icon(Icons.close, color: Colors.white, size: 20),
                   ),
+                  const SizedBox(width: 10),
+                  const Text('ยกเลิก', style: TextStyle(color: Colors.grey, fontSize: 18)),
                 ],
               ),
             ),
@@ -211,9 +212,8 @@ class _RequestPhysicaState extends State<RequestPhysical> {
                       'ยืนยัน',
                       style: TextStyle(
                         fontSize: 18,
-                        fontWeight: FontWeight.bold,
                         color: enabled
-                            ? const Color(0xFF264FAD)
+                            ? const Color.fromARGB(255, 0, 0, 0)
                             : Colors.grey[400],
                       ),
                     ),

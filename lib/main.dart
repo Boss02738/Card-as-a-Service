@@ -74,6 +74,9 @@ class _NovaPayAppState extends State<NovaPayApp> {
       splitScreenMode: true,
       builder: (context, child) {
         return GetMaterialApp(
+          defaultTransition: Transition.cupertino,
+          // defaultTransition: Transition.rightToLeftWithFade,
+          transitionDuration: const Duration(milliseconds: 300),
           debugShowCheckedModeBanner: false,
           initialRoute: '/',
 
@@ -100,7 +103,7 @@ class _NovaPayAppState extends State<NovaPayApp> {
             GetPage(name: '/pin_page', page: () => const PinPage()),
             //Login & Home
             GetPage(name: '/login-pin', page: () => const PinLoginPage()),
-            GetPage(name: "/home", page: () => const HomePage()),
+            GetPage(name: "/home", page: () => const HomePage() ),
             GetPage(name: "/account", page: () => const AccountPage()),
             GetPage(name: "/main", page: () => MainPage()),
             //Card

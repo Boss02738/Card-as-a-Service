@@ -6,6 +6,7 @@ import 'package:get/get.dart';
 import 'package:my_app/module/controller/my_cards_controller.dart';
 import 'package:my_app/module/controller/home_controller.dart';
 import 'package:my_app/views/widgets/buildHeader.dart';
+import 'package:my_app/views/widgets/debitcard.dart';
 import 'package:my_app/views/widgets/exit_confirmation_dialog.dart';
 import 'package:my_app/views/widgets/gradient_header.dart';
 
@@ -33,10 +34,10 @@ class _MyCardPageState extends State<MyCardPage> {
               SafeArea(
                 child: Column(
                   children: [
-                     SizedBox(height: 10.h),
-                     Buildheader(),
-                     SizedBox(height: 10.h),
-      
+                    SizedBox(height: 10.h),
+                    Buildheader(),
+                    SizedBox(height: 10.h),
+
                     // ส่วนของ TabBar และรายการบัตร
                     Expanded(
                       child: Container(
@@ -60,8 +61,8 @@ class _MyCardPageState extends State<MyCardPage> {
                                 Tab(text: 'ระงับชั่วคราว'),
                               ],
                             ),
-                             SizedBox(height: 15.h),
-      
+                            SizedBox(height: 15.h),
+
                             // แสดงรายการบัตรตามสถานะ
                             Expanded(
                               child: TabBarView(
@@ -94,7 +95,7 @@ class _MyCardPageState extends State<MyCardPage> {
                                 ],
                               ),
                             ),
-      
+
                             // ปุ่มสมัครบัตรด้านล่าง
                             Padding(
                               padding: EdgeInsets.symmetric(vertical: 10.h),
@@ -123,13 +124,12 @@ class _MyCardPageState extends State<MyCardPage> {
                         ),
                       ),
                     ),
-                     SizedBox(height: 10.h), // เว้นที่ให้ NavBar
+                    SizedBox(height: 10.h), // เว้นที่ให้ NavBar
                   ],
                 ),
               ),
-      
-              // NavBar อยู่ด้านล่างสุด
 
+              // NavBar อยู่ด้านล่างสุด
             ],
           ),
         ),
@@ -139,12 +139,15 @@ class _MyCardPageState extends State<MyCardPage> {
 
   // ฟังก์ชันสร้างรายการบัตรแบบแนวตั้ง (เหมือนในรูป image_9acc24.png)
   Widget _buildCardList(List<dynamic> cards, String ownerName) {
-    if (cards.isEmpty) return const Center(child: Text("ไม่มีข้อมูลบัตร"));
+    if (cards.isEmpty) {
+      return const Center(child: Text("ไม่มีข้อมูลบัตร"));
+    }
 
     return ListView.builder(
       itemCount: cards.length,
       itemBuilder: (context, index) {
         final card = cards[index];
+
         return InkWell(
           onTap: () {
             Get.toNamed(
@@ -153,118 +156,20 @@ class _MyCardPageState extends State<MyCardPage> {
             );
           },
           child: Padding(
-            padding: EdgeInsets.only(bottom: 15.h),
-            child: _buildVerticalCardItem(card, ownerName),
+            padding: EdgeInsets.only(bottom: 12.h),
+            child: AspectRatio(
+              aspectRatio: 1.586,
+              child: BankCard(
+                card: card,
+                ownerName: ownerName,
+                cardName: card['card_name'] ?? 'Novapay',
+              ),
+            ),
           ),
         );
       },
     );
   }
 
-// ภายในไฟล์ my_card_page.dart
-
-Widget _buildVerticalCardItem(dynamic card, String ownerName) {
-  bool isActive = card['status'] == 'active';
-
-  return AspectRatio(
-    aspectRatio: 1.58, // ✅ กำหนดสัดส่วนให้เท่ากับหน้า MyCardDetail
-    child: Container(
-      padding: EdgeInsets.all(20.r),
-      decoration: BoxDecoration(
-        borderRadius: BorderRadius.circular(20.r),
-        // ✅ ตรวจสอบรูปภาพบัตร (ถ้ามีจาก API ให้โชว์รูปเหมือนหน้า Detail)
-        image: card['card_image'] != null
-            ? DecorationImage(
-                image: MemoryImage(base64Decode(card['card_image'])),
-                fit: BoxFit.cover,
-              )
-            : null,
-        gradient: card['card_image'] == null
-            ? const LinearGradient(
-                colors: [Color(0xFF264FAD), Color(0xFF162E7A)],
-                begin: Alignment.topLeft,
-                end: Alignment.bottomRight,
-              )
-            : null,
-        boxShadow: [
-          BoxShadow(
-            color: Colors.black.withOpacity(0.1),
-            blurRadius: 10.r,
-            offset: Offset(0, 5.h),
-          ),
-        ],
-      ),
-      child: Column(
-        crossAxisAlignment: CrossAxisAlignment.start,
-        mainAxisAlignment: MainAxisAlignment.spaceBetween, // ✅ กระจายเนื้อหาให้เต็มบัตร
-        children: [
-          Row(
-            mainAxisAlignment: MainAxisAlignment.spaceBetween,
-            children: [
-              Text(
-                card['card_name'] ?? 'Novapay',
-                style: TextStyle(color: Colors.white, fontSize: 16.sp, fontWeight: FontWeight.bold),
-              ),
-              // ป้ายสถานะ
-              Container(
-                padding: EdgeInsets.symmetric(horizontal: 10.w, vertical: 4.h),
-                decoration: BoxDecoration(
-                  color: Colors.white,
-                  borderRadius: BorderRadius.circular(15.r),
-                ),
-                child: Text(
-                  isActive ? "เปิดใช้งาน" : "ระงับชั่วคราว",
-                  style: TextStyle(
-                    color: isActive ? Colors.green : Colors.red,
-                    fontWeight: FontWeight.bold,
-                    fontSize: 10.sp, // ปรับขนาด Badge ให้เล็กลงหน่อยเพื่อความสวยงาม
-                  ),
-                ),
-              ),
-            ],
-          ),
-          
-          // ส่วนกลางบัตร (เว้นว่างไว้เหมือนหน้า Detail)
-          const Spacer(), 
-
-          Column(
-            crossAxisAlignment: CrossAxisAlignment.start,
-            children: [
-              Text(
-                ownerName.toUpperCase(),
-                style: TextStyle(color: Colors.white, fontSize: 14.sp, fontWeight: FontWeight.w500),
-              ),
-              SizedBox(height: 5.h),
-              Text(
-                '**** **** **** ${card['last_digits'] ?? '****'}',
-                style: TextStyle(
-                  color: Colors.white,
-                  fontSize: 18.sp,
-                  letterSpacing: 2.w, // ✅ ใช้ .w เพื่อความสม่ำเสมอ
-                  fontWeight: FontWeight.bold,
-                ),
-              ),
-            ],
-          ),
-          
-          SizedBox(height: 10.h),
-          
-          Row(
-            mainAxisAlignment: MainAxisAlignment.spaceBetween,
-            children: [
-              Text(
-                card['virtual'] == true ? "Virtual Card" : "Physical Card",
-                style: TextStyle(color: Colors.white70, fontSize: 11.sp),
-              ),
-              Image.network(
-                'https://upload.wikimedia.org/wikipedia/commons/thumb/2/2a/Mastercard-logo.svg/1280px-Mastercard-logo.svg.png',
-                width: 35.w, // ✅ ขนาดโลโก้เท่าหน้า Detail
-              ),
-            ],
-          ),
-        ],
-      ),
-    ),
-  );
-}
+  // ภายในไฟล์ my_card_page.dart
 }

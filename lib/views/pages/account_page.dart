@@ -102,7 +102,7 @@ class _AccountPageState extends State<AccountPage> {
                               ),
                             ),
                             Padding(
-                              padding: EdgeInsets.all(20.0.r),
+                              padding: EdgeInsets.all(10.0.r),
                               child: Column(
                                 children: [
                                   _buildRow(

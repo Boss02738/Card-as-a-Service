@@ -1,6 +1,10 @@
+import 'dart:convert';
+
 import 'package:flutter/material.dart';
+import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:get/get.dart';
 import 'package:my_app/module/controller/changelimit_controller.dart';
+import 'package:my_app/views/widgets/debitcard.dart';
 
 class ChangeLimitCard extends StatefulWidget {
   const ChangeLimitCard({super.key});
@@ -84,14 +88,13 @@ class _ChangeLimitCardState extends State<ChangeLimitCard> {
       body: Column(
         children: [
           Container(
-            padding: const EdgeInsets.symmetric(vertical: 20, horizontal: 20),
-            // decoration: const BoxDecoration(
-            //   color: Color(0xFF264FAD),
-            //   borderRadius: BorderRadius.vertical(bottom: Radius.circular(30)),
-            // ),
-            child: _buildCard(card, ownerName),
+            padding: EdgeInsets.symmetric(vertical: 20.h, horizontal: 20.w),
+            child: BankCard(
+              card: card,
+              ownerName: ownerName,
+              cardName: card['card_name'],
+            ),
           ),
-
           Expanded(
             child: Padding(
               padding: const EdgeInsets.all(20.0),
@@ -152,8 +155,6 @@ class _ChangeLimitCardState extends State<ChangeLimitCard> {
                     "วงเงินใช้จ่ายบัตรต่อวัน",
                     style: TextStyle(color: Colors.grey, fontSize: 12),
                   ),
-
-
                 ],
               ),
             ),
@@ -189,63 +190,15 @@ class _ChangeLimitCardState extends State<ChangeLimitCard> {
     );
   }
 
-  Widget _buildCard(dynamic card, String name) {
-    return Container(
-      height: 190,
-      width: double.infinity,
-      padding: const EdgeInsets.all(20),
-      decoration: BoxDecoration(
-        borderRadius: BorderRadius.circular(20),
-        gradient: const LinearGradient(
-          colors: [Color(0xFF3B5BDB), Color(0xFF162E7A)],
-          begin: Alignment.topLeft,
-          end: Alignment.bottomRight,
+  Widget _buildSectionHeader(String title) {
+    return Padding(
+      padding: EdgeInsets.only(left: 20.w, top: 15.h, bottom: 8.h),
+      child: Align(
+        alignment: Alignment.centerLeft,
+        child: Text(
+          title,
+          style: TextStyle(fontSize: 13.sp, fontWeight: FontWeight.bold),
         ),
-      ),
-      child: Column(
-        crossAxisAlignment: CrossAxisAlignment.start,
-        mainAxisAlignment: MainAxisAlignment.spaceBetween,
-        children: [
-          const Text(
-            "Novapay",
-            style: TextStyle(
-              color: Colors.white,
-              fontSize: 18,
-              fontWeight: FontWeight.bold,
-            ),
-          ),
-          Column(
-            crossAxisAlignment: CrossAxisAlignment.start,
-            children: [
-              Text(
-                name.toUpperCase(),
-                style: const TextStyle(color: Colors.white, fontSize: 16),
-              ),
-              const SizedBox(height: 5),
-              Text(
-                "**** **** **** ${card['last_digits']}",
-                style: const TextStyle(
-                  color: Colors.white,
-                  fontSize: 20,
-                  letterSpacing: 2,
-                ),
-              ),
-            ],
-          ),
-          Row(
-            mainAxisAlignment: MainAxisAlignment.spaceBetween,
-            children: [
-               Text(
-                card['virtual'] == true ? 'Virtual Card' : 'Physical Card',
-                style: TextStyle(color: Colors.white70, fontSize: 12),
-              ),
-              Image.network(
-                'https://upload.wikimedia.org/wikipedia/commons/thumb/2/2a/Mastercard-logo.svg/1280px-Mastercard-logo.svg.png',
-                width: 40,
-              ),
-            ],
-          ),
-        ],
       ),
     );
   }

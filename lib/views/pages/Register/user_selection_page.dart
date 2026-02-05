@@ -23,41 +23,45 @@ class UserSelectionPage extends StatelessWidget {
                 SizedBox(height: 50.h),
                 Expanded(
                   child: DataCard(
-                    child: Column(
-                      mainAxisAlignment: MainAxisAlignment.center,
-                      children: [
-                        _selectionTile(
-                          title: 'เปิดใช้งานบัญชีใหม่ NovaPay',
-                          subtitle:
-                              'เบอร์ใหม่ ไม่เคยมีบัญชี หรือต้องการสมัครใหม่',
-                          icon: Icons.person_add_alt_1,
-
-                          // onTap: () => Get.toNamed('/idcard_verify'), // Flow สมัครใหม่เดิม?
-                          onTap: () => Get.toNamed(
-                            '/idcard_verify',
-                            arguments: {
-                              ...Get.arguments,
-                              'action': 'register',
-                            },
+                    child: Padding(
+                      padding: EdgeInsets.only(bottom: 10.h),
+                      child: Column(
+                        mainAxisAlignment: MainAxisAlignment.start,
+                        children: [
+                          SizedBox(height:20.h),
+                          _selectionTile(
+                            title: 'เปิดใช้งานบัญชีใหม่ NovaPay',
+                            subtitle:
+                                'เบอร์ใหม่ ไม่เคยมีบัญชี หรือต้องการสมัครใหม่',
+                            icon: Icons.person_add_alt_1,
+                      
+                            // onTap: () => Get.toNamed('/idcard_verify'), // Flow สมัครใหม่เดิม?
+                            onTap: () => Get.toNamed(
+                              '/idcard_verify',
+                              arguments: {
+                                ...Get.arguments,
+                                'action': 'register',
+                              },
+                            ),
                           ),
-                        ),
-                        SizedBox(height: 24.h),
-                        _selectionTile(
-                          title: 'เข้าสู่ระบบบัญชีเดิม',
-                          subtitle:
-                              'มีบัญชีอยู่แล้ว ต้องการย้ายเครื่องหรือติดตั้งแอปใหม่',
-                          icon: Icons.app_registration_rounded,
-                          onTap: () => Get.toNamed(
-                            '/change_device',
-                            arguments: {
-                              ...Get.arguments,
-                              'action':
-                                  'change_device_flow', // ✅ กำหนดเป็นย้ายเครื่องเฉพาะเมื่อกดปุ่มนี้
-                              'mobileNumber': Get.arguments['verifiedMobile'],
-                            },
-                          ), // ไป Flow เปลี่ยนเครื่อง
-                        ),
-                      ],
+                          SizedBox(height: 24.h),
+                          _selectionTile(
+                            title: 'เข้าสู่ระบบบัญชีเดิม',
+                            subtitle:
+                                'มีบัญชีอยู่แล้ว ต้องการย้ายเครื่องหรือติดตั้งแอปใหม่',
+                            icon: Icons.app_registration_rounded,
+                            onTap: () => Get.toNamed(
+                              '/change_device',
+                              arguments: {
+                                ...Get.arguments,
+                                'action':
+                                    'change_device_flow', // ✅ กำหนดเป็นย้ายเครื่องเฉพาะเมื่อกดปุ่มนี้
+                                'mobileNumber': Get.arguments['verifiedMobile'],
+                              },
+                            ), // ไป Flow เปลี่ยนเครื่อง
+                          ),
+                        ],
+                      ),
                     ),
                   ),
                 ),

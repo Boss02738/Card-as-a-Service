@@ -141,7 +141,7 @@ class _Card_DetailState extends State<Card_Detail> {
                 child: Row(
                   children: [
                     Container(
-                      padding: const EdgeInsets.all(8),
+                      padding: const EdgeInsets.all(12),
                       decoration: const BoxDecoration(
                         color: Colors.red,
                         shape: BoxShape.circle,
@@ -174,12 +174,11 @@ class _Card_DetailState extends State<Card_Detail> {
                         'ต่อไป',
                         style: TextStyle(
                           fontSize: 18,
-                          fontWeight: FontWeight.bold,
+                          // fontWeight: FontWeight.bold,
                           
                           color: enabled
                               ? const Color.fromARGB(255, 45, 75, 10)
                               : Colors.grey[400],
-                          
                         ),
                       ),
                       const SizedBox(width: 12),

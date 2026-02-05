@@ -14,76 +14,99 @@ class Address extends StatelessWidget {
       appBar: AppBar(
         title: const Text(
           'ขอบัตร Physical',
-          style: TextStyle(color: Colors.white, fontWeight: FontWeight.bold),
+          style: TextStyle(color: Colors.white),
         ),
         backgroundColor: const Color(0xFF264FAD),
         centerTitle: true,
-        leading: Icon(Icons.arrow_back_ios, color: Colors.white),
+        leading: IconButton(
+          icon: const Icon(Icons.arrow_back_ios, color: Colors.white),
+          onPressed: () => Get.back(),
+        ),
       ),
-      body: Center(
-        child: Padding(
-          padding: const EdgeInsets.all(20.0),
-          child: Column(
-            // mainAxisAlignment: MainAxisAlignment.start,
-            crossAxisAlignment: CrossAxisAlignment.start,
-            children: [
-              Text('ที่อยู่'),
-              TextFormField(
-                controller: addressController.addressCtrl,
-                decoration: InputDecoration(hintText: 'ที่อยู่ปัจจุบัน'),
-              ),
-              SizedBox(height: 10),
-              Row(
+      body: Column(
+        children: [
+          // 🔹 ส่วนที่ scroll ได้
+          Expanded(
+            child: SingleChildScrollView(
+              padding: const EdgeInsets.all(20),
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
-                  Expanded(
-                    child: TextFormField(
-                      controller: addressController.subdistrictCtrl,
-                      decoration: const InputDecoration(hintText: 'ตำบล'),
+                  const Text('ที่อยู่'),
+                  TextFormField(
+                    controller: addressController.addressCtrl,
+                    decoration: const InputDecoration(
+                      hintText: 'ที่อยู่ปัจจุบัน',
                     ),
                   ),
-                  const SizedBox(width: 10),
-                  Expanded(
-                    child: TextFormField(
-                      controller: addressController.districtCtrl,
-                      decoration: const InputDecoration(hintText: 'อำเภอ'),
-                    ),
+                  const SizedBox(height: 10),
+
+                  Row(
+                    children: [
+                      Expanded(
+                        child: TextFormField(
+                          controller: addressController.subdistrictCtrl,
+                          decoration: const InputDecoration(hintText: 'ตำบล'),
+                        ),
+                      ),
+                      const SizedBox(width: 10),
+                      Expanded(
+                        child: TextFormField(
+                          controller: addressController.districtCtrl,
+                          decoration: const InputDecoration(hintText: 'อำเภอ'),
+                        ),
+                      ),
+                      const SizedBox(width: 10),
+                      Expanded(
+                        child: TextFormField(
+                          controller: addressController.provincetCtrl,
+                          decoration: const InputDecoration(
+                            hintText: 'จังหวัด',
+                          ),
+                        ),
+                      ),
+                    ],
                   ),
-                  const SizedBox(width: 10),
-                  Expanded(
-                    child: TextFormField(
-                      controller: addressController.provincetCtrl,
-                      decoration: const InputDecoration(hintText: 'จังหวัด'),
-                    ),
+
+                  const SizedBox(height: 20),
+                  const Text('รหัสไปรษณีย์'),
+                  TextFormField(
+                    controller: addressController.zipcodeCtrl,
+                    keyboardType: TextInputType.number,
+                    decoration: const InputDecoration(hintText: 'รหัสไปรษณีย์'),
                   ),
+
+                  const SizedBox(height: 80), // กันโดนปุ่ม
                 ],
               ),
-              SizedBox(height: 20),
-              Text('รหัสไปรษณีย์'),
-              TextFormField(
-                controller: addressController.zipcodeCtrl,
-                decoration: InputDecoration(hintText: 'รหัสไปรษณีย์'),
-                keyboardType: TextInputType.number,
-              ),
-              Spacer(),
-              Row(
+            ),
+          ),
+
+          // 🔹 ปุ่มล่าง (fixed)
+          SafeArea(
+            top: false,
+            child: Padding(
+              padding: const EdgeInsets.fromLTRB(20, 0, 20, 16),
+              child: Row(
                 mainAxisAlignment: MainAxisAlignment.end,
                 children: [
-                  Text('ต่อไป', style: TextStyle(fontSize: 16)),
-                  SizedBox(width: 10),
-
+                  const Text('ต่อไป', style: TextStyle(fontSize: 16)),
+                  const SizedBox(width: 10),
                   ArrowFab(
-                    onPressed: () {
-                      // ตรวจสอบว่ากรอกข้อมูลครบหรือไม่ (Optional)
+                    enabled: true,
+                    onPressed: () async {
+                      Get.focusScope?.unfocus();
+
+                      await Future.delayed(const Duration(milliseconds: 120));
+
                       if (addressController.addressCtrl.text.isNotEmpty) {
                         Get.toNamed(
                           '/pin_verify_page',
                           arguments: {
-                            'action': 'request_physical', // ✅ ระบุ Action
-                            'card': Get
-                                .arguments['card'], // ✅ บัตรที่เลือกมาจากหน้าก่อน
+                            'action': 'request_physical',
+                            'card': Get.arguments['card'],
                             'ownerName': Get.arguments['ownerName'],
-                            'addressData': addressController
-                                .toJson(), // ✅ ข้อมูลที่อยู่
+                            'addressData': addressController.toJson(),
                           },
                         );
                       } else {
@@ -93,13 +116,12 @@ class Address extends StatelessWidget {
                         );
                       }
                     },
-                    enabled: true,
                   ),
                 ],
               ),
-            ],
+            ),
           ),
-        ),
+        ],
       ),
     );
   }

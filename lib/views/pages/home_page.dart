@@ -29,7 +29,6 @@ class _HomePageState extends State<HomePage> {
             const GradientHeader(),
             SafeArea(
               child: Obx(() {
-                // ถ้ากำลังโหลด ให้โชว์ Loading
                 if (homeController.isLoading.value) {
                   return const Center(
                     child: CircularProgressIndicator(color: Colors.white),
@@ -78,7 +77,7 @@ Widget _buildEmptyCardSlot() {
       border: Border.all(color: Colors.white12),
     ),
     child: InkWell(
-      onTap: () => Get.toNamed('/type_cards'), 
+      onTap: () => Get.toNamed('/type_cards'),
       borderRadius: BorderRadius.circular(20.r),
       child: Column(
         mainAxisAlignment: MainAxisAlignment.center,
