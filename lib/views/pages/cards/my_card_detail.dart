@@ -1,4 +1,3 @@
-import 'dart:convert';
 import 'package:flutter/material.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:get/get.dart';
@@ -38,7 +37,7 @@ class _MyCardDetailState extends State<MyCardDetail> {
           style: TextStyle(
             color: Colors.white,
             fontSize: 18.sp,
-          ), // ✅ Responsive Font
+          ), //  Responsive Font
         ),
         centerTitle: true,
         backgroundColor: const Color(0xFF264FAD),
@@ -48,7 +47,7 @@ class _MyCardDetailState extends State<MyCardDetail> {
             Icons.arrow_back_ios,
             color: Colors.white,
             size: 20.r,
-          ), // ✅ Responsive Icon
+          ), //  Responsive Icon
           onPressed: () => Get.back(),
         ),
       ),
@@ -130,19 +129,20 @@ class _MyCardDetailState extends State<MyCardDetail> {
                   "${_formatMoney(card['current_spending_limit'])} บาท",
                   isBoldValue: true,
                 ),
-                InkWell(
-                  onTap: () async {
-                    await Get.toNamed(
-                      '/change_limit_card',
-                      arguments: {'card': card, 'ownerName': ownerEn},
-                    );
-                    detailController.fetchCardDetail(currentCardId);
-                  },
-                  child: _buildRow("ปรับวงเงิน", "", showArrow: true),
-                ),
+                if (!(card['virtual'] == false && card['status'] == 'inactive'))
+                  InkWell(
+                    onTap: () async {
+                      await Get.toNamed(
+                        '/change_limit_card',
+                        arguments: {'card': card, 'ownerName': ownerEn},
+                      );
+                      detailController.fetchCardDetail(currentCardId);
+                    },
+                    child: _buildRow("ปรับวงเงิน", "", showArrow: true),
+                  ),
               ]),
-
-              _buildSectionHeader("ความปลอดภัย"),
+              if (!(card['virtual'] == false && card['status'] == 'inactive'))
+                _buildSectionHeader("ความปลอดภัย"),
               _buildDetailSection([
                 Padding(
                   padding: EdgeInsets.symmetric(
@@ -151,21 +151,29 @@ class _MyCardDetailState extends State<MyCardDetail> {
                   ),
                   child: Row(
                     mainAxisAlignment: MainAxisAlignment.spaceBetween,
+
                     children: [
-                      Text("เปิดใช้งานบัตร", style: TextStyle(fontSize: 14.sp)),
-                      Transform.scale(
-                        scale: 0.8.r, // ✅ ปรับขนาด Switch ให้พอดีจอ
-                        child: Switch(
-                          value: !statusCardController.isCardFrozen.value,
-                          onChanged: (val) {
-                            if (val)
-                              statusCardController.unfreezeCard(currentCardId);
-                            else
-                              statusCardController.freezeCard(currentCardId);
-                          },
-                          activeColor: const Color(0xFF264FAD),
+                      if (!(card['virtual'] == false &&
+                          card['status'] == 'inactive'))
+                        Text(
+                          "เปิดใช้งานบัตร",
+                          style: TextStyle(fontSize: 14.sp),
                         ),
-                      ),
+                      if (!(card['virtual'] == false &&
+                          card['status'] == 'inactive'))
+                        Transform.scale(
+                          scale: 0.8.r, // ปรับขนาด Switch ให้พอดีจอ
+                          child: Switch(
+                            value: !statusCardController.isCardFrozen.value,
+                            onChanged: (val) {
+                              if (val)
+                                statusCardController.unfreezeCard(currentCardId);
+                              else
+                                statusCardController.freezeCard(currentCardId);
+                            },
+                            activeColor: const Color(0xFF264FAD),
+                          ),
+                        ),
                     ],
                   ),
                 ),
@@ -210,7 +218,7 @@ class _MyCardDetailState extends State<MyCardDetail> {
                     _buildRow(
                       "สถานะปัจจุบัน",
                       detailController.trackingData['delivery_status'] ??
-                          "กำลังเตรียมการจัดส่ง",
+                          "pending",
                       valueColor: Colors.blueAccent,
                       isBoldValue: true,
                     ),

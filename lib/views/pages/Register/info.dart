@@ -21,6 +21,20 @@ class Info extends StatefulWidget {
 class _InfoState extends State<Info> {
   final HeaderTextController headerTextController =
       Get.find<HeaderTextController>();
+  final _formKey = GlobalKey<FormState>();
+  bool _isAgeValid(DateTime birthDate) {
+    final today = DateTime.now();
+
+    int age = today.year - birthDate.year;
+
+    // ถ้ายังไม่ถึงวันเกิดปีนี้ ให้ลบอายุออก 1
+    if (today.month < birthDate.month ||
+        (today.month == birthDate.month && today.day < birthDate.day)) {
+      age--;
+    }
+
+    return age >= 12;
+  }
 
   @override
   void initState() {
@@ -57,6 +71,7 @@ class _InfoState extends State<Info> {
                   child: DataCard(
                     child: SingleChildScrollView(
                       child: Form(
+                        key: _formKey,
                         child: Column(
                           crossAxisAlignment: CrossAxisAlignment.start,
                           children: [
@@ -70,12 +85,18 @@ class _InfoState extends State<Info> {
                             ),
                             TextFormField(
                               controller: infoController.idCardCtrl,
-                              decoration: InputDecoration(
-                                // border: OutlineInputBorder(),
+                              keyboardType: TextInputType.number,
+                              decoration: const InputDecoration(
                                 hintText: 'กรอกหมายเลขบัตรประชาชน',
                               ),
-                              keyboardType: TextInputType.number,
+                              validator: (value) {
+                                if (value == null || value.trim().isEmpty) {
+                                  return 'กรุณากรอกหมายเลขบัตรประชาชน';
+                                }
+                                return null;
+                              },
                             ),
+
                             SizedBox(height: 20),
                             Text(
                               'วัน/เดือน/ปีเกิด',
@@ -86,13 +107,37 @@ class _InfoState extends State<Info> {
                             ),
                             DateFormatField(
                               type: DateFormatType.type2,
+                              lastDate: DateTime.now(), // ❌ เลือกอนาคตไม่ได้
                               onComplete: (date) {
-                                if (date != null) {
-                                  infoController.birthdayDateCtrl.text =
-                                      "${date.day}/${date.month}/${date.year}";
+                                if (date == null) return;
+
+                                final now = DateTime.now();
+                                final age =
+                                    now.year -
+                                    date.year -
+                                    ((now.month < date.month ||
+                                            (now.month == date.month &&
+                                                now.day < date.day))
+                                        ? 1
+                                        : 0);
+
+                                if (age < 12) {
+                                  Get.snackbar(
+                                    'ไม่ผ่านเงื่อนไข',
+                                    'ต้องมีอายุอย่างน้อย 12 ปี',
+                                    snackPosition: SnackPosition.BOTTOM,
+                                  );
+                                  infoController.birthdayDateCtrl.clear();
+                                  return;
                                 }
+
+                                infoController.birthdayDateCtrl.text =
+                                    "${date.day.toString().padLeft(2, '0')}-"
+                                    "${date.month.toString().padLeft(2, '0')}-"
+                                    "${date.year}";
                               },
                             ),
+
                             SizedBox(height: 20),
                             Text(
                               'ชื่อ-นามสกุล (ภาษาไทย)',
@@ -107,6 +152,12 @@ class _InfoState extends State<Info> {
                                 // border: OutlineInputBorder(),
                                 hintText: 'ชื่อ',
                               ),
+                              validator: (value) {
+                                if (value == null || value.trim().isEmpty) {
+                                  return 'กรุณากรอกชื่อภาษาไทย';
+                                }
+                                return null;
+                              },
                             ),
                             TextFormField(
                               controller: infoController.lastNameThCtrl,
@@ -114,6 +165,12 @@ class _InfoState extends State<Info> {
                                 // border: OutlineInputBorder(),
                                 hintText: 'นามสกุล',
                               ),
+                              validator: (value) {
+                                if (value == null || value.trim().isEmpty) {
+                                  return 'กรุณากรอกนามสกุลภาษาไทย';
+                                }
+                                return null;
+                              },
                             ),
                             SizedBox(height: 20),
                             Text(
@@ -129,6 +186,12 @@ class _InfoState extends State<Info> {
                                 // border: OutlineInputBorder(),
                                 hintText: 'ชื่อ',
                               ),
+                              validator: (value) {
+                                if (value == null || value.trim().isEmpty) {
+                                  return 'กรุณากรอกชื่อภาษาอังกฤษ';
+                                }
+                                return null;
+                              },
                             ),
                             TextFormField(
                               controller: infoController.lastNameEnCtrl,
@@ -136,6 +199,12 @@ class _InfoState extends State<Info> {
                                 // border: OutlineInputBorder(),
                                 hintText: 'นามสกุล',
                               ),
+                              validator: (value) {
+                                if (value == null || value.trim().isEmpty) {
+                                  return 'กรุณากรอกนามสกุลภาษาอังกฤษ';
+                                }
+                                return null;
+                              },
                             ),
                             SizedBox(height: 20),
                             Text(
@@ -151,6 +220,12 @@ class _InfoState extends State<Info> {
                                 // border: OutlineInputBorder(),
                                 hintText: 'อีเมล',
                               ),
+                              validator: (value) {
+                                if (value == null || value.trim().isEmpty) {
+                                  return 'กรุณากรอกอีเมล';
+                                }
+                                return null;
+                              },
                             ),
                             SizedBox(height: 20),
                             Row(
@@ -161,10 +236,24 @@ class _InfoState extends State<Info> {
                                 ArrowFab(
                                   enabled: true,
                                   onPressed: () {
-                                    Get.to(
-                                      () => const FaceVerify(),
-                                      arguments: Get.arguments,
-                                    );
+                                    if (_formKey.currentState!.validate()) {
+                                      if (infoController
+                                          .birthdayDateCtrl
+                                          .text
+                                          .isEmpty) {
+                                        Get.snackbar(
+                                          'ข้อมูลไม่ครบ',
+                                          'กรุณาเลือกวันเกิด',
+                                          snackPosition: SnackPosition.BOTTOM,
+                                        );
+                                        return;
+                                      }
+
+                                      Get.to(
+                                        () => const FaceVerify(),
+                                        arguments: Get.arguments,
+                                      );
+                                    }
                                   },
                                 ),
                               ],

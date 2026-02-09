@@ -25,7 +25,6 @@ class _IdcardVerifyState extends State<IdcardVerify> {
 
   File? _image; // ตัวแปรเก็บรูปที่ถ่าย
   final CameraService _cameraService = CameraService();
-  final PhoneCtrl = Get.find<PhonenumberController>();
   @override
   void initState() {
     super.initState();
@@ -158,7 +157,6 @@ class _IdcardVerifyState extends State<IdcardVerify> {
                                 ),
                               ),
                             ),
-                            Text(PhoneCtrl.phoneNumber.value),
                             SizedBox(height: 40.h),
 
                             Row(

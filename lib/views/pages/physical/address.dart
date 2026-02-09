@@ -1,20 +1,63 @@
 import 'package:flutter/material.dart';
+import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:get/get.dart';
 import 'package:my_app/module/controller/address_controller.dart';
 import 'package:my_app/views/widgets/arrow_fab.dart';
 
-class Address extends StatelessWidget {
+class Address extends StatefulWidget {
   const Address({super.key});
 
   @override
-  Widget build(BuildContext context) {
-    final AddressController addressController = Get.put(AddressController());
+  State<Address> createState() => _AddressState();
+}
 
+class _AddressState extends State<Address> {
+  final AddressController addressController = Get.put(AddressController());
+  
+  // ✅ สร้างตัวแปรเช็คสถานะความครบถ้วนของฟอร์ม
+  final ValueNotifier<bool> isFormValid = ValueNotifier(false);
+
+  @override
+  void initState() {
+    super.initState();
+    // ✅ เพิ่ม Listener ให้กับทุก Controller เพื่อตรวจสอบค่าทุกครั้งที่มีการพิมพ์
+    addressController.addressCtrl.addListener(_validateForm);
+    addressController.subdistrictCtrl.addListener(_validateForm);
+    addressController.districtCtrl.addListener(_validateForm);
+    addressController.provincetCtrl.addListener(_validateForm);
+    addressController.zipcodeCtrl.addListener(_validateForm);
+  }
+
+  // ✅ ฟังก์ชันเช็คว่ากรอกครบทุกช่องหรือไม่
+  void _validateForm() {
+    bool isValid = addressController.addressCtrl.text.isNotEmpty &&
+        addressController.subdistrictCtrl.text.isNotEmpty &&
+        addressController.districtCtrl.text.isNotEmpty &&
+        addressController.provincetCtrl.text.isNotEmpty &&
+        addressController.zipcodeCtrl.text.isNotEmpty;
+    
+    isFormValid.value = isValid;
+  }
+
+  @override
+  void dispose() {
+    // ล้าง Listener เมื่อเลิกใช้งาน
+    addressController.addressCtrl.removeListener(_validateForm);
+    addressController.subdistrictCtrl.removeListener(_validateForm);
+    addressController.districtCtrl.removeListener(_validateForm);
+    addressController.provincetCtrl.removeListener(_validateForm);
+    addressController.zipcodeCtrl.removeListener(_validateForm);
+    isFormValid.dispose();
+    super.dispose();
+  }
+
+  @override
+  Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
-        title: const Text(
+        title: Text(
           'ขอบัตร Physical',
-          style: TextStyle(color: Colors.white),
+          style: TextStyle(color: Colors.white, fontSize: 18.sp),
         ),
         backgroundColor: const Color(0xFF264FAD),
         centerTitle: true,
@@ -25,99 +68,95 @@ class Address extends StatelessWidget {
       ),
       body: Column(
         children: [
-          // 🔹 ส่วนที่ scroll ได้
           Expanded(
             child: SingleChildScrollView(
-              padding: const EdgeInsets.all(20),
+              padding: EdgeInsets.all(20.r),
               child: Column(
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
-                  const Text('ที่อยู่'),
+                  const Text('ที่อยู่ปัจจุบัน'),
                   TextFormField(
                     controller: addressController.addressCtrl,
-                    decoration: const InputDecoration(
-                      hintText: 'ที่อยู่ปัจจุบัน',
-                    ),
+                    decoration: const InputDecoration(hintText: 'บ้านเลขที่, ถนน, ซอย'),
                   ),
-                  const SizedBox(height: 10),
-
+                  SizedBox(height: 15.h),
                   Row(
                     children: [
                       Expanded(
                         child: TextFormField(
                           controller: addressController.subdistrictCtrl,
-                          decoration: const InputDecoration(hintText: 'ตำบล'),
+                          decoration: const InputDecoration(hintText: 'ตำบล/แขวง'),
                         ),
                       ),
-                      const SizedBox(width: 10),
+                      SizedBox(width: 10.w),
                       Expanded(
                         child: TextFormField(
                           controller: addressController.districtCtrl,
-                          decoration: const InputDecoration(hintText: 'อำเภอ'),
-                        ),
-                      ),
-                      const SizedBox(width: 10),
-                      Expanded(
-                        child: TextFormField(
-                          controller: addressController.provincetCtrl,
-                          decoration: const InputDecoration(
-                            hintText: 'จังหวัด',
-                          ),
+                          decoration: const InputDecoration(hintText: 'อำเภอ/เขต'),
                         ),
                       ),
                     ],
                   ),
-
-                  const SizedBox(height: 20),
+                  SizedBox(height: 15.h),
+                  TextFormField(
+                    controller: addressController.provincetCtrl,
+                    decoration: const InputDecoration(hintText: 'จังหวัด'),
+                  ),
+                  SizedBox(height: 15.h),
                   const Text('รหัสไปรษณีย์'),
                   TextFormField(
                     controller: addressController.zipcodeCtrl,
                     keyboardType: TextInputType.number,
                     decoration: const InputDecoration(hintText: 'รหัสไปรษณีย์'),
                   ),
-
-                  const SizedBox(height: 80), // กันโดนปุ่ม
+                  SizedBox(height: 80.h),
                 ],
               ),
             ),
           ),
 
-          // 🔹 ปุ่มล่าง (fixed)
+          // 🔹 ปุ่มล่าง (เปลี่ยนสีและสถานะตามการกรอก)
           SafeArea(
             top: false,
             child: Padding(
-              padding: const EdgeInsets.fromLTRB(20, 0, 20, 16),
-              child: Row(
-                mainAxisAlignment: MainAxisAlignment.end,
-                children: [
-                  const Text('ต่อไป', style: TextStyle(fontSize: 16)),
-                  const SizedBox(width: 10),
-                  ArrowFab(
-                    enabled: true,
-                    onPressed: () async {
-                      Get.focusScope?.unfocus();
-
-                      await Future.delayed(const Duration(milliseconds: 120));
-
-                      if (addressController.addressCtrl.text.isNotEmpty) {
-                        Get.toNamed(
-                          '/pin_verify_page',
-                          arguments: {
-                            'action': 'request_physical',
-                            'card': Get.arguments['card'],
-                            'ownerName': Get.arguments['ownerName'],
-                            'addressData': addressController.toJson(),
-                          },
-                        );
-                      } else {
-                        Get.snackbar(
-                          'คำเตือน',
-                          'กรุณากรอกข้อมูลที่อยู่ให้ครบถ้วน',
-                        );
-                      }
-                    },
-                  ),
-                ],
+              padding: EdgeInsets.fromLTRB(20.w, 0, 20.w, 16.h),
+              child: ValueListenableBuilder<bool>(
+                valueListenable: isFormValid,
+                builder: (context, isValid, child) {
+                  return Row(
+                    mainAxisAlignment: MainAxisAlignment.end,
+                    children: [
+                      Text(
+                        'ต่อไป',
+                        style: TextStyle(
+                          fontSize: 16.sp,
+                          fontWeight: FontWeight.bold,
+                          // ✅ สีข้อความจะเปลี่ยนตามสถานะ
+                          color: isValid ? const Color(0xFF264FAD) : Colors.grey,
+                        ),
+                      ),
+                      SizedBox(width: 10.w),
+                      ArrowFab(
+                        enabled: isValid, // ✅ ส่งค่า true/false ไปที่ Widget
+                        onPressed: isValid 
+                          ? () async {
+                              Get.focusScope?.unfocus();
+                              await Future.delayed(const Duration(milliseconds: 150));
+                              Get.toNamed(
+                                '/pin_verify_page',
+                                arguments: {
+                                  'action': 'request_physical',
+                                  'card': Get.arguments['card'],
+                                  'ownerName': Get.arguments['ownerName'],
+                                  'addressData': addressController.toJson(),
+                                },
+                              );
+                            }
+                          : () {}, // ถ้าไม่ Valid จะกดไม่ได้
+                      ),
+                    ],
+                  );
+                },
               ),
             ),
           ),

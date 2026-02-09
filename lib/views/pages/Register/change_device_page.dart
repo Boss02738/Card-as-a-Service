@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:get/get.dart';
 import 'package:my_app/module/controller/phonenumber_controller.dart';
@@ -18,6 +19,8 @@ class _ChangeDevicePageState extends State<ChangeDevicePage> {
   final _idCardCtrl = TextEditingController();
   final _accNoCtrl = TextEditingController();
   final phoneCtrl = Get.find<PhonenumberController>();
+
+  final ValueNotifier<bool> canNext = ValueNotifier(false);
   @override
   Widget build(BuildContext context) {
     return Scaffold(
@@ -52,12 +55,24 @@ class _ChangeDevicePageState extends State<ChangeDevicePage> {
                             fontSize: 12.sp,
                           ),
                         ),
+
+                        // isPhoneComplete.value = value.trim().length == 10;
                         TextField(
                           controller: _idCardCtrl,
                           keyboardType: TextInputType.number,
+                          maxLength: 13,
+                          inputFormatters: [
+                            FilteringTextInputFormatter.digitsOnly,
+                          ],
                           decoration: const InputDecoration(
-                            hintText: 'กรอกหมายเลข 13 หลัก',
+                            hintText: 'กรอกเลขบัตรประชาชน',
+                            counterText: '',
                           ),
+                          onChanged: (_) {
+                            canNext.value =
+                                _idCardCtrl.text.length == 13 &&
+                                _accNoCtrl.text.length == 10;
+                          },
                         ),
                         SizedBox(height: 30.h),
                         Text(
@@ -70,10 +85,21 @@ class _ChangeDevicePageState extends State<ChangeDevicePage> {
                         TextField(
                           controller: _accNoCtrl,
                           keyboardType: TextInputType.number,
+                          maxLength: 10,
+                          inputFormatters: [
+                            FilteringTextInputFormatter.digitsOnly,
+                          ],
                           decoration: const InputDecoration(
-                            hintText: 'กรอกเลขบัญชีเงินฝาก',
+                            hintText: 'กรอกเลขบัญชี',
+                            counterText: '',
                           ),
+                          onChanged: (_) {
+                            canNext.value =
+                                _idCardCtrl.text.length == 13 &&
+                                _accNoCtrl.text.length == 10;
+                          },
                         ),
+
                         const Spacer(),
                         Row(
                           mainAxisAlignment: MainAxisAlignment.end,
@@ -81,36 +107,36 @@ class _ChangeDevicePageState extends State<ChangeDevicePage> {
                             const Text('ต่อไป'),
                             SizedBox(width: 10.w),
                             // ใน ChangeDevicePage
-                            ArrowFab(
-                              enabled: true,
-                              onPressed: () {
-                                final String verifiedMobile =
-                                    Get.arguments?['mobileNumber'] ??
-                                    phoneCtrl.phoneNumber.value;
+                            ValueListenableBuilder<bool>(
+                              valueListenable: canNext,
+                              builder: (context, enable, _) {
+                                return ArrowFab(
+                                  enabled: enable,
+                                  onPressed: enable
+                                      ? () {
+                                          final String verifiedMobile =
+                                              Get.arguments?['mobileNumber'] ??
+                                              phoneCtrl.phoneNumber.value;
 
-                                if (_idCardCtrl.text.length == 13 &&
-                                    _accNoCtrl.text.length == 10) {
-                                  Get.toNamed(
-                                    '/face_verify',
-                                    arguments: {
-                                      'action': 'change_device_flow',
-                                      'citizenId': _idCardCtrl.text,
-                                      'accountNumber': _accNoCtrl.text,
-                                      'mobileNumber': verifiedMobile,
-                                      // อย่าลืมส่งเบอร์โทรไปด้วยถ้ายังไม่มีใน Storage
-                                    },
-                                  );
-                                } else {
-                                  Get.snackbar(
-                                    'แจ้งเตือน',
-                                    'กรุณากรอกข้อมูลให้ครบถ้วน',
-                                  );
-                                }
+                                          Get.toNamed(
+                                            '/face_verify',
+                                            arguments: {
+                                              'action': 'change_device_flow',
+                                              'citizenId': _idCardCtrl.text,
+                                              'accountNumber': _accNoCtrl.text,
+                                              'mobileNumber': verifiedMobile,
+                                            },
+                                          );
+                                        }
+                                      : () {}, // กันกด
+                                );
                               },
                             ),
+
                             SizedBox(height: 30.h),
                           ],
                         ),
+                        SizedBox(height: 16.h),
                       ],
                     ),
                   ),

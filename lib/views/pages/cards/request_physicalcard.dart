@@ -2,10 +2,12 @@ import 'dart:convert';
 import 'dart:typed_data';
 
 import 'package:flutter/material.dart';
+import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:get/get.dart';
 import 'package:my_app/module/controller/type_cards_controller.dart';
 import 'package:my_app/views/pages/Create_cards/card_details.dart';
 import 'package:my_app/views/widgets/arrow_fab.dart';
+import 'package:flutter_screenutil/flutter_screenutil.dart';
 
 class RequestPhysical extends StatefulWidget {
   const RequestPhysical({super.key});
@@ -39,9 +41,9 @@ class _RequestPhysicaState extends State<RequestPhysical> {
         centerTitle: true,
         elevation: 0,
       ),
-      // ✅ ใช้ Obx ครอบคลุมเนื้อหาทั้งหมดที่ต้องใช้ข้อมูลจาก cardList
+      //  ใช้ Obx ครอบคลุมเนื้อหาทั้งหมดที่ต้องใช้ข้อมูลจาก cardList
       body: Obx(() {
-        // 🔍 ค้นหาข้อมูลภายใน Obx เพื่อให้ UI วาดใหม่เมื่อ cardList เปลี่ยนแปลง
+        //  ค้นหาข้อมูลภายใน Obx เพื่อให้ UI วาดใหม่เมื่อ cardList เปลี่ยนแปลง
         final dynamic cardTypeDetail = typeController.cardList.firstWhere(
           (t) => t['type_debit_id'] == card['type_debit_id'],
           orElse: () => null,
@@ -71,9 +73,10 @@ class _RequestPhysicaState extends State<RequestPhysical> {
                 width: double.infinity,
                 padding: const EdgeInsets.all(16),
                 color: Colors.grey[200],
-                child: const Text(
+                child: Text(
                   'รายละเอียดบัตร',
                   style: TextStyle(
+                    fontSize: 16.sp,
                     fontWeight: FontWeight.bold,
                     color: Colors.black54,
                   ),
@@ -83,9 +86,9 @@ class _RequestPhysicaState extends State<RequestPhysical> {
               // ส่วนแสดงภาพบัตร (ใช้ imageBytes ที่ Decode มาจริง)
               Container(
                 width: double.infinity,
-                padding: const EdgeInsets.symmetric(
-                  vertical: 30,
-                  horizontal: 40,
+                padding: EdgeInsets.symmetric(
+                  vertical: 30.h,
+                  horizontal: 40.w,
                 ),
                 color: Colors.grey[50],
                 child: Column(
@@ -96,16 +99,16 @@ class _RequestPhysicaState extends State<RequestPhysical> {
                         child: Image.memory(imageBytes, fit: BoxFit.contain),
                       )
                     else
-                      const Icon(
+                       Icon(
                         Icons.credit_card,
-                        size: 150,
+                        size: 150.r,
                         color: Colors.grey,
                       ),
-                    const SizedBox(height: 15),
+                     SizedBox(height: 15.h),
                     Text(
                       cardTypeDetail?['type_debit_name'] ?? 'บัตรเดบิต NovaPay',
-                      style: const TextStyle(
-                        fontSize: 16,
+                      style: TextStyle(
+                        fontSize: 16.sp,
                         fontWeight: FontWeight.bold,
                       ),
                     ),
@@ -114,19 +117,19 @@ class _RequestPhysicaState extends State<RequestPhysical> {
               ),
 
               Padding(
-                padding: const EdgeInsets.all(20.0),
+                padding: EdgeInsets.all(20.0.w),
                 child: Column(
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
-                    const Text(
+                     Text(
                       'ค่าธรรมเนียม',
                       style: TextStyle(
                         fontWeight: FontWeight.bold,
-                        fontSize: 16,
+                        fontSize: 16.sp,
                       ),
                     ),
-                    const SizedBox(height: 10),
-                    // ✅ แสดงค่าธรรมเนียมที่ดึงมาจาก cardTypeDetail
+                     SizedBox(height: 10.h),
+                    //  แสดงค่าธรรมเนียมที่ดึงมาจาก cardTypeDetail
                     _buildFeeRow(
                       'ค่าธรรมเนียมออกบัตรใหม่',
                       '${cardTypeDetail?['entrance_fee'] ?? '0.00'} บาท',
@@ -136,24 +139,24 @@ class _RequestPhysicaState extends State<RequestPhysical> {
                       '${cardTypeDetail?['annual_fee'] ?? '0.00'} บาท',
                     ),
 
-                    const Divider(height: 40),
-                    const Text(
+                     Divider(height: 40.h),
+                     Text(
                       'รายละเอียด',
                       style: TextStyle(
                         fontWeight: FontWeight.bold,
-                        fontSize: 16,
+                        fontSize: 16.sp,
                       ),
                     ),
-                    const SizedBox(height: 10),
+                     SizedBox(height: 10.h),
                     // ✅ แสดงรายละเอียดจริงจาก API
                     Text(
                       cardTypeDetail?['type_debit_description'] ?? '-',
-                      style: const TextStyle(
+                      style:  TextStyle(
                         color: Colors.black87,
-                        height: 1.5,
+                        height: 1.5.h,
                       ),
                     ),
-                    const SizedBox(height: 30),
+                     SizedBox(height: 30.h),
                     TermsCheckbox(
                       onChanged: (val) => isButtonEnabled.value = val,
                     ),
@@ -171,7 +174,7 @@ class _RequestPhysicaState extends State<RequestPhysical> {
   // ฟังก์ชันช่วยสร้างแถวค่าธรรมเนียมให้สวยงาม
   Widget _buildFeeRow(String label, String value) {
     return Padding(
-      padding: const EdgeInsets.symmetric(vertical: 4),
+      padding: EdgeInsets.symmetric(vertical: 4.h),
       child: Row(
         mainAxisAlignment: MainAxisAlignment.spaceBetween,
         children: [
@@ -185,7 +188,7 @@ class _RequestPhysicaState extends State<RequestPhysical> {
   Widget _buildBottomNav() {
     return SafeArea(
       child: Padding(
-        padding: const EdgeInsets.symmetric(horizontal: 25, vertical: 20),
+        padding: EdgeInsets.symmetric(horizontal: 25.w, vertical: 20.h),
         child: Row(
           mainAxisAlignment: MainAxisAlignment.spaceBetween,
           children: [
@@ -194,12 +197,12 @@ class _RequestPhysicaState extends State<RequestPhysical> {
               child: Row(
                 children: [
                   Container(
-                    padding: const EdgeInsets.all(12),
-                    decoration: const BoxDecoration(color: Colors.red, shape: BoxShape.circle),
+                    padding: EdgeInsets.all(12.h),
+                    decoration: BoxDecoration(color: Colors.red, shape: BoxShape.circle),
                     child: const Icon(Icons.close, color: Colors.white, size: 20),
                   ),
-                  const SizedBox(width: 10),
-                  const Text('ยกเลิก', style: TextStyle(color: Colors.grey, fontSize: 18)),
+                   SizedBox(width: 10.h),
+                   Text('ยกเลิก', style: TextStyle(color: Colors.grey, fontSize: 18.sp)),
                 ],
               ),
             ),
@@ -211,13 +214,13 @@ class _RequestPhysicaState extends State<RequestPhysical> {
                     Text(
                       'ยืนยัน',
                       style: TextStyle(
-                        fontSize: 18,
+                        fontSize: 18.sp,
                         color: enabled
                             ? const Color.fromARGB(255, 0, 0, 0)
                             : Colors.grey[400],
                       ),
                     ),
-                    const SizedBox(width: 12),
+                    SizedBox(width: 12.h),
                     ArrowFab(
                       enabled: enabled,
                       onPressed: () {

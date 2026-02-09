@@ -26,6 +26,7 @@ class _EnterPhonePageState extends State<EnterPhonePage> {
   );
   final _phoneCtrl = TextEditingController();
   final _formKey = GlobalKey<FormState>();
+  final ValueNotifier<bool> isPhoneComplete = ValueNotifier(false);
 
   @override
   void initState() {
@@ -106,37 +107,51 @@ class _EnterPhonePageState extends State<EnterPhonePage> {
                             decoration: const InputDecoration(
                               hintText: 'ระบุเบอร์มือถือ',
                             ),
+                            onChanged: (value) {
+                              isPhoneComplete.value = value.trim().length == 10;
+                            },
                             validator: (v) {
                               final s = (v ?? '').trim();
                               if (s.length != 10) return 'เบอร์ไม่ถูกต้อง';
                               return null;
                             },
                           ),
+
                           const Spacer(),
-                          Row(
-                            mainAxisAlignment: MainAxisAlignment.end,
-                            children: [
-                              Obx(
-                                () => Text(
-                                  phonenumberController.isLoading.value
-                                      ? 'กำลังส่ง...'
-                                      : 'ยืนยัน',
-                                  style: TextStyle(
-                                    color: Colors.black.withOpacity(0.4),
-                                  ),
-                                ),
-                              ),
-                              SizedBox(width: 10.w),
-                              // เปลี่ยน enabled มาอิงตาม phonenumberController.isLoading
-                              Obx(
-                                () => ArrowFab(
-                                  enabled:
-                                      !phonenumberController.isLoading.value,
-                                  onPressed: _submit,
-                                ),
-                              ),
-                            ],
+                          ValueListenableBuilder<bool>(
+                            valueListenable: isPhoneComplete,
+                            builder: (context, phoneValid, _) {
+                              return Obx(() {
+                                bool canSubmit =
+                                    phoneValid &&
+                                    !phonenumberController.isLoading.value;
+
+                                return Row(
+                                  mainAxisAlignment: MainAxisAlignment.end,
+                                  children: [
+                                    Text(
+                                      phonenumberController.isLoading.value
+                                          ? 'กำลังส่ง...'
+                                          : 'ยืนยัน',
+                                      style: TextStyle(
+                                        fontSize: 16.sp,
+                                        fontWeight: FontWeight.bold,
+                                        color: canSubmit
+                                            ? const Color.fromARGB(255, 0, 0, 0)
+                                            : Colors.black.withOpacity(0.4),
+                                      ),
+                                    ),
+                                    SizedBox(width: 10.w),
+                                    ArrowFab(
+                                      enabled: canSubmit,
+                                      onPressed: canSubmit ? _submit : () {},
+                                    ),
+                                  ],
+                                );
+                              });
+                            },
                           ),
+
                           SizedBox(height: 16.h),
                         ],
                       ),
