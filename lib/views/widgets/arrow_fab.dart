@@ -6,7 +6,7 @@ class ArrowFab extends StatelessWidget {
   const ArrowFab({
     super.key,
     required this.onPressed,
-    required this.enabled,
+    required this.enabled, 
   });
 
   @override

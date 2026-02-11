@@ -42,7 +42,6 @@ class PinController extends GetxController {
   void handlePinComplete() {
     final dynamic args = Get.arguments;
     String? action = (args is Map) ? args['action'] : null;
-    print('DEBUG Pin args = ${Get.arguments}');
 
     if (action == 'change_device_flow') {
       verifyOldPinAndChangeDevice();
@@ -96,12 +95,10 @@ class PinController extends GetxController {
       );
 
       if (response.statusCode == 200) {
-        // ✅ จุดที่ต้องแก้ไข: บันทึกข้อมูลลงเครื่องใหม่เพื่อให้ Login ได้
         await storage.write(key: 'userMobile', value: mobile);
         await storage.write(key: 'isRegistered', value: 'true');
         await storage.write(key: 'deviceId', value: deviceId ?? "");
 
-        print("DEBUG: บันทึกเบอร์ $mobile ลงเครื่องใหม่สำเร็จ");
         Get.snackbar('สำเร็จ', 'ยืนยันตัวตนสำเร็จ กรุณาเข้าสู่ระบบ');
 
         await Future.delayed(const Duration(milliseconds: 500));
@@ -126,7 +123,7 @@ class PinController extends GetxController {
       isLoading.value = true;
       String? deviceId = await getDeviceId();
 
-      // 🔍 เช็ค Arguments ให้ละเอียด
+
       final dynamic args = Get.arguments;
       String mobile = "";
 
@@ -134,7 +131,7 @@ class PinController extends GetxController {
         mobile = args['mobileNumber'] ?? "";
       }
 
-      // 🛡️ ถ้าไม่มีเบอร์โทรศัพท์ ให้แจ้งเตือนแทนการปล่อยให้ Error
+      // ถ้าไม่มีเบอร์โทรศัพท์ ให้แจ้งเตือนแทนการปล่อยให้ Error
       if (mobile.isEmpty) {
         Get.snackbar('ผิดพลาด', 'ไม่พบข้อมูลเบอร์โทรศัพท์ในระบบ');
         return;
@@ -146,16 +143,12 @@ class PinController extends GetxController {
         "deviceId": deviceId,
       };
 
-      print("DEBUG: Sending Reset PIN Request for $mobile");
 
       final response = await http.post(
         Uri.parse("${ApiConstants.baseUrl}${ApiConstants.forgetPassword}"),
         headers: {"Content-Type": "application/json"},
         body: jsonEncode(body),
       );
-
-      print("DEBUG: API Response Code: ${response.statusCode}");
-      print("DEBUG: API Response Body: ${response.body}");
 
       if (response.statusCode == 200) {
         Get.snackbar('สำเร็จ', 'รีเซ็ตรหัสผ่านใหม่เรียบร้อยแล้ว');
@@ -172,7 +165,6 @@ class PinController extends GetxController {
         enteredPin.value = ''; // ให้ User ลองกรอก Confirm PIN ใหม่
       }
     } catch (e) {
-      print("DEBUG: Catch Error: $e"); // ดู Error ใน Log ว่าติดที่บรรทัดไหน
       Get.snackbar('Error', 'เกิดข้อผิดพลาดในการเชื่อมต่อ: $e');
     } finally {
       isLoading.value = false;
@@ -208,8 +200,6 @@ class PinController extends GetxController {
 
       if (response.statusCode == 200) {
         // ใช้ lockedMobile ในการบันทึกลงเครื่อง
-        print("กำลังบันทึกข้อมูลลง Storage สำหรับเบอร์: $lockedMobile");
-
         // await storage.write(key: 'userMobile', value: lockedMobile);
 
         await storage.write(key: 'deviceId', value: deviceId ?? "");
@@ -218,14 +208,10 @@ class PinController extends GetxController {
           key: 'userMobile',
           value: Get.arguments['verifiedMobile'],
         );
-
-        print("บันทึกสำเร็จ! ค่าเบอร์คือ: $lockedMobile");
-
         Get.snackbar('สำเร็จ', 'สมัครสมาชิกเรียบร้อยแล้ว');
         await Future.delayed(const Duration(milliseconds: 500));
         Get.offAllNamed('/success');
       } else {
-        print("Server Error Detail: ${response.body}");
         Get.snackbar('ผิดพลาด', 'การลงทะเบียนไม่สำเร็จ: ${response.body}');
       }
     } catch (e) {

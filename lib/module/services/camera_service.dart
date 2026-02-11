@@ -17,7 +17,6 @@ class CameraService {
       }
       return null;
     } catch (e) {
-      print("Error taking picture: $e");
       return null;
     }
   }

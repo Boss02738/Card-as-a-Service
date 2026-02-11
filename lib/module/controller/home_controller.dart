@@ -62,16 +62,13 @@ class HomeController extends GetxController {
 
         if (data['card_id'] != null) {
           myCards.value = data['card_id']; 
-          print("ดึงข้อมูลบัตรสำเร็จ: ${myCards.length} ใบ");
         } else {
           myCards.clear();
         }
       } else {
-        print("Error: ${response.statusCode}");
         Get.snackbar('Error', 'ไม่สามารถดึงข้อมูลบัญชีได้');
       }
     } catch (e) {
-      print("Exception: $e");
       Get.snackbar('Error', 'เกิดข้อผิดพลาดในการเชื่อมต่อ');
     } finally {
       isLoading.value = false;

@@ -24,7 +24,6 @@ class _Welcome_PageState extends State<Welcome_Page> {
 
     // 1. อ่านค่า Flag จาก Secure Storage
     String? isRegistered = await storage.read(key: 'isRegistered');
-    print("DEBUG: จังหวะเปิดแอปใหม่ ค่า isRegistered คือ: $isRegistered");
     // 2. ตรวจสอบเงื่อนไข
     if (isRegistered == 'true') {
       // กรณีเคยสมัครแล้ว -> ส่งไปหน้าใส่ PIN (Login)

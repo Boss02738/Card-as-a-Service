@@ -32,12 +32,10 @@ class MyCardsController extends GetxController {
       if (response.statusCode == 200) {
         final List<dynamic> data = jsonDecode(utf8.decode(response.bodyBytes));
         myCards.assignAll(data); // อัปเดตข้อมูลบัตรทั้งหมด
-        print("ดึงข้อมูลบัตรสำเร็จ: ${myCards.length} ใบ");
       } else {
         myCards.clear();
       }
     } catch (e) {
-      print("Error fetching cards: $e");
       myCards.clear();
     } finally {
       isLoading.value = false;

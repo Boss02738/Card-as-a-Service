@@ -55,7 +55,7 @@ class CardDetailController extends GetxController {
         trackingData.value = jsonDecode(utf8.decode(response.bodyBytes));
       }
     } catch (e) {
-      print("Error tracking: $e");
+
     }
   }
 }

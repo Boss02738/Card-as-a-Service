@@ -179,7 +179,6 @@ void _showErrorDialog() {
         if (token != null) {
           // บันทึก Token ลงเครื่อง
           await storage.write(key: 'accessToken', value: token);
-          print("DEBUG: บันทึก Token สำเร็จ");
 
           Get.offAllNamed('/main'); // เข้าหน้าหลัก
         } else {

@@ -34,6 +34,6 @@ class ApiConstants {
 
   static const String cardDetail = "${feature}/card/detail";
   //pin
-  static const String changePassword = "${feature}/change-pin";
-  static const String forgetPassword = "${auth}/forget-pin";
+  static const String changePassword = "$feature/change-pin";
+  static const String forgetPassword = "$auth/forget-pin";
 }

@@ -124,7 +124,7 @@ Widget _buildOffersSection() {
           mainAxisAlignment: MainAxisAlignment.spaceBetween,
           children: [
             Text(
-              'ข้อเสนอพิเศษ',
+              'ข้อเสนอพำพิเศษ',
               style: TextStyle(
                 color: Colors.white,
                 fontSize: 18.sp,

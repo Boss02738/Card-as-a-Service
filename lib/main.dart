@@ -37,6 +37,7 @@ import 'package:my_app/views/pages/Create_cards/type_cards.dart';
 import 'package:my_app/views/pages/Create_cards/card_confirm_page.dart';
 import 'package:my_app/views/pages/profile.dart';
 import 'package:my_app/views/pages/setting_page.dart';
+import 'package:my_app/views/promotion.dart';
 import 'package:my_app/views/widgets/custom_bottom_nav_bar.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
 
@@ -70,18 +71,17 @@ class _NovaPayAppState extends State<NovaPayApp> {
   Widget build(BuildContext context) {
     return ScreenUtilInit(
       designSize: const Size(393, 852),
-      minTextAdapt: true,
+      minTextAdapt: true, 
       splitScreenMode: true,
       builder: (context, child) {
         return GetMaterialApp(
           defaultTransition: Transition.cupertino,
-          // defaultTransition: Transition.rightToLeftWithFade,
           transitionDuration: const Duration(milliseconds: 300),
           debugShowCheckedModeBanner: false,
           initialRoute: '/',
 
           initialBinding: BindingsBuilder(() {
-            Get.lazyPut(() => PhonenumberController(), fenix: true);
+            // Get.lazyPut(() => PhonenumberController(), fenix: true);
             Get.lazyPut(() => HeaderTextController(), fenix: true);
             Get.lazyPut(() => HomeController(), fenix: true);
             Get.lazyPut(() => MyCardsController(), fenix: true);
@@ -93,7 +93,6 @@ class _NovaPayAppState extends State<NovaPayApp> {
               page: () => MainPage(),
               binding: MainTabBinding(),
             ),
-
             //Register
             GetPage(name: '/', page: () => const Welcome_Page()),
             GetPage(name: '/enter-phone', page: () => const EnterPhonePage()),
@@ -106,6 +105,7 @@ class _NovaPayAppState extends State<NovaPayApp> {
             GetPage(name: "/home", page: () => const HomePage() ),
             GetPage(name: "/account", page: () => const AccountPage()),
             GetPage(name: "/main", page: () => MainPage()),
+            GetPage(name: "/promotion", page: () => PromotionPage()),
             //Card
             GetPage(name: "/my_cards", page: () => const MyCardPage()),
             GetPage(name: "/my_card_detail", page: () => MyCardDetail()),
@@ -143,7 +143,7 @@ class _NovaPayAppState extends State<NovaPayApp> {
             //pin
             GetPage(name: "/change_pin", page: () => const ChangePinPage()),
             GetPage(name: "/pin_page", page: () => const PinPage()),
-            GetPage(name: '/user_selection', page: () => UserSelectionPage()),
+            GetPage(name: '/user_selection', page: () => const UserSelectionPage()),
             GetPage(
               name: '/change_device',
               page: () => const ChangeDevicePage(),

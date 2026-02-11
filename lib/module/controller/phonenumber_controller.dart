@@ -24,7 +24,6 @@ class PhonenumberController extends GetxController {
     try {
       isLoading.value = true;
       final url = Uri.parse('${ApiConstants.baseUrl}${ApiConstants.refCode}');
-      print("Requesting to: $url");
 
       final response = await http.post(
         url,
@@ -48,9 +47,7 @@ class PhonenumberController extends GetxController {
         return false;
       }
     } catch (e) {
-      print(
-        "Connection Error: $e",
-      ); // ดูใน Console ว่าติด Firewall หรือ IP ผิดไหม
+
       Get.snackbar('Error', 'เชื่อมต่อไม่ได้: $e');
       return false;
     } finally {

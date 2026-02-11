@@ -12,7 +12,6 @@ class GradientHeader extends StatelessWidget {
           end: Alignment.bottomRight,
           colors: [
             Color(0xFF2D56BB), // 100%
-            // Color.fromARGB(127, 45, 85, 187), // 70%
             Color(0xB32D55BB), // 70%
           ],
         ),

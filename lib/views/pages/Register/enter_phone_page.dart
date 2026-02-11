@@ -135,7 +135,6 @@ class _EnterPhonePageState extends State<EnterPhonePage> {
                                           : 'ยืนยัน',
                                       style: TextStyle(
                                         fontSize: 16.sp,
-                                        fontWeight: FontWeight.bold,
                                         color: canSubmit
                                             ? const Color.fromARGB(255, 0, 0, 0)
                                             : Colors.black.withOpacity(0.4),
