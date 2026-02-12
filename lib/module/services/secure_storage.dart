@@ -3,10 +3,9 @@ import 'package:flutter_secure_storage/flutter_secure_storage.dart';
 
 AndroidOptions _getAndroidOptions() => const AndroidOptions(
       encryptedSharedPreferences: true,
-      // บังคับให้ใช้ Key ในระดับ Hardware (ถ้าเครื่องรองรับ) 
-      // จะช่วยกำจัดตัวแดงเรื่องการเก็บกุญแจไม่ปลอดภัยได้
-      keyCipherAlgorithm: KeyCipherAlgorithm.RSA_ECB_PKCS1Padding,
+      // บังคับใช้ AES-GCM ซึ่งปลอดภัยกว่า CBC และป้องกัน Padding Oracle Attack ได้
       storageCipherAlgorithm: StorageCipherAlgorithm.AES_GCM_NoPadding,
+      keyCipherAlgorithm: KeyCipherAlgorithm.RSA_ECB_PKCS1Padding,
     );
 
 final storage = FlutterSecureStorage(aOptions: _getAndroidOptions());
