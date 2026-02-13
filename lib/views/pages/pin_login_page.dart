@@ -1,11 +1,10 @@
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
-import 'package:my_app/module/controller/pin_login_controller.dart'; // อย่าลืมสร้างไฟล์นี้
+import 'package:my_app/module/controller/pin_login_controller.dart'; 
 import 'package:my_app/views/widgets/Pin/pin_dots.dart';
 import 'package:my_app/views/widgets/Pin/pin_keypad.dart';
 import 'package:my_app/views/widgets/Pin/pin_layout.dart';
-import 'package:my_app/views/widgets/exit_confirmation_dialog.dart';
-import '../widgets/brand_logo.dart';
+
 
 class PinLoginPage extends StatelessWidget {
   const PinLoginPage({super.key});

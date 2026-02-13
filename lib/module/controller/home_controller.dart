@@ -1,13 +1,12 @@
-import 'dart:convert';
 import 'package:get/get.dart';
-import 'package:http/http.dart' as http;
 import 'package:my_app/core/api_constants.dart';
-import 'package:my_app/module/services/secure_storage.dart';
+import 'package:my_app/core/api_service.dart';
+import 'package:dio/dio.dart' as dio; // นำเข้าเพื่อจัดการ Exception
 
 class HomeController extends GetxController {
   var isLoading = true.obs;
   
-  // ดึงบัญชีผู้ใช้
+  // ข้อมูลบัญชีผู้ใช้
   var fullNameTh = ''.obs;
   var accountNumber = ''.obs;
   var accountType = ''.obs;
@@ -16,60 +15,51 @@ class HomeController extends GetxController {
   var createdAt = ''.obs;
   var email = ''.obs;
   var number = ''.obs;
-  // ดึงข้อมูลบัตรของฉัน
-  var myCards = [].obs; // เก็บ List ของบัตรที่ดึงมาจาก API
+
+  final ApiService _apiService = ApiService();
+  var myCards = [].obs;
 
   @override
   void onInit() {
     super.onInit();
-    fetchHomeProfile(); // ดึงข้อมูลทันทีที่หน้า Home ถูกสร้าง
+    fetchHomeProfile();
   }
 
   Future<void> fetchHomeProfile() async {
     try {
       isLoading.value = true;
-      
-      // ดึง Token จาก Secure Storage ที่บันทึกไว้ตอน Login
-      String? token = await storage.read(key: 'accessToken');
 
-      if (token == null) {
-        Get.offAllNamed('/login'); 
-        return;
-      }
-
-      // เรียก API โดยแนบ Bearer Token ใน Header
-      final response = await http.get(
-        Uri.parse("${ApiConstants.baseUrl}${ApiConstants.account}"),
-        headers: {
-          "Content-Type": "application/json",
-          "Authorization": "Bearer $token", 
-        },
+      // ✅ ไม่ต้องดึง token และใส่ Header เอง เพราะ ApiService จัดการให้แล้ว
+      final response = await _apiService.instance.get(
+        ApiConstants.account
       );
 
       if (response.statusCode == 200) {
-        // แปลงข้อมูลจาก UTF-8 เพื่อรองรับภาษาไทย
-        final data = jsonDecode(utf8.decode(response.bodyBytes));
+        // ✅ Dio แปลงข้อมูลเป็น Map ให้แล้ว ใช้งานได้เลย
+        final data = response.data;
         
-        fullNameTh.value = data['fullNameTh'];
-        fullNameEn.value = data['fullNameEn'];
-        number.value = data['number'];
-        email.value = data['email'];
-        createdAt.value = data['createdAt'];
-        accountNumber.value = data['accountNumber'];
-        accountType.value = data['accountType'];
+        fullNameTh.value = data['fullNameTh'] ?? '';
+        fullNameEn.value = data['fullNameEn'] ?? '';
+        number.value = data['number'] ?? '';
+        email.value = data['email'] ?? '';
+        createdAt.value = data['createdAt'] ?? '';
+        accountNumber.value = data['accountNumber'] ?? '';
+        accountType.value = data['accountType'] ?? '';
         balance.value = (data['balance'] as num).toDouble();
-        
 
         if (data['card_id'] != null) {
-          myCards.value = data['card_id']; 
+          // ✅ ใช้ assignAll สำหรับการอัปเดต List
+          myCards.assignAll(data['card_id']); 
         } else {
           myCards.clear();
         }
-      } else {
-        Get.snackbar('Error', 'ไม่สามารถดึงข้อมูลบัญชีได้');
       }
+    } on dio.DioException catch (e) {
+      // ✅ จัดการ Error เฉพาะทางของ Dio
+      print("Home Profile Error: ${e.message}");
+      Get.snackbar('Error', 'ไม่สามารถดึงข้อมูลบัญชีได้');
     } catch (e) {
-      Get.snackbar('Error', 'เกิดข้อผิดพลาดในการเชื่อมต่อ');
+      Get.snackbar('Error', 'เกิดข้อผิดพลาดไม่คาดคิด');
     } finally {
       isLoading.value = false;
     }

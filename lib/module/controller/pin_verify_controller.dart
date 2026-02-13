@@ -1,7 +1,7 @@
-import 'dart:convert';
+import 'package:dio/dio.dart' as dio; // นำเข้า Dio และตั้งชื่อเล่นว่า dio เพื่อจัดการ Exception
 import 'package:get/get.dart';
-import 'package:http/http.dart' as http;
 import 'package:my_app/core/api_constants.dart';
+import 'package:my_app/core/api_service.dart';
 import 'package:my_app/module/controller/changelimit_controller.dart';
 import 'package:my_app/module/services/device_id.dart';
 import 'package:my_app/module/services/secure_storage.dart';
@@ -9,11 +9,12 @@ import 'package:my_app/module/services/secure_storage.dart';
 class PinVerifyController extends GetxController {
   var enteredPin = ''.obs;
   var isLoading = false.obs;
+  final ApiService _apiService = ApiService();
 
   // รับข้อมูลบัตรที่ส่งมาจากหน้า Confirm
   final dynamic cardData = Get.arguments;
-  // final dynamic args = Get.arguments;
   late Map<String, dynamic> args;
+
   @override
   void onInit() {
     super.onInit();
@@ -26,7 +27,7 @@ class PinVerifyController extends GetxController {
       enteredPin.value += number.toString();
     }
     if (enteredPin.value.length == 6) {
-      //  เพิ่มเงื่อนไขเช็ค action ขอบัตรแข็ง
+      // เพิ่มเงื่อนไขเช็ค action ขอบัตรแข็ง
       if (args['action'] == 'request_physical') {
         processRequestPhysical({args['card']['card_id']});
       } else if (args['action'] == 'view_sensitive') {
@@ -41,15 +42,13 @@ class PinVerifyController extends GetxController {
     }
   }
 
-  //  ฟังก์ชันใหม่สำหรับตรวจสอบ PIN แอปก่อนตั้งรหัสบัตร
-  // // ในไฟล์ pin_verify_controller.dart
+  // ฟังก์ชันใหม่สำหรับตรวจสอบ PIN แอปก่อนตั้งรหัสบัตร
   Future<void> processFinalActivate(
     String newCardPin,
     dynamic originalArgs,
   ) async {
     try {
       isLoading.value = true;
-      String? token = await storage.read(key: 'accessToken');
       String? deviceId = await getDeviceId();
 
       Map<String, dynamic> body = {
@@ -59,17 +58,13 @@ class PinVerifyController extends GetxController {
         "expiry": originalArgs['input_data']['expiry'],
         "cvv": originalArgs['input_data']['cvv'],
         "newCardPin": newCardPin, // รหัส ATM 6 หลักที่ตั้งใหม่
-        "card_id":
-            originalArgs['card']['card_id'], // ✅ เพิ่มบรรทัดนี้เพื่อให้ API รู้ว่าเปิดใบไหน
+        "card_id": originalArgs['card']['card_id'], // ✅ เพิ่มบรรทัดนี้เพื่อให้ API รู้ว่าเปิดใบไหน
       };
 
-      final response = await http.post(
-        Uri.parse("${ApiConstants.baseUrl}${ApiConstants.activatecard}"),
-        headers: {
-          "Content-Type": "application/json",
-          "Authorization": "Bearer $token",
-        },
-        body: jsonEncode(body),
+      // ใช้ _apiService.instance แทน http
+      final response = await _apiService.instance.post(
+        ApiConstants.activatecard,
+        data: body,
       );
 
       if (response.statusCode == 200) {
@@ -81,13 +76,14 @@ class PinVerifyController extends GetxController {
             "subtitle": "บัตรของคุณพร้อมใช้งานแล้ว",
           },
         );
-      } else {
-        final errorData = jsonDecode(utf8.decode(response.bodyBytes));
-        Get.snackbar(
-          'ผิดพลาด',
-          errorData['message'] ?? 'ไม่สามารถเปิดใช้งานบัตรได้',
-        );
       }
+    } on dio.DioException catch (e) {
+      // จัดการ Error แบบ Dio
+      String errorMessage = 'ไม่สามารถเปิดใช้งานบัตรได้';
+      if (e.response?.data != null && e.response?.data['message'] != null) {
+        errorMessage = e.response?.data['message'];
+      }
+      Get.snackbar('ผิดพลาด', errorMessage);
     } catch (e) {
       Get.snackbar('Error', 'เกิดข้อผิดพลาดในการเชื่อมต่อ');
     } finally {
@@ -95,39 +91,38 @@ class PinVerifyController extends GetxController {
     }
   }
 
-Future<void> verifyAppPinForActivation() async {
-  try {
-    isLoading.value = true;
-    String? deviceId = await getDeviceId();
-    String? mobile = await storage.read(key: 'userMobile');
+  Future<void> verifyAppPinForActivation() async {
+    try {
+      isLoading.value = true;
+      String? deviceId = await getDeviceId();
+      String? mobile = await storage.read(key: 'userMobile');
 
-    final response = await http.post(
-      Uri.parse("${ApiConstants.baseUrl}${ApiConstants.login}"),
-      headers: {"Content-Type": "application/json"},
-      body: jsonEncode({
-        "mobileNumber": mobile,
-        "pin": enteredPin.value,
-        "deviceId": deviceId,
-      }),
-    );
-
-    if (response.statusCode == 200) {
-      Get.toNamed(
-        '/set_card_pin',
-        arguments: {...args, 'app_pin': enteredPin.value},
+      final response = await _apiService.instance.post(
+        ApiConstants.login,
+        data: {
+          "mobileNumber": mobile,
+          "pin": enteredPin.value,
+          "deviceId": deviceId,
+        },
       );
-    } else {
+
+      if (response.statusCode == 200) {
+        Get.toNamed(
+          '/set_card_pin',
+          arguments: {...args, 'app_pin': enteredPin.value},
+        );
+      }
+    } on dio.DioException catch (_) {
+      // กรณี Login ไม่ผ่าน (401) หรือรหัสผิด
       Get.snackbar('ผิดพลาด', 'รหัสผ่านไม่ถูกต้อง');
       enteredPin.value = '';
+    } catch (e) {
+      Get.snackbar('Error', 'เชื่อมต่อเซิร์ฟเวอร์ไม่ได้');
+      enteredPin.value = '';
+    } finally {
+      isLoading.value = false;
     }
-  } catch (e) {
-    Get.snackbar('Error', 'เชื่อมต่อเซิร์ฟเวอร์ไม่ได้');
-    enteredPin.value = '';
-  } finally {
-    isLoading.value = false;
   }
-}
-
 
   void deleteNumber() {
     if (enteredPin.value.isNotEmpty) {
@@ -138,11 +133,10 @@ Future<void> verifyAppPinForActivation() async {
     }
   }
 
-  //สร้างบัตรเดบิต
+  // สร้างบัตรเดบิต
   Future<void> createVirtualCard() async {
     try {
       isLoading.value = true;
-      String? token = await storage.read(key: 'accessToken');
       String? deviceId = await getDeviceId();
 
       Map<String, dynamic> body = {
@@ -151,13 +145,9 @@ Future<void> verifyAppPinForActivation() async {
         "typeDebitId": cardData['type_debit_id'],
       };
 
-      final response = await http.post(
-        Uri.parse("${ApiConstants.baseUrl}${ApiConstants.createcard}"),
-        headers: {
-          "Content-Type": "application/json",
-          "Authorization": "Bearer $token", // ต้องแนบ Token ไปด้วย
-        },
-        body: jsonEncode(body),
+      final response = await _apiService.instance.post(
+        ApiConstants.createcard,
+        data: body,
       );
 
       if (response.statusCode == 200) {
@@ -169,11 +159,14 @@ Future<void> verifyAppPinForActivation() async {
             "subtitle": "ระบบกำลังดำเนินการเปิดใช้งานบัตรของคุณ",
           },
         );
-      } else {
-        final errorData = jsonDecode(utf8.decode(response.bodyBytes));
-        Get.snackbar('ผิดพลาด', errorData['message'] ?? 'รหัสผ่านไม่ถูกต้อง');
-        enteredPin.value = ''; // ล้างรหัสให้กรอกใหม่
       }
+    } on dio.DioException catch (e) {
+      String errorMessage = 'รหัสผ่านไม่ถูกต้อง';
+      if (e.response?.data != null && e.response?.data['message'] != null) {
+        errorMessage = e.response?.data['message'];
+      }
+      Get.snackbar('ผิดพลาด', errorMessage);
+      enteredPin.value = ''; // ล้างรหัสให้กรอกใหม่
     } catch (e) {
       Get.snackbar('Error', 'ไม่สามารถเชื่อมต่อเซิร์ฟเวอร์ได้');
       enteredPin.value = '';
@@ -182,7 +175,7 @@ Future<void> verifyAppPinForActivation() async {
     }
   }
 
-  //เปลี่ยนวงเงิน
+  // เปลี่ยนวงเงิน
   Future<void> processChangeLimit() async {
     try {
       isLoading.value = true;
@@ -208,10 +201,7 @@ Future<void> verifyAppPinForActivation() async {
           },
         );
       } else {
-        Get.snackbar(
-          'ผิดพลาด',
-          'รหัสผ่านไม่ถูกต้อง หรือไม่สามารถเปลี่ยนวงเงินได้',
-        );
+        // controller นั้นจัดการ error snackbar ให้แล้ว แต่เราล้าง pin ที่นี่
         enteredPin.value = '';
       }
     } finally {
@@ -222,24 +212,20 @@ Future<void> verifyAppPinForActivation() async {
   Future<void> processViewSensitiveData(cardId) async {
     try {
       isLoading.value = true;
-      String? token = await storage.read(key: 'accessToken');
       String? deviceId = await getDeviceId();
 
-      final response = await http.post(
-        Uri.parse("${ApiConstants.baseUrl}${ApiConstants.sensitive}"),
-        headers: {
-          "Content-Type": "application/json",
-          "Authorization": "Bearer $token",
-        },
-        body: jsonEncode({
+      final response = await _apiService.instance.post(
+        ApiConstants.sensitive,
+        data: {
           "pin": enteredPin.value,
           "deviceId": deviceId,
           "card_id": args['card_id'],
-        }),
+        },
       );
 
       if (response.statusCode == 200) {
-        final sensitiveData = jsonDecode(utf8.decode(response.bodyBytes));
+        // Dio แปลง json ให้แล้ว เรียกใช้ response.data ได้เลย
+        final sensitiveData = response.data;
         // ✅ ส่งข้อมูลที่ได้จาก API ไปแสดงที่หน้า SensitiveDataPage
         Get.offNamed(
           '/sensitive',
@@ -249,10 +235,10 @@ Future<void> verifyAppPinForActivation() async {
             'sensitive': sensitiveData,
           },
         );
-      } else {
-        Get.snackbar('ผิดพลาด', 'รหัสผ่านไม่ถูกต้อง');
-        enteredPin.value = '';
       }
+    } on dio.DioException catch (e) {
+      Get.snackbar('ผิดพลาด', 'รหัสผ่านไม่ถูกต้อง');
+      enteredPin.value = '';
     } catch (e) {
       Get.snackbar('Error', 'เกิดข้อผิดพลาดในการเชื่อมต่อ');
     } finally {
@@ -263,7 +249,6 @@ Future<void> verifyAppPinForActivation() async {
   Future<void> processRequestPhysical(cardId) async {
     try {
       isLoading.value = true;
-      String? token = await storage.read(key: 'accessToken');
       String? deviceId = await getDeviceId();
 
       // 📦 1. ดึงข้อมูลที่อยู่จาก arguments ที่ส่งมาจากหน้าก่อนหน้า
@@ -280,13 +265,9 @@ Future<void> verifyAppPinForActivation() async {
       };
 
       // 🚀 3. ยิง API โดยใช้ Body ที่รวมข้อมูลครบแล้ว
-      final response = await http.post(
-        Uri.parse("${ApiConstants.baseUrl}${ApiConstants.requestphysicalcard}"),
-        headers: {
-          "Content-Type": "application/json",
-          "Authorization": "Bearer $token",
-        },
-        body: jsonEncode(requestBody),
+      final response = await _apiService.instance.post(
+        ApiConstants.requestphysicalcard,
+        data: requestBody,
       );
 
       if (response.statusCode == 200) {
@@ -297,14 +278,14 @@ Future<void> verifyAppPinForActivation() async {
             "subtitle": "ระบบกำลังจัดส่งบัตรไปยังที่อยู่ของคุณ",
           },
         );
-      } else {
-        final errorData = jsonDecode(utf8.decode(response.bodyBytes));
-        Get.snackbar(
-          'ผิดพลาด',
-          errorData['message'] ?? 'ไม่สามารถดำเนินการได้',
-        );
-        enteredPin.value = '';
       }
+    } on dio.DioException catch (e) {
+      String errorMessage = 'ไม่สามารถดำเนินการได้';
+      if (e.response?.data != null && e.response?.data['message'] != null) {
+        errorMessage = e.response?.data['message'];
+      }
+      Get.snackbar('ผิดพลาด', errorMessage);
+      enteredPin.value = '';
     } catch (e) {
       Get.snackbar('Error', 'เกิดข้อผิดพลาดในการเชื่อมต่อ');
       enteredPin.value = '';

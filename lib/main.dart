@@ -86,7 +86,6 @@ class _NovaPayAppState extends State<NovaPayApp> {
             Get.lazyPut(() => HomeController(), fenix: true);
             Get.lazyPut(() => MyCardsController(), fenix: true);
           }),
-
           getPages: [
             GetPage(
               name: "/main",

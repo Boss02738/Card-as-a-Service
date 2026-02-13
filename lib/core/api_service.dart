@@ -1,50 +1,64 @@
 import 'package:dio/dio.dart';
 import 'package:flutter_secure_storage/flutter_secure_storage.dart';
-import 'package:get/get.dart';
+import 'package:get/get.dart' as get_x; // ป้องกันชื่อซ้ำกับ dio
 import 'package:my_app/core/api_constants.dart';
 
 class ApiService {
   final Dio _dio = Dio();
   final storage = const FlutterSecureStorage();
+  bool _isRefreshing = false; // สถานะว่ากำลังแลก Token อยู่หรือไม่
+  List<ErrorInterceptorHandler> _failedRequests = []; // เก็บ Request ที่ค้างไว้
 
   ApiService() {
     _dio.options.baseUrl = ApiConstants.baseUrl;
-  
+    _dio.options.connectTimeout = const Duration(seconds: 10);
+    _dio.options.receiveTimeout = const Duration(seconds: 10);
+
     _dio.interceptors.add(InterceptorsWrapper(
       onRequest: (options, handler) async {
         // ดึง Access Token มาใส่ Header ทุกครั้ง
         String? token = await storage.read(key: 'accessToken');
-        options.headers['Authorization'] = 'Bearer $token';
+        if (token != null) {
+          options.headers['Authorization'] = 'Bearer $token';
+        }
         return handler.next(options);
       },
       onError: (DioException e, handler) async {
-        // ถ้า Server ตอบกลับมาว่า 401 (Token Expired)
+        // ถ้า Server ตอบกลับมาว่า 401 (Unauthorized)
         if (e.response?.statusCode == 401) {
           String? refreshToken = await storage.read(key: 'refreshToken');
-          
+
           if (refreshToken != null) {
-            try {
-              // 1. ส่ง Refresh Token ไปแลกชุดใหม่
-              final refreshResponse = await _dio.post('/refresh', data: {
-                'refreshToken': refreshToken,
-              });
+            if (!_isRefreshing) {
+              _isRefreshing = true;
+              try {
+                // ใช้ Dio instance ใหม่ยิงเพื่อไม่ให้ติด Interceptor เดิม (ป้องกัน Loop)
+                final refreshDio = Dio(BaseOptions(baseUrl: ApiConstants.baseUrl));
+                final response = await refreshDio.post(ApiConstants.refreshToken, data: {
+                  'refreshToken': refreshToken,
+                });
 
-              if (refreshResponse.statusCode == 200) {
-                // 2. เก็บ Token ใหม่ที่ได้จาก Backend (ทั้ง Access และ Refresh ตัวใหม่)
-                String newAccess = refreshResponse.data['token'];
-                String newRefresh = refreshResponse.data['refreshToken'];
+                if (response.statusCode == 200) {
+                  String newAccess = response.data['token'];
+                  String newRefresh = response.data['refreshToken'];
 
-                await storage.write(key: 'accessToken', value: newAccess);
-                await storage.write(key: 'refreshToken', value: newRefresh);
+                  // บันทึก Token ใหม่
+                  await storage.write(key: 'accessToken', value: newAccess);
+                  await storage.write(key: 'refreshToken', value: newRefresh);
 
-                // 3. ยิง Request เดิมที่เคยพังไปใหม่อีกครั้งด้วย Token ใหม่
-                e.requestOptions.headers['Authorization'] = 'Bearer $newAccess';
-                final retryResponse = await _dio.fetch(e.requestOptions);
-                return handler.resolve(retryResponse);
+                  _isRefreshing = false;
+
+                  // ยิง Request เดิมที่เคยพังไปใหม่
+                  e.requestOptions.headers['Authorization'] = 'Bearer $newAccess';
+                  final retryResponse = await _dio.fetch(e.requestOptions);
+                  return handler.resolve(retryResponse);
+                }
+              } catch (err) {
+                _isRefreshing = false;
+                // ถ้า Refresh ไม่ผ่าน ให้กลับไป Login
+                await storage.deleteAll();
+                get_x.Get.offAllNamed('/login');
               }
-            } catch (err) {
-              // ถ้า Refresh ไม่ผ่าน (เช่น Refresh Token ก็หมดอายุด้วย) ให้ไล่ไป Login ใหม่
-              Get.offAllNamed('/login');
             }
           }
         }
