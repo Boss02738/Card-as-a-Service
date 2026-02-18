@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:get/get.dart';
 import 'package:my_app/module/controller/address_controller.dart';
@@ -13,7 +14,7 @@ class Address extends StatefulWidget {
 
 class _AddressState extends State<Address> {
   final AddressController addressController = Get.put(AddressController());
-  
+
   // ✅ สร้างตัวแปรเช็คสถานะความครบถ้วนของฟอร์ม
   final ValueNotifier<bool> isFormValid = ValueNotifier(false);
 
@@ -30,12 +31,13 @@ class _AddressState extends State<Address> {
 
   // ✅ ฟังก์ชันเช็คว่ากรอกครบทุกช่องหรือไม่
   void _validateForm() {
-    bool isValid = addressController.addressCtrl.text.isNotEmpty &&
+    bool isValid =
+        addressController.addressCtrl.text.isNotEmpty &&
         addressController.subdistrictCtrl.text.isNotEmpty &&
         addressController.districtCtrl.text.isNotEmpty &&
         addressController.provincetCtrl.text.isNotEmpty &&
         addressController.zipcodeCtrl.text.isNotEmpty;
-    
+
     isFormValid.value = isValid;
   }
 
@@ -77,7 +79,9 @@ class _AddressState extends State<Address> {
                   const Text('ที่อยู่ปัจจุบัน'),
                   TextFormField(
                     controller: addressController.addressCtrl,
-                    decoration: const InputDecoration(hintText: 'บ้านเลขที่, ถนน, ซอย'),
+                    decoration: const InputDecoration(
+                      hintText: 'บ้านเลขที่, ถนน, ซอย',
+                    ),
                   ),
                   SizedBox(height: 15.h),
                   Row(
@@ -85,14 +89,18 @@ class _AddressState extends State<Address> {
                       Expanded(
                         child: TextFormField(
                           controller: addressController.subdistrictCtrl,
-                          decoration: const InputDecoration(hintText: 'ตำบล/แขวง'),
+                          decoration: const InputDecoration(
+                            hintText: 'ตำบล/แขวง',
+                          ),
                         ),
                       ),
                       SizedBox(width: 10.w),
                       Expanded(
                         child: TextFormField(
                           controller: addressController.districtCtrl,
-                          decoration: const InputDecoration(hintText: 'อำเภอ/เขต'),
+                          decoration: const InputDecoration(
+                            hintText: 'อำเภอ/เขต',
+                          ),
                         ),
                       ),
                     ],
@@ -107,7 +115,17 @@ class _AddressState extends State<Address> {
                   TextFormField(
                     controller: addressController.zipcodeCtrl,
                     keyboardType: TextInputType.number,
-                    decoration: const InputDecoration(hintText: 'รหัสไปรษณีย์'),
+                    // เพิ่มบรรทัดนี้เพื่อจำกัดจำนวน 5 ตัวอักษร
+                    inputFormatters: [
+                      LengthLimitingTextInputFormatter(5),
+                      FilteringTextInputFormatter
+                          .digitsOnly, // แนะนำให้ใส่ตัวนี้ด้วยเพื่อให้พิมพ์ได้เฉพาะตัวเลขเท่านั้น
+                    ],
+                    decoration: const InputDecoration(
+                      hintText: 'รหัสไปรษณีย์',
+                      counterText:
+                          "", // ใส่บรรทัดนี้ถ้าไม่ต้องการให้มีตัวเลข 0/5 โชว์ที่มุมขวาล่าง
+                    ),
                   ),
                   SizedBox(height: 80.h),
                 ],
@@ -130,29 +148,33 @@ class _AddressState extends State<Address> {
                         'ต่อไป',
                         style: TextStyle(
                           fontSize: 16.sp,
-                          fontWeight: FontWeight.bold,
+                          // fontWeight: FontWeight.bold,
                           // ✅ สีข้อความจะเปลี่ยนตามสถานะ
-                          color: isValid ? const Color(0xFF264FAD) : Colors.grey,
+                          color: isValid
+                              ? const Color.fromARGB(255, 0, 0, 0)
+                              : Colors.grey,
                         ),
                       ),
                       SizedBox(width: 10.w),
                       ArrowFab(
                         enabled: isValid, // ✅ ส่งค่า true/false ไปที่ Widget
-                        onPressed: isValid 
-                          ? () async {
-                              Get.focusScope?.unfocus();
-                              await Future.delayed(const Duration(milliseconds: 150));
-                              Get.toNamed(
-                                '/pin_verify_page',
-                                arguments: {
-                                  'action': 'request_physical',
-                                  'card': Get.arguments['card'],
-                                  'ownerName': Get.arguments['ownerName'],
-                                  'addressData': addressController.toJson(),
-                                },
-                              );
-                            }
-                          : () {}, // ถ้าไม่ Valid จะกดไม่ได้
+                        onPressed: isValid
+                            ? () async {
+                                Get.focusScope?.unfocus();
+                                await Future.delayed(
+                                  const Duration(milliseconds: 150),
+                                );
+                                Get.toNamed(
+                                  '/pin_verify_page',
+                                  arguments: {
+                                    'action': 'request_physical',
+                                    'card': Get.arguments['card'],
+                                    'ownerName': Get.arguments['ownerName'],
+                                    'addressData': addressController.toJson(),
+                                  },
+                                );
+                              }
+                            : () {}, // ถ้าไม่ Valid จะกดไม่ได้
                       ),
                     ],
                   );

@@ -150,7 +150,7 @@ class Card_Confirm_Page extends StatelessWidget {
             // ปุ่มยืนยัน (ต่อไป)
             Row(
               children: [
-                const Text('ต่อไป', style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold, color: Colors.grey)),
+                const Text('ต่อไป', style: TextStyle(fontSize: 18, color: Color.fromARGB(255, 0, 0, 0))),
                 const SizedBox(width: 12),
                 ArrowFab(
                   enabled: true, // หน้านี้เปิดให้กดได้เลย

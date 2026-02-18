@@ -15,7 +15,10 @@ class ActivatePhysical extends StatefulWidget {
 class _ActivatePhysicalState extends State<ActivatePhysical> {
   final dynamic args = Get.arguments;
 
-  final List<TextEditingController> digitCtrls = List.generate(4, (_) => TextEditingController());
+  final List<TextEditingController> digitCtrls = List.generate(
+    4,
+    (_) => TextEditingController(),
+  );
   final List<FocusNode> focusNodes = List.generate(4, (_) => FocusNode());
 
   final expiryCtrl = TextEditingController();
@@ -37,7 +40,7 @@ class _ActivatePhysicalState extends State<ActivatePhysical> {
     // ✅ เช็คความยาว MM/YY (รวม / เป็น 5 ตัว)
     isFormValid.value =
         lastFour.length == 4 &&
-        expiryCtrl.text.length == 5 && 
+        expiryCtrl.text.length == 5 &&
         cvvCtrl.text.length == 3;
   }
 
@@ -66,7 +69,10 @@ class _ActivatePhysicalState extends State<ActivatePhysical> {
     return Scaffold(
       backgroundColor: Colors.white,
       appBar: AppBar(
-        title: Text('เปิดใช้งานบัตร', style: TextStyle(color: Colors.white, fontSize: 18.sp)),
+        title: Text(
+          'เปิดใช้งานบัตร',
+          style: TextStyle(color: Colors.white, fontSize: 18.sp),
+        ),
         centerTitle: true,
         backgroundColor: const Color(0xFF264FAD),
         elevation: 0,
@@ -84,18 +90,35 @@ class _ActivatePhysicalState extends State<ActivatePhysical> {
               padding: EdgeInsets.all(25.r),
               child: Column(
                 children: [
-                  Text("กรอกข้อมูลบัตรเดบิต", style: TextStyle(fontSize: 16.sp, color: Colors.black87, fontWeight: FontWeight.bold)),
+                  Text(
+                    "กรอกข้อมูลบัตรเดบิต",
+                    style: TextStyle(
+                      fontSize: 16.sp,
+                      color: Colors.black87,
+                      fontWeight: FontWeight.bold,
+                    ),
+                  ),
                   SizedBox(height: 25.h),
                   _buildFigmaInputRow(card['last_digits'] ?? "****"),
                   SizedBox(height: 35.h),
                   Row(
                     children: [
                       Expanded(
-                        child: _buildLabelInput("วันหมดอายุ", "MM/YY", expiryCtrl, 5),
+                        child: _buildLabelInput(
+                          "วันหมดอายุ",
+                          "MM/YY",
+                          expiryCtrl,
+                          5,
+                        ),
                       ),
                       SizedBox(width: 20.w),
                       Expanded(
-                        child: _buildLabelInput("CVV/CVC", "ระบุเลข 3 หลัก", cvvCtrl, 3),
+                        child: _buildLabelInput(
+                          "CVV/CVC",
+                          "ระบุเลข 3 หลัก",
+                          cvvCtrl,
+                          3,
+                        ),
                       ),
                     ],
                   ),
@@ -138,8 +161,18 @@ class _ActivatePhysicalState extends State<ActivatePhysical> {
             ),
           ),
           SizedBox(height: 15.h),
-          Text("NovaPay Debit Card", style: TextStyle(color: Colors.white, fontSize: 16.sp, fontWeight: FontWeight.bold)),
-          Text("หมายเลข: **** **** **** '****", style: TextStyle(color: Colors.white70, fontSize: 14.sp)),
+          Text(
+            "NovaPay Debit Card",
+            style: TextStyle(
+              color: Colors.white,
+              fontSize: 16.sp,
+              fontWeight: FontWeight.bold,
+            ),
+          ),
+          Text(
+            "หมายเลข: **** **** **** '****",
+            style: TextStyle(color: Colors.white70, fontSize: 14.sp),
+          ),
         ],
       ),
     );
@@ -158,31 +191,53 @@ class _ActivatePhysicalState extends State<ActivatePhysical> {
         child: Row(
           mainAxisAlignment: MainAxisAlignment.center,
           children: [
-            Text("XXXX - XXXX - XXXX - ", style: TextStyle(fontSize: 16.sp, fontWeight: FontWeight.bold, color: Colors.grey.shade500, letterSpacing: 1.2)),
+            Text(
+              "XXXX - XXXX - XXXX - ",
+              style: TextStyle(
+                fontSize: 16.sp,
+                fontWeight: FontWeight.bold,
+                color: Colors.grey.shade500,
+                letterSpacing: 1.2,
+              ),
+            ),
             Row(
-              children: List.generate(4, (index) => Container(
-                margin: EdgeInsets.symmetric(horizontal: 4.w),
-                width: 32.w,
-                height: 42.h,
-                decoration: BoxDecoration(
-                  color: Colors.white,
-                  border: Border.all(color: const Color(0xFF264FAD), width: 1.5),
-                  borderRadius: BorderRadius.circular(8.r),
+              children: List.generate(
+                4,
+                (index) => Container(
+                  margin: EdgeInsets.symmetric(horizontal: 4.w),
+                  width: 32.w,
+                  height: 42.h,
+                  decoration: BoxDecoration(
+                    color: Colors.white,
+                    border: Border.all(
+                      color: const Color(0xFF264FAD),
+                      width: 1.5,
+                    ),
+                    borderRadius: BorderRadius.circular(8.r),
+                  ),
+                  child: TextField(
+                    controller: digitCtrls[index],
+                    focusNode: focusNodes[index],
+                    textAlign: TextAlign.center,
+                    keyboardType: TextInputType.number,
+                    maxLength: 1,
+                    style: TextStyle(
+                      fontSize: 18.sp,
+                      fontWeight: FontWeight.bold,
+                    ),
+                    decoration: const InputDecoration(
+                      counterText: "",
+                      border: InputBorder.none,
+                    ),
+                    onChanged: (val) {
+                      if (val.isNotEmpty && index < 3)
+                        focusNodes[index + 1].requestFocus();
+                      if (val.isEmpty && index > 0)
+                        focusNodes[index - 1].requestFocus();
+                    },
+                  ),
                 ),
-                child: TextField(
-                  controller: digitCtrls[index],
-                  focusNode: focusNodes[index],
-                  textAlign: TextAlign.center,
-                  keyboardType: TextInputType.number,
-                  maxLength: 1,
-                  style: TextStyle(fontSize: 18.sp, fontWeight: FontWeight.bold),
-                  decoration: const InputDecoration(counterText: "", border: InputBorder.none),
-                  onChanged: (val) {
-                    if (val.isNotEmpty && index < 3) focusNodes[index + 1].requestFocus();
-                    if (val.isEmpty && index > 0) focusNodes[index - 1].requestFocus();
-                  },
-                ),
-              )),
+              ),
             ),
           ],
         ),
@@ -190,11 +245,23 @@ class _ActivatePhysicalState extends State<ActivatePhysical> {
     );
   }
 
-  Widget _buildLabelInput(String label, String hint, TextEditingController ctrl, int max) {
+  Widget _buildLabelInput(
+    String label,
+    String hint,
+    TextEditingController ctrl,
+    int max,
+  ) {
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
-        Text(label, style: TextStyle(color: Colors.black54, fontSize: 13.sp, fontWeight: FontWeight.bold)),
+        Text(
+          label,
+          style: TextStyle(
+            color: Colors.black54,
+            fontSize: 13.sp,
+            fontWeight: FontWeight.bold,
+          ),
+        ),
         SizedBox(height: 8.h),
         TextField(
           controller: ctrl,
@@ -210,9 +277,21 @@ class _ActivatePhysicalState extends State<ActivatePhysical> {
             hintText: hint,
             hintStyle: TextStyle(color: Colors.grey.shade400, fontSize: 13.sp),
             counterText: "",
-            contentPadding: EdgeInsets.symmetric(vertical: 12.h, horizontal: 10.w),
-            enabledBorder: OutlineInputBorder(borderSide: BorderSide(color: Colors.grey.shade300), borderRadius: BorderRadius.circular(10.r)),
-            focusedBorder: OutlineInputBorder(borderSide: const BorderSide(color: Color(0xFF264FAD), width: 1.5), borderRadius: BorderRadius.circular(10.r)),
+            contentPadding: EdgeInsets.symmetric(
+              vertical: 12.h,
+              horizontal: 10.w,
+            ),
+            enabledBorder: OutlineInputBorder(
+              borderSide: BorderSide(color: Colors.grey.shade300),
+              borderRadius: BorderRadius.circular(10.r),
+            ),
+            focusedBorder: OutlineInputBorder(
+              borderSide: const BorderSide(
+                color: Color(0xFF264FAD),
+                width: 1.5,
+              ),
+              borderRadius: BorderRadius.circular(10.r),
+            ),
           ),
         ),
       ],
@@ -229,9 +308,20 @@ class _ActivatePhysicalState extends State<ActivatePhysical> {
             return Row(
               mainAxisAlignment: MainAxisAlignment.end,
               children: [
-                Text("ถัดไป", style: TextStyle(fontSize: 18.sp, color: isValid ? const Color(0xFF264FAD) : Colors.grey)),
-                SizedBox(width: 15.w),
-                ArrowFab(onPressed: isValid ? proceedToVerifyPin : () {}, enabled: isValid),
+                Text(
+                  "ถัดไป",
+                  style: TextStyle(
+                    fontSize: 18.sp,
+                    color: isValid
+                        ? const Color.fromARGB(255, 0, 0, 0)
+                        : Colors.grey,
+                  ),
+                ),
+                SizedBox(width: 10.w),
+                ArrowFab(
+                  onPressed: isValid ? proceedToVerifyPin : () {},
+                  enabled: isValid,
+                ),
               ],
             );
           },
@@ -254,12 +344,15 @@ class _ActivatePhysicalState extends State<ActivatePhysical> {
     super.dispose();
   }
 }
+
 class CardExpirationFormatter extends TextInputFormatter {
   @override
   TextEditingValue formatEditUpdate(
-      TextEditingValue oldValue, TextEditingValue newValue) {
+    TextEditingValue oldValue,
+    TextEditingValue newValue,
+  ) {
     final newValueString = newValue.text;
-    
+
     // 1. ถ้าเป็นการลบ ให้ลบปกติ
     if (newValueString.length < oldValue.text.length) {
       return newValue;
@@ -267,7 +360,7 @@ class CardExpirationFormatter extends TextInputFormatter {
 
     // 2. ล้างเอาสิ่งที่ไม่ใช่ตัวเลขออกก่อน (กันเหนียว)
     String cleaned = newValueString.replaceAll(RegExp(r'[^0-9]'), '');
-    
+
     // 3. จัดรูปแบบใหม่
     String formatted = "";
     for (int i = 0; i < cleaned.length; i++) {
@@ -275,7 +368,7 @@ class CardExpirationFormatter extends TextInputFormatter {
       // ถ้าพิมพ์ถึงหลักที่ 2 และยังมีตัวเลขต่อ ให้เติม /
       if (i == 1 && cleaned.length > 2) {
         formatted += "/";
-      } 
+      }
       // ถ้าพิมพ์แค่ 2 ตัว (กำลังจะพิมพ์ตัวที่ 3) ให้เติม / ต่อท้าย
       else if (i == 1 && cleaned.length == 2) {
         formatted += "/";

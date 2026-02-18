@@ -1,5 +1,6 @@
 import 'package:date_format_field/date_format_field.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
 import 'package:get/get.dart';
 import 'package:my_app/module/controller/info_controller.dart';
 import 'package:my_app/views/pages/Register/face_verify.dart';
@@ -86,8 +87,14 @@ class _InfoState extends State<Info> {
                             TextFormField(
                               controller: infoController.idCardCtrl,
                               keyboardType: TextInputType.number,
+                              inputFormatters: [
+                                LengthLimitingTextInputFormatter(13),
+                                FilteringTextInputFormatter
+                                    .digitsOnly, // แนะนำให้ใส่ตัวนี้ด้วยเพื่อให้พิมพ์ได้เฉพาะตัวเลขเท่านั้น
+                              ],
                               decoration: const InputDecoration(
                                 hintText: 'กรอกหมายเลขบัตรประชาชน',
+                                counterText: "",
                               ),
                               validator: (value) {
                                 if (value == null || value.trim().isEmpty) {
@@ -96,7 +103,6 @@ class _InfoState extends State<Info> {
                                 return null;
                               },
                             ),
-
                             SizedBox(height: 20),
                             Text(
                               'วัน/เดือน/ปีเกิด',
@@ -107,6 +113,7 @@ class _InfoState extends State<Info> {
                             ),
                             DateFormatField(
                               type: DateFormatType.type2,
+                              focusNode: AlwaysDisabledFocusNode(),
                               lastDate: DateTime.now(), // ❌ เลือกอนาคตไม่ได้
                               onComplete: (date) {
                                 if (date == null) return;
@@ -224,6 +231,10 @@ class _InfoState extends State<Info> {
                                 if (value == null || value.trim().isEmpty) {
                                   return 'กรุณากรอกอีเมล';
                                 }
+                                if (!GetUtils.isEmail(value)) {
+                                  // 👈 ใช้ตัวนี้ของ GetX ได้เลยครับ ง่ายมาก!
+                                  return 'รูปแบบอีเมลไม่ถูกต้อง';
+                                }
                                 return null;
                               },
                             ),
@@ -271,4 +282,9 @@ class _InfoState extends State<Info> {
       ),
     );
   }
+}
+
+class AlwaysDisabledFocusNode extends FocusNode {
+  @override
+  bool get hasFocus => false;
 }

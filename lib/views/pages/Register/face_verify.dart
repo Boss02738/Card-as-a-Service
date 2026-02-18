@@ -18,10 +18,11 @@ class FaceVerify extends StatefulWidget {
 class _FaceVerifyState extends State<FaceVerify> {
   final CameraService _cameraService = CameraService();
   File? _image;
-  final phoneCtrl = Get.find<PhonenumberController>();
+
+  // ✅ ลบบรรทัด phoneCtrl ออกแล้ว เพื่อไม่ให้แอปเด้งตอนลืมรหัสผ่าน
+
   @override
   Widget build(BuildContext context) {
-    // final HomeController homeController = Get.find<HomeController>();
     return Scaffold(
       body: Stack(
         children: [
@@ -32,10 +33,10 @@ class _FaceVerifyState extends State<FaceVerify> {
               children: [
                 const SizedBox(height: 30),
                 // --- ส่วนหัวข้อ ---
-                Center(
+                const Center(
                   child: Text(
                     'กรุณาวางใบหน้าในกรอบที่กำหนด',
-                    style: const TextStyle(
+                    style: TextStyle(
                       fontSize: 18,
                       fontWeight: FontWeight.w600,
                       color: Colors.white,
@@ -50,9 +51,7 @@ class _FaceVerifyState extends State<FaceVerify> {
                     width: double.infinity,
                     margin: const EdgeInsets.symmetric(horizontal: 20),
                     decoration: BoxDecoration(
-                      color: Colors.black.withOpacity(
-                        0.1,
-                      ), // พื้นหลังมัวเล็กน้อย
+                      color: Colors.black.withOpacity(0.1),
                       borderRadius: BorderRadius.circular(12),
                     ),
                     child: Stack(
@@ -71,7 +70,6 @@ class _FaceVerifyState extends State<FaceVerify> {
                             : Image.asset(
                                 'assets/images/face_verify.png',
                                 fit: BoxFit.contain,
-                                // color: Colors.white.withOpacity(0.8),
                               ),
                       ],
                     ),
@@ -136,7 +134,6 @@ class _FaceVerifyState extends State<FaceVerify> {
                       Center(
                         child: ElevatedButton(
                           onPressed: () {
-                            // ✅ หน้าที่เดียวคือเปิดกล้อง ห้ามเปลี่ยนหน้าตรงนี้
                             _cameraService.takePicture().then((file) {
                               if (file != null) {
                                 setState(() => _image = file);
@@ -175,31 +172,29 @@ class _FaceVerifyState extends State<FaceVerify> {
                           const SizedBox(width: 10),
                           ArrowFab(
                             enabled: _image != null,
-                            // ภายใน face_verify.dart ตรงปุ่ม ArrowFab
-                            // face_verify.dart
                             onPressed: () async {
                               final args = Get.arguments;
-                              var mobile = args?['verifiedMobile'];
-
                               final Map<String, dynamic> currentArgs =
                                   (args is Map)
-                                  ? Map<String, dynamic>.from(args)
-                                  : {};
+                                      ? Map<String, dynamic>.from(args)
+                                      : {};
 
                               final String action =
-                                  currentArgs['action'] ??
-                                  'forgot_password_reset';
+                                  currentArgs['action'] ?? 'forgot_password_reset';
+                              
+                              String? mobile; // สร้างตัวแปรมารอรับค่า
 
+                              // ✅ Logic ที่ถูกต้องและปลอดภัย
                               if (action == 'register') {
-                                // สมัครใหม่ → ใช้จาก controller
-                                mobile = phoneCtrl.phoneNumber.value;
+                                // กรณีสมัครสมาชิก: ดึงจาก Controller (เช็คก่อนว่ามีไหม)
+                                if (Get.isRegistered<PhonenumberController>()) {
+                                  mobile = Get.find<PhonenumberController>().phoneNumber.value;
+                                }
                               } else if (action == 'change_device_flow') {
-                                // 🔥 ย้ายเครื่อง → ใช้จาก arguments เท่านั้น
-                                mobile =
-                                    currentArgs['verifiedMobile'] ??
-                                    currentArgs['mobileNumber'];
+                                // กรณีย้ายเครื่อง: ดึงจาก Arguments
+                                mobile = currentArgs['verifiedMobile'] ?? currentArgs['mobileNumber'];
                               } else {
-                                // ลืมรหัส → ใช้จาก storage
+                                // กรณีลืมรหัสผ่าน: ดึงจาก Storage
                                 mobile = await storage.read(key: 'userMobile');
                               }
 
