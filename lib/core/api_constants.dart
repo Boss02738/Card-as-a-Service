@@ -1,5 +1,4 @@
 class ApiConstants {
-  // ใช้ IP ของเครื่อง Backend
   static const String baseUrl = "http://192.168.250.35:8084";
   // static const String baseUrlCore = "http://10.82.241.156:8080";
 

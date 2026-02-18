@@ -1,8 +1,8 @@
 import 'dart:convert';
+import 'package:dio/dio.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:get/get.dart';
-import 'package:http/http.dart' as http;
 import 'package:my_app/core/api_constants.dart';
 import 'package:my_app/core/api_service.dart';
 import 'package:my_app/module/services/device_id.dart';
@@ -12,18 +12,22 @@ class PinLoginController extends GetxController {
   var enteredPin = ''.obs;
   var isLoading = false.obs;
   final ApiService _apiService = ApiService();
+
   void addNumber(int number) {
+    if (isLoading.value) return;
+
     if (enteredPin.value.length < 6) {
       enteredPin.value += number.toString();
     }
-    if (enteredPin.value.length == 6) {
+
+    if (enteredPin.value.length == 6 && !isLoading.value) {
       // เมื่อครบ 6 หลัก ให้หน่วงเวลาเล็กน้อยเพื่อให้จุดวงกลมเต็มก่อนยิง API
       Future.delayed(const Duration(milliseconds: 200), () => loginWithPin());
     }
   }
 
   void deleteNumber() {
-    if (enteredPin.value.isNotEmpty) {
+    if (enteredPin.value.isNotEmpty && !isLoading.value) {
       enteredPin.value = enteredPin.value.substring(
         0,
         enteredPin.value.length - 1,
@@ -31,6 +35,7 @@ class PinLoginController extends GetxController {
     }
   }
 
+  // --- Dialog กรณีใส่รหัสผิดปกติ (ยังไม่ครบ 3 ครั้ง) ---
   void _showErrorDialog() {
     Get.dialog(
       Dialog(
@@ -44,152 +49,189 @@ class PinLoginController extends GetxController {
           child: Column(
             mainAxisSize: MainAxisSize.min,
             children: [
-              // ===== Content =====
               Padding(
                 padding: EdgeInsets.fromLTRB(24.w, 28.h, 24.w, 24.h),
                 child: Column(
                   children: [
-                    // Icon !
-                    Container(
-                      width: 56.r,
-                      height: 56.r,
-                      decoration: BoxDecoration(
-                        border: Border.all(
-                          color: const Color(0xFF2F6BFF),
-                          width: 2,
-                        ),
-                        shape: BoxShape.circle,
-                      ),
-                      child: Center(
-                        child: Text(
-                          '!',
-                          style: TextStyle(
-                            fontSize: 36.sp,
-                            fontWeight: FontWeight.w700,
-                            color: const Color(0xFF2F6BFF),
-                          ),
-                        ),
-                      ),
-                    ),
-
+                    _buildIcon('!'),
                     SizedBox(height: 16.h),
-
-                    // Title
                     Text(
                       'ขออภัย',
                       style: TextStyle(
                         fontSize: 18.sp,
                         fontWeight: FontWeight.w600,
-                        color: const Color(0xFF222222),
                       ),
                     ),
-
                     SizedBox(height: 12.h),
-
-                    // Description
                     Text(
-                      'คุณใส่รหัสผ่านไม่ถูกต้อง หากใส่รหัสผิดครบ 3 ครั้ง แอปพลิเคชันจะถูกล็อก\nกรณีจำรหัสไม่ได้ กด “ลืมรหัสผ่าน” เพื่อตั้งรหัสผ่านใหม่',
+                      'คุณใส่รหัสผ่านไม่ถูกต้อง หากใส่รหัสผิดครบ \n 3 ครั้ง แอปพลิเคชันจะถูกล็อก ต้องทำการรีเซ็ตรหัสผ่าน ',
                       textAlign: TextAlign.center,
-                      style: TextStyle(
-                        fontSize: 14.sp,
-                        height: 1.5,
-                        color: const Color(0xFF333333),
-                      ),
+                      style: TextStyle(fontSize: 14.sp, height: 1.5),
                     ),
                   ],
                 ),
               ),
-
-              // Divider
-              Container(height: 1, color: const Color(0xFFDADADA)),
-
-              // ===== Button =====
-              Padding(
-                padding: EdgeInsets.fromLTRB(24.w, 16.h, 24.w, 20.h),
-                child: GestureDetector(
-                  onTap: () => Get.back(),
-                  child: Container(
-                    height: 44.h,
-                    decoration: BoxDecoration(
-                      borderRadius: BorderRadius.circular(24.r),
-                      gradient: const LinearGradient(
-                        begin: Alignment.topCenter,
-                        end: Alignment.bottomCenter,
-                        colors: [Color(0xFF2F6BFF), Color(0xFF1F4ED8)],
-                      ),
-                    ),
-                    child: Center(
-                      child: Text(
-                        'ตกลง',
-                        style: TextStyle(
-                          fontSize: 16.sp,
-                          fontWeight: FontWeight.w600,
-                          color: Colors.white,
-                        ),
-                      ),
-                    ),
-                  ),
-                ),
-              ),
+              const Divider(height: 1),
+              _buildDialogButton('ตกลง', () => Get.back()),
             ],
           ),
         ),
       ),
       barrierDismissible: false,
-      barrierColor: Colors.black.withOpacity(0.55),
+    );
+  }
+
+  // --- Dialog กรณีบัญชีถูกล็อก (ผิดครบ 3 ครั้ง) ---
+  void _showLockedDialog() {
+    Get.dialog(
+      Dialog(
+        backgroundColor: Colors.transparent,
+        insetPadding: EdgeInsets.symmetric(horizontal: 32.w),
+        child: Container(
+          decoration: BoxDecoration(
+            color: Colors.white,
+            borderRadius: BorderRadius.circular(20.r),
+          ),
+          child: Column(
+            mainAxisSize: MainAxisSize.min,
+            children: [
+              Padding(
+                padding: EdgeInsets.fromLTRB(24.w, 28.h, 24.w, 24.h),
+                child: Column(
+                  children: [
+                    _buildIcon('!', color: Colors.red),
+                    SizedBox(height: 16.h),
+                    Text(
+                      'บัญชีถูกระงับชั่วคราว',
+                      style: TextStyle(
+                        fontSize: 18.sp,
+                        fontWeight: FontWeight.bold,
+                        color: Colors.red,
+                      ),
+                    ),
+                    SizedBox(height: 12.h),
+                    Text(
+                      'คุณกรอกรหัสผิดเกินกำหนด เพื่อความปลอดภัย ระบบได้ทำการล็อกบัญชีของคุณ กรุณาตั้งรหัสผ่านใหม่',
+                      textAlign: TextAlign.center,
+                      style: TextStyle(fontSize: 14.sp, height: 1.5),
+                    ),
+                  ],
+                ),
+              ),
+              const Divider(height: 1),
+              _buildDialogButton('ตั้งรหัสผ่านใหม่', () async {
+                await storage.deleteAll(); // ล้าง Token เก่า
+                Get.offAllNamed('/face_verify'); // พาไปเริ่ม Reset PIN
+              }),
+            ],
+          ),
+        ),
+      ),
+      barrierDismissible: false,
     );
   }
 
   Future<void> loginWithPin() async {
+    if (isLoading.value) return;
     try {
       isLoading.value = true;
-
       String? mobile = await storage.read(key: 'userMobile');
       String? deviceId = await getDeviceId();
 
       if (mobile == null || mobile.isEmpty) {
-        Get.snackbar('Error', 'ไม่พบข้อมูลผู้ใช้ กรุณาลงทะเบียนใหม่');
+        Get.snackbar('Error', 'ไม่พบข้อมูลผู้ใช้');
+        isLoading.value = false;
         return;
       }
 
-      Map<String, dynamic> loginData = {
-        "mobileNumber": mobile,
-        "deviceId": deviceId,
-        "pin": enteredPin.value,
-      };
-
-      // --- เปลี่ยนจาก http.post มาใช้ _apiService.instance.post (Dio) ---
       final response = await _apiService.instance.post(
-          ApiConstants.login, // ใส่แค่ path เพราะ baseUrl ตั้งไว้ใน ApiService แล้ว
-        data: loginData,
+        ApiConstants.login,
+        data: {
+          "mobileNumber": mobile,
+          "deviceId": deviceId,
+          "pin": enteredPin.value,
+ },
       );
 
       if (response.statusCode == 200) {
-        // Dio จะ decode json มาให้แล้วใน response.data
         final responseData = response.data;
-
-        String? accessToken = responseData['token'];
-        String? refreshToken =
-            responseData['refreshToken']; // ต้องเก็บตัวนี้ด้วยเพื่อใช้แลกชุดใหม่
-
-        if (accessToken != null && refreshToken != null) {
-          // บันทึกทั้ง Access และ Refresh Token ลงใน Secure Storage
-          await storage.write(key: 'accessToken', value: accessToken);
-          await storage.write(key: 'refreshToken', value: refreshToken);
-          print('AccessToken: $accessToken');
-          print('RefreshToken: $refreshToken');
+        if (responseData['token'] != null) {
+          await storage.write(key: 'accessToken', value: responseData['token']);
+          await storage.write(
+            key: 'refreshToken',
+            value: responseData['refreshToken'],
+          );
           Get.offAllNamed('/main');
-        } else {
-          Get.snackbar('Error', 'ไม่ได้รับข้อมูล Token ครบถ้วนจากระบบ');
         }
       }
     } catch (e) {
-      // Dio จะโยน Exception เมื่อเจอ Error status (เช่น 400, 500)
-      _showErrorDialog();
-      enteredPin.value = '';
-      print("Login Error: $e");
+      enteredPin.value = ''; // ล้างค่า PIN ทันทีเพื่อป้องกัน Loop
+
+      if (e is DioException) {
+        final responseData = e.response?.data;
+        //  ตรวจสอบสถานะ Account Locked จาก Backend
+        if (e.response?.statusCode == 401 &&
+            responseData?['message'] ==
+                'บัญชีถูกระงับชั่วคราวเนื่องจากใส่รหัสผิดเกิน 3 ครั้ง กรุณากด \'ลืมรหัสผ่าน\' เพื่อตั้งค่าใหม่') {
+          _showLockedDialog();
+        } else {
+          _showErrorDialog();
+        }
+      } else {
+        Get.snackbar('Error', 'เกิดข้อผิดพลาดในการเชื่อมต่อ');
+      }
     } finally {
       isLoading.value = false;
     }
+  }
+
+  // --- Helper Widgets สำหรับ Dialog ---
+  Widget _buildIcon(String char, {Color color = const Color(0xFF2F6BFF)}) {
+    return Container(
+      width: 56.r,
+      height: 56.r,
+      decoration: BoxDecoration(
+        border: Border.all(color: color, width: 2),
+        shape: BoxShape.circle,
+      ),
+      child: Center(
+        child: Text(
+          char,
+          style: TextStyle(
+            fontSize: 36.sp,
+            fontWeight: FontWeight.w700,
+            color: color,
+          ),
+        ),
+      ),
+    );
+  }
+
+  Widget _buildDialogButton(String text, VoidCallback onTap) {
+    return Padding(
+      padding: EdgeInsets.fromLTRB(24.w, 16.h, 24.w, 20.h),
+      child: GestureDetector(
+        onTap: onTap,
+        child: Container(
+          height: 44.h,
+          decoration: BoxDecoration(
+            borderRadius: BorderRadius.circular(24.r),
+            gradient: const LinearGradient(
+              colors: [Color(0xFF2F6BFF), Color(0xFF1F4ED8)],
+            ),
+          ),
+          child: Center(
+            child: Text(
+              text,
+              style: TextStyle(
+                fontSize: 16.sp,
+                fontWeight: FontWeight.w600,
+                color: Colors.white,
+              ),
+            ),
+          ),
+        ),
+      ),
+    );
   }
 }

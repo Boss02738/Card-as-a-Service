@@ -87,11 +87,10 @@ class ChangePinController extends GetxController {
       }
     } on dio.DioException catch (e) {
       // จัดการ Error ผ่าน DioException เช่น รหัสเดิมไม่ถูกต้อง (400/401)
-      String errorMessage = 'ไม่สามารถเปลี่ยนรหัสได้ กรุณาตรวจสอบรหัสเดิม';
-      if (e.response?.data != null && e.response?.data['message'] != null) {
-        errorMessage = e.response?.data['message'];
-      }
-      Get.snackbar('ผิดพลาด', errorMessage);
+      String responseMessage = e.response?.data?['message'] ?? '';
+        responseMessage = e.response?.data['error'];
+      
+      Get.snackbar('ผิดพลาด', responseMessage);
       reset();
     } catch (e) {
       Get.snackbar('Error', 'เกิดข้อผิดพลาดในการเชื่อมต่อ');

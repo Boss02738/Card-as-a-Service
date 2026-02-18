@@ -6,65 +6,73 @@ import 'package:my_app/core/api_constants.dart';
 class ApiService {
   final Dio _dio = Dio();
   final storage = const FlutterSecureStorage();
-  bool _isRefreshing = false; // สถานะว่ากำลังแลก Token อยู่หรือไม่
-  List<ErrorInterceptorHandler> _failedRequests = []; // เก็บ Request ที่ค้างไว้
+  bool _isRefreshing = false;
 
   ApiService() {
     _dio.options.baseUrl = ApiConstants.baseUrl;
     _dio.options.connectTimeout = const Duration(seconds: 10);
     _dio.options.receiveTimeout = const Duration(seconds: 10);
 
-    _dio.interceptors.add(InterceptorsWrapper(
-      onRequest: (options, handler) async {
-        // ดึง Access Token มาใส่ Header ทุกครั้ง
-        String? token = await storage.read(key: 'accessToken');
-        if (token != null) {
-          options.headers['Authorization'] = 'Bearer $token';
-        }
-        return handler.next(options);
-      },
-      onError: (DioException e, handler) async {
-        // ถ้า Server ตอบกลับมาว่า 401 (Unauthorized)
-        if (e.response?.statusCode == 401) {
-          String? refreshToken = await storage.read(key: 'refreshToken');
+    _dio.interceptors.add(
+      InterceptorsWrapper(
+        onRequest: (options, handler) async {
+          String? token = await storage.read(key: 'accessToken');
+          if (token != null) {
+            options.headers['Authorization'] = 'Bearer $token';
+          }
+          return handler.next(options);
+        },
+        onError: (DioException e, handler) async {
+          // 1. ถ้าเป็น 401 (Unauthorized / Locked)
+          if (e.response?.statusCode == 401) {
+            
+            // จุดที่ 1: ถ้าเกิด Error ที่หน้า Login ห้าม Interceptor จัดการเองเด็ดขาด
+            // ปล่อยให้ PinLoginController เป็นคนรับ Error ไปโชว์ Dialog หรือเช็ค Locked เอง
+            if (e.requestOptions.path.contains(ApiConstants.login)) {
+              return handler.next(e); 
+            }
 
-          if (refreshToken != null) {
-            if (!_isRefreshing) {
+            // 2. ถ้าไม่ใช่หน้า Login ให้พยายาม Refresh Token
+            String? refreshToken = await storage.read(key: 'refreshToken');
+            if (refreshToken != null && !_isRefreshing) {
               _isRefreshing = true;
               try {
-                // ใช้ Dio instance ใหม่ยิงเพื่อไม่ให้ติด Interceptor เดิม (ป้องกัน Loop)
                 final refreshDio = Dio(BaseOptions(baseUrl: ApiConstants.baseUrl));
-                final response = await refreshDio.post(ApiConstants.refreshToken, data: {
-                  'refreshToken': refreshToken,
-                });
+                final response = await refreshDio.post(
+                  ApiConstants.refreshToken,
+                  data: {'refreshToken': refreshToken},
+                );
 
                 if (response.statusCode == 200) {
                   String newAccess = response.data['token'];
                   String newRefresh = response.data['refreshToken'];
 
-                  // บันทึก Token ใหม่
                   await storage.write(key: 'accessToken', value: newAccess);
                   await storage.write(key: 'refreshToken', value: newRefresh);
 
                   _isRefreshing = false;
 
-                  // ยิง Request เดิมที่เคยพังไปใหม่
+                  // ยิง Request เดิมซ้ำ
                   e.requestOptions.headers['Authorization'] = 'Bearer $newAccess';
                   final retryResponse = await _dio.fetch(e.requestOptions);
                   return handler.resolve(retryResponse);
                 }
               } catch (err) {
                 _isRefreshing = false;
-                // ถ้า Refresh ไม่ผ่าน ให้กลับไป Login
+                // จุดที่ 2: ถ้า Refresh พังจริงๆ ถึงค่อยดีดออกไปหน้าแรก
                 await storage.deleteAll();
-                get_x.Get.offAllNamed('/login');
+                get_x.Get.offAllNamed('//login-pin');
+                return handler.next(e);
               }
+            } else if (refreshToken == null) {
+               // ไม่มี Refresh Token และไม่ใช่หน้า Login ให้ดีดออก
+               get_x.Get.offAllNamed('//login-pin');
             }
           }
-        }
-        return handler.next(e);
-      },
-    ));
+          return handler.next(e);
+        },
+      ),
+    );
   }
 
   Dio get instance => _dio;

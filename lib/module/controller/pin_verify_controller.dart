@@ -58,7 +58,7 @@ class PinVerifyController extends GetxController {
         "expiry": originalArgs['input_data']['expiry'],
         "cvv": originalArgs['input_data']['cvv'],
         "newCardPin": newCardPin, // รหัส ATM 6 หลักที่ตั้งใหม่
-        "card_id": originalArgs['card']['card_id'], // ✅ เพิ่มบรรทัดนี้เพื่อให้ API รู้ว่าเปิดใบไหน
+        "card_id": originalArgs['card']['card_id'], //  เพิ่มบรรทัดนี้เพื่อให้ API รู้ว่าเปิดใบไหน
       };
 
       // ใช้ _apiService.instance แทน http

@@ -3,6 +3,7 @@ import 'dart:convert';
 import 'package:get/get.dart';
 import 'package:my_app/core/api_constants.dart';
 import 'package:my_app/core/api_service.dart';
+import 'package:my_app/core/screen_size.dart';
 import 'package:my_app/module/services/secure_storage.dart';
 import 'package:dio/dio.dart' as dio; // นำเข้าเพื่อใช้จัดการ DioException
 
@@ -15,14 +16,17 @@ class CardDetailController extends GetxController {
   Future<void> fetchCardDetail(String cardId) async {
     try {
       isLoading.value = true;
+      String screenType = getDeviceSizeCategory();
 
       final response = await _apiService.instance.post(
         ApiConstants.cardDetail,
-        data: {"card_id": cardId}, // ✅ ตรวจสอบว่าส่ง body แล้ว
+        data: {"card_id": cardId},
+        queryParameters: {'image_size': screenType}, 
       );
 
       if (response.statusCode == 200) {
-        cardData.value = response.data; // ✅ ถ้าเป็นบัตร Physical และสถานะยังไม่ active ให้เรียกดู tracking ต่อทันที
+        cardData.value = response
+            .data; // ถ้าเป็นบัตร Physical และสถานะยังไม่ active ให้เรียกดู tracking ต่อทันที
         if (cardData['virtual'] == false && cardData['status'] == 'inactive') {
           await fetchCardTracking(cardId);
         }
@@ -38,7 +42,7 @@ class CardDetailController extends GetxController {
     }
   }
 
-  // ✅ ปรับปรุงฟังก์ชัน Tracking
+  //  ปรับปรุงฟังก์ชัน Tracking
   Future<void> fetchCardTracking(String cardId) async {
     try {
       final response = await _apiService.instance.post(

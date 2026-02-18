@@ -1,7 +1,8 @@
 import 'package:get/get.dart';
 import 'package:my_app/core/api_constants.dart';
 import 'package:my_app/core/api_service.dart';
-import 'package:dio/dio.dart' as dio; // นำเข้าเพื่อใช้จัดการ Exception
+import 'package:dio/dio.dart' as dio;
+import 'package:my_app/core/screen_size.dart'; // นำเข้าเพื่อใช้จัดการ Exception
 
 class TypeCardsController extends GetxController {
   var isLoading = true.obs;
@@ -19,11 +20,14 @@ class TypeCardsController extends GetxController {
   Future<void> fetchCardTypes() async {
     try {
       isLoading.value = true;
-      
-      // ✅ ไม่ต้องดึง Token เองแล้ว เพราะ Interceptor ใน ApiService จัดการให้
-      // ✅ เรียก API ผ่าน Dio instance
+      String screentype = getDeviceSizeCategory(); 
+      // ไม่ต้องดึง Token เองแล้ว เพราะ Interceptor ใน ApiService จัดการให้
+      // เรียก API ผ่าน Dio instance
       final response = await _apiService.instance.get(
         ApiConstants.typecards,
+        queryParameters: {
+          'image_size': screentype,
+        },
       );
 
       if (response.statusCode == 200) {
@@ -34,7 +38,7 @@ class TypeCardsController extends GetxController {
         }
       }
     } on dio.DioException catch (e) {
-      // ✅ ดักจับ Error เฉพาะของ Dio
+      // ดักจับ Error เฉพาะของ Dio
       print("Fetch TypeCards Error: ${e.message}");
       Get.snackbar('Error', 'ไม่สามารถโหลดข้อมูลประเภทบัตรได้');
     } catch (e) {
