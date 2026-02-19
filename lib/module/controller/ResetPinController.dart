@@ -1,7 +1,7 @@
 import 'dart:convert';
 import 'package:get/get.dart';
-import 'package:http/http.dart' as http;
 import 'package:my_app/core/api_constants.dart';
+import 'package:my_app/core/api_service.dart';
 import 'package:my_app/module/services/device_id.dart';
 import 'package:my_app/module/services/secure_storage.dart';
 
@@ -10,7 +10,8 @@ class ResetPinController extends GetxController {
   var firstPin = ''.obs;
   var isConfirmMode = false.obs;
   var isLoading = false.obs;
-
+  final ApiService _apiService = ApiService();
+  
   void addNumber(int number) {
     if (enteredPin.value.length < 6) {
       enteredPin.value += number.toString();
@@ -49,10 +50,9 @@ class ResetPinController extends GetxController {
         "deviceId": deviceId,
       };
 
-      final response = await http.post(
-        Uri.parse("${ApiConstants.baseUrl}${ApiConstants.forgetPassword}"),
-        headers: {"Content-Type": "application/json"},
-        body: jsonEncode(body),
+      final response = await _apiService.instance.post(
+        ApiConstants.forgetPassword,
+        data: body,
       );
 
       if (response.statusCode == 200) {
@@ -60,8 +60,7 @@ class ResetPinController extends GetxController {
         Get.offAllNamed('/pin_login');
         Get.snackbar('สำเร็จ', 'ตั้งรหัสผ่านใหม่เรียบร้อยแล้ว กรุณาเข้าสู่ระบบอีกครั้ง');
       } else {
-        final error = jsonDecode(utf8.decode(response.bodyBytes));
-        Get.snackbar('ผิดพลาด', error['message'] ?? 'ไม่สามารถรีเซ็ตรหัสผ่านได้');
+        Get.snackbar('ผิดพลาด', response.data['message'] ?? 'ไม่สามารถรีเซ็ตรหัสผ่านได้');
         resetFlow();
       }
     } catch (e) {

@@ -15,12 +15,6 @@ class Card_Confirm_Page extends StatelessWidget {
     // ดึงข้อมูลโปรไฟล์จาก HomeController
     final HomeController homeCtrl = Get.find<HomeController>();
 
-    // เตรียมรูปภาพ Base64
-    Uint8List? imageBytes;
-    if (cardData['type_debit_image'] != null) {
-      imageBytes = base64Decode(cardData['type_debit_image'].split(',').last);
-    }
-
     return Scaffold(
       backgroundColor: Colors.white,
       appBar: AppBar(
@@ -55,10 +49,10 @@ class Card_Confirm_Page extends StatelessWidget {
               color: Colors.grey[50],
               child: Column(
                 children: [
-                  if (imageBytes != null)
+                  if (cardData['type_debit_image'] != null)
                     ClipRRect(
                       borderRadius: BorderRadius.circular(15),
-                      child: Image.memory(imageBytes, fit: BoxFit.contain),
+                      child: Image.network(cardData['type_debit_image'], fit: BoxFit.contain),
                     ),
                   const SizedBox(height: 15),
                   Text(

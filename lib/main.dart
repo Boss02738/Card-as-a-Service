@@ -7,7 +7,6 @@ import 'package:my_app/module/controller/header_text_controller.dart';
 import 'package:my_app/module/controller/home_controller.dart';
 import 'package:my_app/module/controller/mainTab_Controller%20.dart';
 import 'package:my_app/module/controller/my_cards_controller.dart';
-import 'package:my_app/module/controller/phonenumber_controller.dart';
 import 'package:my_app/views/pages/Register/change_device_page.dart';
 import 'package:my_app/views/pages/Register/enter_phone_page.dart';
 import 'package:my_app/views/pages/Register/face_verify.dart';
@@ -71,14 +70,14 @@ class _NovaPayAppState extends State<NovaPayApp> {
   Widget build(BuildContext context) {
     return ScreenUtilInit(
       designSize: const Size(393, 852),
-      minTextAdapt: true, 
+      minTextAdapt: true,
       splitScreenMode: true,
       builder: (context, child) {
         return GetMaterialApp(
           defaultTransition: Transition.cupertino,
           transitionDuration: const Duration(milliseconds: 300),
           debugShowCheckedModeBanner: false,
-          initialRoute: '/',
+          initialRoute: '/enter-phone',
 
           initialBinding: BindingsBuilder(() {
             // Get.lazyPut(() => PhonenumberController(), fenix: true);
@@ -101,7 +100,7 @@ class _NovaPayAppState extends State<NovaPayApp> {
             GetPage(name: '/pin_page', page: () => const PinPage()),
             //Login & Home
             GetPage(name: '/login-pin', page: () => const PinLoginPage()),
-            GetPage(name: "/home", page: () => const HomePage() ),
+            GetPage(name: "/home", page: () => const HomePage()),
             GetPage(name: "/account", page: () => const AccountPage()),
             GetPage(name: "/main", page: () => MainPage()),
             GetPage(name: "/promotion", page: () => PromotionPage()),
@@ -142,7 +141,10 @@ class _NovaPayAppState extends State<NovaPayApp> {
             //pin
             GetPage(name: "/change_pin", page: () => const ChangePinPage()),
             GetPage(name: "/pin_page", page: () => const PinPage()),
-            GetPage(name: '/user_selection', page: () => const UserSelectionPage()),
+            GetPage(
+              name: '/user_selection',
+              page: () => const UserSelectionPage(),
+            ),
             GetPage(
               name: '/change_device',
               page: () => const ChangeDevicePage(),
@@ -161,7 +163,7 @@ class MainPage extends StatelessWidget {
   final controller = Get.find<MainTabController>();
 
   final pages = [HomePage(), AccountPage(), MyCardPage(), SettingTabPage()];
-
+  
   @override
   Widget build(BuildContext context) {
     return Obx(

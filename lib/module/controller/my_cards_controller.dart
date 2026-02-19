@@ -31,6 +31,7 @@ class MyCardsController extends GetxController {
 
       if (response.statusCode == 200) {
         final List<dynamic> data = response.data;
+        print('Screen size category: $screenType');
         myCards.assignAll(data);
       } else {
         myCards.clear();

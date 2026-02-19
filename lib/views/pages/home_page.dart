@@ -3,6 +3,7 @@ import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:get/get.dart';
 import 'package:my_app/module/controller/mainTab_Controller%20.dart';
 import 'package:my_app/views/widgets/buildHeader.dart';
+import 'package:my_app/views/widgets/debitcard.dart';
 import 'package:my_app/views/widgets/exit_confirmation_dialog.dart';
 import 'package:my_app/views/widgets/gradient_header.dart';
 import 'package:my_app/module/controller/home_controller.dart';
@@ -305,77 +306,16 @@ Widget _buildActiveCardItem(dynamic card, String ownerName) {
         arguments: {'card_id': card['card_id'], 'ownerName': ownerName},
       );
     },
-    child: Container(
-      width: 300.w,
-      margin: EdgeInsets.only(right: 15.r),
-      padding: EdgeInsets.all(20.r),
-      decoration: BoxDecoration(
-        borderRadius: BorderRadius.circular(20.r),
-        gradient: const LinearGradient(
-          colors: [Color(0xFF264FAD), Color(0xFF162E7A)],
-          begin: Alignment.topLeft,
-          end: Alignment.bottomRight,
+    child: Padding(
+      padding: EdgeInsets.only(right: 15.w),
+      // ✅ เปลี่ยนจาก Container เดิม มาใช้ BankCard Widget
+      child: SizedBox(
+        width: 300.w, // กำหนดความกว้างให้เท่าเดิม
+        child: BankCard(
+          card: card, // ส่ง Object 'card' ทั้งก้อนที่มีฟิลด์ 'card_image'
+          ownerName: ownerName,
+          cardName: card['card_name'] ?? 'Novapay',
         ),
-        boxShadow: [
-          BoxShadow(
-            color: Colors.black38,
-            blurRadius: 8.r,
-            offset: Offset(0, 4.h),
-          ),
-        ],
-      ),
-      child: Column(
-        crossAxisAlignment: CrossAxisAlignment.start,
-        mainAxisAlignment: MainAxisAlignment.spaceBetween,
-        children: [
-          Row(
-            mainAxisAlignment: MainAxisAlignment.spaceBetween,
-            children: [
-              Text(
-                card['card_name'] ?? 'Novapay',
-                style: TextStyle(
-                  color: Colors.white,
-                  fontWeight: FontWeight.bold,
-                  fontSize: 14.sp,
-                ),
-              ),
-            ],
-          ),
-          const Spacer(),
-          Text(
-            ownerName.toUpperCase(),
-            style: TextStyle(
-              color: Colors.white,
-              fontSize: 12.sp,
-              fontWeight: FontWeight.w500,
-            ),
-          ),
-          SizedBox(height: 5.h),
-          // ✅ แสดงเลขบัตรที่ Mask ไว้ (ดึง last_digits จาก API)
-          Text(
-            '**** **** **** ${card['last_digits'] ?? '****'}',
-            style: TextStyle(
-              color: Colors.white,
-              fontSize: 16.sp,
-              letterSpacing: 2.sp,
-              fontWeight: FontWeight.bold,
-            ),
-          ),
-          SizedBox(height: 10.h),
-          Row(
-            mainAxisAlignment: MainAxisAlignment.spaceBetween,
-            children: [
-              Text(
-                card['virtual'] == true ? 'Virtual Card' : 'Physical Card',
-                style: TextStyle(color: Colors.white70, fontSize: 11.sp),
-              ),
-              Image.network(
-                'https://upload.wikimedia.org/wikipedia/commons/thumb/2/2a/Mastercard-logo.svg/1280px-Mastercard-logo.svg.png',
-                width: 25.w,
-              ),
-            ],
-          ),
-        ],
       ),
     ),
   );

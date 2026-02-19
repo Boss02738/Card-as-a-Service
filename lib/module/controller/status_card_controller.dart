@@ -1,7 +1,5 @@
-import 'dart:convert';
 import 'package:dio/dio.dart' as dio;
 import 'package:get/get.dart';
-import 'package:http/http.dart' as http;
 import 'package:my_app/core/api_constants.dart';
 import 'package:my_app/core/api_service.dart';
 import 'package:my_app/module/controller/card_detail_controller.dart';

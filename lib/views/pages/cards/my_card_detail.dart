@@ -58,7 +58,7 @@ class _MyCardDetailState extends State<MyCardDetail> {
 
         final String currentCardId = card['card_id'];
         final String ownerEn = homeController.fullNameEn.value;
-        final String cardName = card['card_name'];
+        // final String cardName = card['card_name'];
 
         // ซิงค์สถานะ
         if (!statusCardController.isLoading.value) {
@@ -94,7 +94,7 @@ class _MyCardDetailState extends State<MyCardDetail> {
               ),
 
               _buildDetailSection([
-                _buildRow("ชื่อ นามสกุล", homeController.fullNameTh.value),
+                // _buildRow("ชื่อ นามสกุล", homeController.fullNameTh.value),
                 _buildRow(
                   "สถานะบัตร",
                   statusCardController.isCardFrozen.value
@@ -104,7 +104,7 @@ class _MyCardDetailState extends State<MyCardDetail> {
                       ? Colors.red
                       : Colors.green,
                 ),
-                _buildRow("ผูกกับบัญชี", homeController.accountNumber.value),
+                // _buildRow("ผูกกับบัญชี", homeController.accountNumber.value),
 
                 // ดูเลขบัตร (ซ่อนถ้าบัตรยังไม่เปิดใช้งาน)
                 if (!(card['virtual'] == false && card['status'] == 'inactive'))

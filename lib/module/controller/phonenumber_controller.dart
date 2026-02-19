@@ -1,13 +1,12 @@
 import 'package:get/get.dart';
-import 'package:http/http.dart' as http;
-import 'dart:convert';
 import 'package:my_app/core/api_constants.dart';
+import 'package:my_app/core/api_service.dart';
 
 class PhonenumberController extends GetxController {
   var phoneNumber = ''.obs;
   var isLoading = false.obs;
   var REF_CODE = ''.obs; // <--- เพิ่มตัวแปรเก็บเลขอ้างอิง
-
+  final ApiService _apiService = ApiService(); // <--- สร้าง instance ของ ApiService
   void setPhoneNumber(String number) {
     phoneNumber.value = number;
   }
@@ -25,15 +24,15 @@ class PhonenumberController extends GetxController {
       isLoading.value = true;
       final url = Uri.parse('${ApiConstants.baseUrl}${ApiConstants.refCode}');
 
-      final response = await http.post(
-        url,
-        headers: {'Content-Type': 'application/json'},
-        // body: jsonEncode({'phoneNumber': phoneNumber.value}),
-        body: jsonEncode({'mobileNumber': phoneNumber.value}),
+      final response = await _apiService.instance.post(
+        ApiConstants.refCode,
+        data: {
+          'mobileNumber': phoneNumber.value
+        },
       );
 
       if (response.statusCode == 200) {
-        final data = jsonDecode(response.body);
+        final data = response.data;
 
         // *** สำคัญ: ต้องเอาค่าจาก JSON มาใส่ใน REF_CODE.value ***
         // สมมติว่า Server ส่งกลับมาในรูปแบบ {"REF_CODE": "ABC123"}

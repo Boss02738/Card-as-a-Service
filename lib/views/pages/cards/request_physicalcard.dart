@@ -49,16 +49,6 @@ class _RequestPhysicaState extends State<RequestPhysical> {
           orElse: () => null,
         );
 
-        // Decode รูปภาพภายใน Obx
-        Uint8List? imageBytes;
-        if (cardTypeDetail != null &&
-            cardTypeDetail['type_debit_image'] != null) {
-          String base64String = cardTypeDetail['type_debit_image']
-              .split(',')
-              .last;
-          imageBytes = base64Decode(base64String);
-        }
-
         // แสดง Loading หากข้อมูลยังโหลดไม่เสร็จ
         if (typeController.isLoading.value) {
           return const Center(child: CircularProgressIndicator());
@@ -93,10 +83,10 @@ class _RequestPhysicaState extends State<RequestPhysical> {
                 color: Colors.grey[50],
                 child: Column(
                   children: [
-                    if (imageBytes != null)
+                    if (cardTypeDetail?['type_debit_image'] != null)
                       ClipRRect(
                         borderRadius: BorderRadius.circular(15),
-                        child: Image.memory(imageBytes, fit: BoxFit.contain),
+                        child: Image.network(cardTypeDetail['type_debit_image'], fit: BoxFit.contain),
                       )
                     else
                        Icon(

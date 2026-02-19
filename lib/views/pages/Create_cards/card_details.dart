@@ -1,5 +1,3 @@
-import 'dart:convert';
-import 'dart:typed_data';
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import 'package:my_app/views/widgets/arrow_fab.dart'; // ตรวจสอบ path ของคุณ
@@ -18,12 +16,6 @@ class _Card_DetailState extends State<Card_Detail> {
   @override
   Widget build(BuildContext context) {
     // Decode รูปภาพครั้งเดียวใน build
-    Uint8List? imageBytes;
-    if (cardData['type_debit_image'] != null) {
-      String base64String = cardData['type_debit_image'].split(',').last;
-      imageBytes = base64Decode(base64String);
-    }
-
     return Scaffold(
       backgroundColor: Colors.white,
       appBar: AppBar(
@@ -57,34 +49,40 @@ class _Card_DetailState extends State<Card_Detail> {
             ),
 
             // ส่วนแสดงบัตร (จะไม่กระพริบแล้วเพราะเราแยก State ของ Checkbox)
-            Container(
-              width: double.infinity,
-              padding: const EdgeInsets.symmetric(vertical: 30, horizontal: 50),
-              color: Colors.grey[50],
-              child: Column(
-                children: [
-                  if (imageBytes != null)
-                    ClipRRect(
-                      borderRadius: BorderRadius.circular(15),
-                      child: Image.memory(imageBytes, fit: BoxFit.contain),
-                    )
-                  else
-                    const Icon(
-                      Icons.credit_card,
-                      size: 150,
-                      color: Colors.grey,
-                    ),
-                  const SizedBox(height: 15),
-                  Text(
-                    cardData['type_debit_name'] ?? '-',
-                    style: const TextStyle(
-                      fontSize: 18,
-                      fontWeight: FontWeight.bold,
-                    ),
-                  ),
-                ],
-              ),
-            ),
+            // ✅ ส่วนแสดงบัตรที่ถูกต้องใน Card_Detail
+Container(
+  width: double.infinity,
+  padding: const EdgeInsets.symmetric(vertical: 30, horizontal: 50),
+  color: Colors.grey[50],
+  child: Column(
+    children: [
+      if (cardData['type_debit_image'] != null)
+        ClipRRect(
+          borderRadius: BorderRadius.circular(15),
+          child: Image.network(
+            // ใช้ .toString().trim() เพื่อความปลอดภัยจากช่องว่าง
+            cardData['type_debit_image'].toString().trim(),
+            fit: BoxFit.contain,
+            errorBuilder: (context, error, stackTrace) {
+              return const Icon(
+                Icons.credit_card,
+                size: 150,
+                color: Colors.grey,
+              );
+            },
+          ),
+        )
+      else
+        const Icon(Icons.credit_card, size: 150, color: Colors.grey),
+      
+      const SizedBox(height: 15),
+      Text(
+        cardData['card_name'] ?? '-',
+        style: const TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
+      ),
+    ],
+  ),
+),
 
             Padding(
               padding: const EdgeInsets.all(20.0),
@@ -174,8 +172,8 @@ class _Card_DetailState extends State<Card_Detail> {
                         'ต่อไป',
                         style: TextStyle(
                           fontSize: 18,
+
                           // fontWeight: FontWeight.bold,
-                          
                           color: enabled
                               ? const Color.fromARGB(255, 45, 75, 10)
                               : Colors.grey[400],

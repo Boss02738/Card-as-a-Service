@@ -21,12 +21,14 @@ class CardDetailController extends GetxController {
       final response = await _apiService.instance.post(
         ApiConstants.cardDetail,
         data: {"card_id": cardId},
-        queryParameters: {'image_size': screenType}, 
+        queryParameters: {'image_size': screenType},
       );
 
       if (response.statusCode == 200) {
         cardData.value = response
             .data; // ถ้าเป็นบัตร Physical และสถานะยังไม่ active ให้เรียกดู tracking ต่อทันที
+        print('Screen size category: $screenType');
+
         if (cardData['virtual'] == false && cardData['status'] == 'inactive') {
           await fetchCardTracking(cardId);
         }

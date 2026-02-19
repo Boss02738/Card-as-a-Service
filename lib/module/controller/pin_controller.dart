@@ -1,19 +1,17 @@
-import 'dart:convert';
-
 import 'package:get/get.dart';
+import 'package:my_app/core/api_service.dart';
 import 'package:my_app/module/controller/info_controller.dart';
 import 'package:my_app/module/controller/phonenumber_controller.dart';
 import 'package:my_app/core/api_constants.dart';
 import 'package:my_app/module/services/device_id.dart'; // import ไฟล์ที่เก็บฟังก์ชัน getDeviceId
 import 'package:my_app/module/services/secure_storage.dart';
-import 'package:http/http.dart' as http;
 
 class PinController extends GetxController {
   var enteredPin = ''.obs; // PIN ที่กำลังพิมพ์
   var firstPin = ''.obs; // เก็บ PIN รอบแรก
   var isConfirmMode = false.obs; // สลับโหมด ตั้งค่า/ยืนยัน
   var isLoading = false.obs;
-
+  final ApiService _apiService = ApiService();
   String lockedMobile = "";
 
   //pin
@@ -88,10 +86,9 @@ class PinController extends GetxController {
         "newDeviceId": deviceId,
       };
 
-      final response = await http.post(
-        Uri.parse("${ApiConstants.baseUrl}${ApiConstants.changedevice}"),
-        headers: {"Content-Type": "application/json"},
-        body: jsonEncode(body),
+      final response = await _apiService.instance.post(
+        ApiConstants.changedevice,
+        data: body,
       );
 
       if (response.statusCode == 200) {
@@ -104,10 +101,9 @@ class PinController extends GetxController {
         await Future.delayed(const Duration(milliseconds: 500));
         Get.offAllNamed('/success');
       } else {
-        final error = jsonDecode(utf8.decode(response.bodyBytes));
         Get.snackbar(
           'ผิดพลาด',
-          error['message'] ?? 'ข้อมูลไม่ถูกต้อง กรุณาตรวจสอบข้อมูลอีกครั้ง',
+          response.data['message'] ?? 'ข้อมูลไม่ถูกต้อง กรุณาตรวจสอบข้อมูลอีกครั้ง',
         );
         enteredPin.value = '';
       }
@@ -144,10 +140,9 @@ class PinController extends GetxController {
       };
 
 
-      final response = await http.post(
-        Uri.parse("${ApiConstants.baseUrl}${ApiConstants.forgetPassword}"),
-        headers: {"Content-Type": "application/json"},
-        body: jsonEncode(body),
+      final response = await _apiService.instance.post(
+        ApiConstants.forgetPassword,
+        data: body,
       );
 
       if (response.statusCode == 200) {
@@ -160,7 +155,7 @@ class PinController extends GetxController {
         // await Future.delayed(const Duration(milliseconds: 500));
         Get.offAllNamed('/login-pin');
       } else {
-        final error = jsonDecode(utf8.decode(response.bodyBytes));
+        final error = response.data;
         Get.snackbar('ผิดพลาด', error['message'] ?? 'รีเซ็ตรหัสผ่านไม่สำเร็จ');
         enteredPin.value = ''; // ให้ User ลองกรอก Confirm PIN ใหม่
       }
@@ -192,10 +187,9 @@ class PinController extends GetxController {
         "deviceId": deviceId,
       };
 
-      final response = await http.post(
-        Uri.parse("${ApiConstants.baseUrl}${ApiConstants.register}"),
-        headers: {"Content-Type": "application/json"},
-        body: jsonEncode(finalData),
+      final response = await _apiService.instance.post(
+        ApiConstants.register,
+        data: finalData,
       );
 
       if (response.statusCode == 200) {
@@ -212,7 +206,7 @@ class PinController extends GetxController {
         await Future.delayed(const Duration(milliseconds: 500));
         Get.offAllNamed('/success');
       } else {
-        Get.snackbar('ผิดพลาด', 'การลงทะเบียนไม่สำเร็จ: ${response.body}');
+        Get.snackbar('ผิดพลาด', 'การลงทะเบียนไม่สำเร็จ: ${response.data['message'] ?? 'โปรดลองอีกครั้ง'}');
       }
     } catch (e) {
       Get.snackbar('Error', 'ไม่สามารถเชื่อมต่อเซิร์ฟเวอร์ได้: $e');

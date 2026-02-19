@@ -59,17 +59,13 @@ class Type_Cards extends StatelessWidget {
     );
   }
 
-  Widget _buildCardItem(dynamic card) {
-    // แปลงรูปภาพ Base64
-    Uint8List? imageBytes;
-    if (card['type_debit_image'] != null) {
-      String base64String = card['type_debit_image'].split(',').last;
-      imageBytes = base64Decode(base64String);
-    }
+Widget _buildCardItem(dynamic card) {
+    // ✅ ไม่ต้องใช้ Uint8List หรือ base64Decode แล้ว เพราะ API ส่งเป็น URL มาให้
+    // final String? imageUrl = card['type_debit_image'];
+    final String? imageUrl = card['type_debit_image'];
 
     return InkWell(
       onTap: () {
-        // ไปหน้าถัดไปพร้อมส่งข้อมูลบัตรที่เลือก
         Get.toNamed('/card_detail', arguments: card);
       },
       child: Padding(
@@ -85,18 +81,38 @@ class Type_Cards extends StatelessWidget {
             Row(
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
-                // รูปหน้าบัตร
+                // ✅ รูปหน้าบัตร (โหลดผ่าน Network)
                 Container(
                   width: 120,
                   height: 75,
                   decoration: BoxDecoration(
                     borderRadius: BorderRadius.circular(8),
                     color: Colors.grey[300],
+                    boxShadow: [
+                      BoxShadow(
+                        color: Colors.black12,
+                        blurRadius: 4,
+                        offset: const Offset(0, 2),
+                      ),
+                    ],
                   ),
-                  child: imageBytes != null
+                  child: imageUrl != null
                       ? ClipRRect(
                           borderRadius: BorderRadius.circular(8),
-                          child: Image.memory(imageBytes, fit: BoxFit.cover),
+                          child: Image.network(
+                            imageUrl, // 🌐 ใช้ URL จาก API โดยตรง
+                            fit: BoxFit.cover,
+                            // ✅ เพิ่ม Loading Placeholder ขณะโหลดรูป
+                            loadingBuilder: (context, child, loadingProgress) {
+                              if (loadingProgress == null) return child;
+                              return const Center(
+                                child: CircularProgressIndicator(strokeWidth: 2),
+                              );
+                            },
+                            // ✅ เพิ่ม Error Placeholder กรณีโหลดรูปไม่สำเร็จ
+                            errorBuilder: (context, error, stackTrace) =>
+                                const Icon(Icons.credit_card, size: 40),
+                          ),
                         )
                       : const Icon(Icons.credit_card, size: 40),
                 ),

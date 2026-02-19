@@ -168,6 +168,4 @@ class _MyCardPageState extends State<MyCardPage> {
       },
     );
   }
-
-  // ภายในไฟล์ my_card_page.dart
 }

@@ -1,4 +1,4 @@
-import 'dart:convert';
+// debitcard.dart
 import 'package:flutter/material.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
 
@@ -17,14 +17,15 @@ class BankCard extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return AspectRatio(
-      aspectRatio: 1.58, // 🔒 ล็อกสเกลเดียวกับ MyCardDetail
+      aspectRatio: 1.58,
       child: Container(
         padding: EdgeInsets.all(20.r),
         decoration: BoxDecoration(
           borderRadius: BorderRadius.circular(15.r),
+          // ✅ เปลี่ยนการโหลดรูปภาพจาก Memory (Base64) เป็น Network (URL)
           image: card['card_image'] != null
               ? DecorationImage(
-                  image: MemoryImage(base64Decode(card['card_image'])),
+                  image: NetworkImage(card['card_image']), // 🌐 ดึงรูปจาก URL ที่ได้จาก API
                   fit: BoxFit.cover,
                 )
               : null,
@@ -48,11 +49,9 @@ class BankCard extends StatelessWidget {
           children: [
             Text(
               cardName.toUpperCase(),
-              style: TextStyle(color: Colors.white, fontSize: 16.sp),
+              style: TextStyle(color: Colors.white, fontSize: 16.sp, fontWeight: FontWeight.bold),
             ),
-
             const Spacer(),
-
             Text(
               ownerName.toUpperCase(),
               style: TextStyle(
@@ -63,7 +62,7 @@ class BankCard extends StatelessWidget {
             ),
             SizedBox(height: 5.h),
             Text(
-              "**** **** **** ${card['last_digits']}",
+              "**** **** **** ${card['last_digits'] ?? '****'}",
               style: TextStyle(
                 color: Colors.white,
                 fontSize: 18.sp,
@@ -71,9 +70,7 @@ class BankCard extends StatelessWidget {
                 fontWeight: FontWeight.bold,
               ),
             ),
-
             SizedBox(height: 15.h),
-
             Row(
               mainAxisAlignment: MainAxisAlignment.spaceBetween,
               children: [

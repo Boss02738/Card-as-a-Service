@@ -190,18 +190,6 @@ class _ChangeLimitCardState extends State<ChangeLimitCard> {
     );
   }
 
-  Widget _buildSectionHeader(String title) {
-    return Padding(
-      padding: EdgeInsets.only(left: 20.w, top: 15.h, bottom: 8.h),
-      child: Align(
-        alignment: Alignment.centerLeft,
-        child: Text(
-          title,
-          style: TextStyle(fontSize: 13.sp, fontWeight: FontWeight.bold),
-        ),
-      ),
-    );
-  }
 
   void _showLimitPicker() {
     final List<String> limitOptions = [

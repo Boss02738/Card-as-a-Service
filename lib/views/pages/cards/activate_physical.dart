@@ -152,7 +152,7 @@ class _ActivatePhysicalState extends State<ActivatePhysical> {
                 borderRadius: BorderRadius.circular(12.r),
                 image: card['card_image'] != null
                     ? DecorationImage(
-                        image: MemoryImage(base64Decode(card['card_image'])),
+                        image: NetworkImage(card['card_image']),
                         fit: BoxFit.cover,
                       )
                     : null,
