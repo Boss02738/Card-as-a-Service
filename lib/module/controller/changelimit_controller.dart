@@ -1,6 +1,6 @@
 import 'package:dio/dio.dart' as dio;
-import 'package:my_app/core/api_constants.dart';
-import 'package:my_app/core/api_service.dart';
+import 'package:my_app/core/service/api_constants.dart';
+import 'package:my_app/core/service/api_service.dart';
 import 'package:my_app/module/controller/my_cards_controller.dart';
 import 'package:get/get.dart';
 import 'package:my_app/module/services/device_id.dart';

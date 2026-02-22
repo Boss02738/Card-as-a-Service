@@ -5,13 +5,13 @@ import 'package:flutter_screenutil/flutter_screenutil.dart';
 class BankCard extends StatelessWidget {
   final dynamic card;
   final String ownerName;
-  final String cardName;
+  final String? cardName;
 
   const BankCard({
     super.key,
     required this.card,
     required this.ownerName,
-    required this.cardName,
+    this.cardName,
   });
 
   @override
@@ -22,10 +22,10 @@ class BankCard extends StatelessWidget {
         padding: EdgeInsets.all(20.r),
         decoration: BoxDecoration(
           borderRadius: BorderRadius.circular(15.r),
-          // ✅ เปลี่ยนการโหลดรูปภาพจาก Memory (Base64) เป็น Network (URL)
+          // เปลี่ยนการโหลดรูปภาพจาก Memory (Base64) เป็น Network (URL)
           image: card['card_image'] != null
               ? DecorationImage(
-                  image: NetworkImage(card['card_image']), // 🌐 ดึงรูปจาก URL ที่ได้จาก API
+                  image: NetworkImage(card['card_image']), // ดึงรูปจาก URL ที่ได้จาก API
                   fit: BoxFit.cover,
                 )
               : null,
@@ -48,7 +48,7 @@ class BankCard extends StatelessWidget {
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
             Text(
-              cardName.toUpperCase(),
+              cardName?.toUpperCase() ?? '',
               style: TextStyle(color: Colors.white, fontSize: 16.sp, fontWeight: FontWeight.bold),
             ),
             const Spacer(),
@@ -78,10 +78,7 @@ class BankCard extends StatelessWidget {
                   card['virtual'] == true ? "Virtual Card" : "Physical Card",
                   style: TextStyle(color: Colors.white70, fontSize: 14.sp),
                 ),
-                Image.network(
-                  'https://upload.wikimedia.org/wikipedia/commons/thumb/2/2a/Mastercard-logo.svg/1280px-Mastercard-logo.svg.png',
-                  width: 35.w,
-                ),
+            
               ],
             ),
           ],

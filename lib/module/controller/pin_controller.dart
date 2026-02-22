@@ -1,8 +1,9 @@
+import 'dart:convert';
 import 'package:get/get.dart';
-import 'package:my_app/core/api_service.dart';
+import 'package:my_app/core/service/api_service.dart';
 import 'package:my_app/module/controller/info_controller.dart';
 import 'package:my_app/module/controller/phonenumber_controller.dart';
-import 'package:my_app/core/api_constants.dart';
+import 'package:my_app/core/service/api_constants.dart';
 import 'package:my_app/module/services/device_id.dart'; // import ไฟล์ที่เก็บฟังก์ชัน getDeviceId
 import 'package:my_app/module/services/secure_storage.dart';
 
@@ -86,6 +87,7 @@ class PinController extends GetxController {
         "newDeviceId": deviceId,
       };
 
+      print("Request Body: ${jsonEncode(body)}");
       final response = await _apiService.instance.post(
         ApiConstants.changedevice,
         data: body,
@@ -103,7 +105,8 @@ class PinController extends GetxController {
       } else {
         Get.snackbar(
           'ผิดพลาด',
-          response.data['message'] ?? 'ข้อมูลไม่ถูกต้อง กรุณาตรวจสอบข้อมูลอีกครั้ง',
+          response.data['message'] ??
+              'ข้อมูลไม่ถูกต้อง กรุณาตรวจสอบข้อมูลอีกครั้ง',
         );
         enteredPin.value = '';
       }
@@ -118,7 +121,6 @@ class PinController extends GetxController {
     try {
       isLoading.value = true;
       String? deviceId = await getDeviceId();
-
 
       final dynamic args = Get.arguments;
       String mobile = "";
@@ -138,7 +140,6 @@ class PinController extends GetxController {
         "newPin": firstPin.value,
         "deviceId": deviceId,
       };
-
 
       final response = await _apiService.instance.post(
         ApiConstants.forgetPassword,
@@ -206,7 +207,10 @@ class PinController extends GetxController {
         await Future.delayed(const Duration(milliseconds: 500));
         Get.offAllNamed('/success');
       } else {
-        Get.snackbar('ผิดพลาด', 'การลงทะเบียนไม่สำเร็จ: ${response.data['message'] ?? 'โปรดลองอีกครั้ง'}');
+        Get.snackbar(
+          'ผิดพลาด',
+          'การลงทะเบียนไม่สำเร็จ: ${response.data['message'] ?? 'โปรดลองอีกครั้ง'}',
+        );
       }
     } catch (e) {
       Get.snackbar('Error', 'ไม่สามารถเชื่อมต่อเซิร์ฟเวอร์ได้: $e');

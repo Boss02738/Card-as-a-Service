@@ -1,7 +1,7 @@
 import 'package:dio/dio.dart' as dio; // นำเข้า Dio และตั้งชื่อเล่นว่า dio เพื่อจัดการ Exception
 import 'package:get/get.dart';
-import 'package:my_app/core/api_constants.dart';
-import 'package:my_app/core/api_service.dart';
+import 'package:my_app/core/service/api_constants.dart';
+import 'package:my_app/core/service/api_service.dart';
 import 'package:my_app/module/controller/changelimit_controller.dart';
 import 'package:my_app/module/services/device_id.dart';
 import 'package:my_app/module/services/secure_storage.dart';
@@ -61,7 +61,6 @@ class PinVerifyController extends GetxController {
         "card_id": originalArgs['card']['card_id'], //  เพิ่มบรรทัดนี้เพื่อให้ API รู้ว่าเปิดใบไหน
       };
 
-      // ใช้ _apiService.instance แทน http
       final response = await _apiService.instance.post(
         ApiConstants.activatecard,
         data: body,

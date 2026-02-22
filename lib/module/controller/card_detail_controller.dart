@@ -1,9 +1,9 @@
 // card_detail_controller.dart
 import 'dart:convert';
 import 'package:get/get.dart';
-import 'package:my_app/core/api_constants.dart';
-import 'package:my_app/core/api_service.dart';
-import 'package:my_app/core/screen_size.dart';
+import 'package:my_app/core/service/api_constants.dart';
+import 'package:my_app/core/service/api_service.dart';
+import 'package:my_app/core/utils/screen_size.dart';
 import 'package:my_app/module/services/secure_storage.dart';
 import 'package:dio/dio.dart' as dio; // นำเข้าเพื่อใช้จัดการ DioException
 

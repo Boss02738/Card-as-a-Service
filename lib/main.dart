@@ -5,7 +5,7 @@ import 'package:get/get.dart';
 import 'package:my_app/module/binding/main_tab_binding.dart';
 import 'package:my_app/module/controller/header_text_controller.dart';
 import 'package:my_app/module/controller/home_controller.dart';
-import 'package:my_app/module/controller/mainTab_Controller%20.dart';
+import 'package:my_app/module/controller/main_tab_controller.dart';
 import 'package:my_app/module/controller/my_cards_controller.dart';
 import 'package:my_app/views/pages/Register/change_device_page.dart';
 import 'package:my_app/views/pages/Register/enter_phone_page.dart';
@@ -77,8 +77,7 @@ class _NovaPayAppState extends State<NovaPayApp> {
           defaultTransition: Transition.cupertino,
           transitionDuration: const Duration(milliseconds: 300),
           debugShowCheckedModeBanner: false,
-          initialRoute: '/enter-phone',
-
+          initialRoute: '/',
           initialBinding: BindingsBuilder(() {
             // Get.lazyPut(() => PhonenumberController(), fenix: true);
             Get.lazyPut(() => HeaderTextController(), fenix: true);
@@ -127,7 +126,7 @@ class _NovaPayAppState extends State<NovaPayApp> {
             //Physical card
             GetPage(name: "/address_input", page: () => const Address()),
             GetPage(
-              name: "/requestPhysical",
+              name: "/requestPhysical",  
               page: () => const RequestPhysical(),
             ),
             GetPage(

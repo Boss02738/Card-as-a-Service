@@ -1,7 +1,7 @@
 import 'dart:convert';
 import 'package:get/get.dart';
-import 'package:my_app/core/api_constants.dart';
-import 'package:my_app/core/api_service.dart';
+import 'package:my_app/core/service/api_constants.dart';
+import 'package:my_app/core/service/api_service.dart';
 import 'package:my_app/module/services/device_id.dart';
 import 'package:my_app/module/services/secure_storage.dart';
 

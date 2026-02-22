@@ -1,6 +1,6 @@
 import 'package:get/get.dart';
-import 'package:my_app/core/api_constants.dart';
-import 'package:my_app/core/api_service.dart';
+import 'package:my_app/core/service/api_constants.dart';
+import 'package:my_app/core/service/api_service.dart';
 
 class PhonenumberController extends GetxController {
   var phoneNumber = ''.obs;

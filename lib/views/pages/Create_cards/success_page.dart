@@ -1,6 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
-import 'package:my_app/module/controller/mainTab_Controller%20.dart';
+import 'package:my_app/module/controller/main_tab_controller.dart';
 import 'package:my_app/views/widgets/gradient_header.dart';
 
 class SuccessPaga extends StatelessWidget {

@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:get/get.dart';
-import 'package:my_app/module/controller/mainTab_Controller%20.dart';
+import 'package:my_app/module/controller/main_tab_controller.dart';
 import 'package:my_app/views/widgets/buildHeader.dart';
 import 'package:my_app/views/widgets/debitcard.dart';
 import 'package:my_app/views/widgets/exit_confirmation_dialog.dart';
@@ -313,8 +313,8 @@ Widget _buildActiveCardItem(dynamic card, String ownerName) {
         width: 300.w, // กำหนดความกว้างให้เท่าเดิม
         child: BankCard(
           card: card, // ส่ง Object 'card' ทั้งก้อนที่มีฟิลด์ 'card_image'
-          ownerName: ownerName,
-          cardName: card['card_name'] ?? 'Novapay',
+          ownerName: ownerName, cardName: card['card_name'] ?? '',
+          // cardName: card['fddf'] ?? '',
         ),
       ),
     ),

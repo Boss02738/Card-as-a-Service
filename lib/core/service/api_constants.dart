@@ -1,9 +1,10 @@
 class ApiConstants {
-  static const String baseUrl = "http://192.168.250.35:8084";
+  // static const String baseUrl = "http://192.168.250.35:8084";
   // static const String baseUrlCore = "http://10.82.241.156:8080";
 
   // static const String baseUrl = "http://10.82.241.238:8084";
-
+  static const String baseUrl = "https://10.82.241.151:8443";
+  
   static const String auth = "/api/v1/mobile/auth";
   static const String feature = "/api/v1/mobile/feature";
   //Register

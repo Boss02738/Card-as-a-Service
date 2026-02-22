@@ -1,8 +1,8 @@
 import 'package:get/get.dart';
-import 'package:my_app/core/api_constants.dart';
-import 'package:my_app/core/api_service.dart';
+import 'package:my_app/core/service/api_constants.dart';
+import 'package:my_app/core/service/api_service.dart';
 import 'package:dio/dio.dart' as dio;
-import 'package:my_app/core/screen_size.dart'; // นำเข้าเพื่อใช้จัดการ Exception
+import 'package:my_app/core/utils/screen_size.dart'; // นำเข้าเพื่อใช้จัดการ Exception
 
 class TypeCardsController extends GetxController {
   var isLoading = true.obs;
