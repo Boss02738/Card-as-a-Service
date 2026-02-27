@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:get/get.dart';
 import 'package:my_app/module/controller/main_tab_controller.dart';
+import 'package:my_app/views/slidebar_promotion.dart';
 import 'package:my_app/views/widgets/buildHeader.dart';
 import 'package:my_app/views/widgets/debitcard.dart';
 import 'package:my_app/views/widgets/exit_confirmation_dialog.dart';
@@ -44,12 +45,12 @@ class _HomePageState extends State<HomePage> {
                       const Buildheader(),
                       SizedBox(height: 10.h),
                       Padding(
-                        padding: EdgeInsets.symmetric(horizontal: 15.w),
+                        padding: EdgeInsets.symmetric(horizontal: 10.w),
                         child: const AccountWidget(),
                       ),
                       SizedBox(height: 10.h),
                       _buildOffersSection(), // ส่วนข้อเสนอพิเศษ
-                      SizedBox(height: 10.h),
+                      // SizedBox(height: 10.h),
                       _buildMyCardsSection(
                         cardController,
                         homeController, // ส่วนบัตรของฉัน0.
@@ -125,7 +126,7 @@ Widget _buildOffersSection() {
           mainAxisAlignment: MainAxisAlignment.spaceBetween,
           children: [
             Text(
-              'ข้อเสนอพำพิเศษ',
+              'ข้อเสนอพิเศษ',
               style: TextStyle(
                 color: Colors.white,
                 fontSize: 18.sp,
@@ -133,16 +134,9 @@ Widget _buildOffersSection() {
               ),
             ),
             ElevatedButton(
-              onPressed: () {
-                Get.find<MainTabController>().changeTab(2);
-              },
+              onPressed: () => Get.toNamed('/promotion'),
               style: ElevatedButton.styleFrom(
-                backgroundColor: const Color.fromARGB(
-                  255,
-                  169,
-                  169,
-                  169,
-                ).withOpacity(0.1),
+                backgroundColor: Colors.white.withOpacity(0.1),
                 shape: RoundedRectangleBorder(
                   borderRadius: BorderRadius.circular(20),
                 ),
@@ -150,46 +144,22 @@ Widget _buildOffersSection() {
               ),
               child: Row(
                 children: [
-                  Text(
-                    'ดูทั้งหมด',
-                    style: TextStyle(
-                      color: const Color.fromARGB(255, 255, 255, 255),
-                      fontSize: 14.sp,
-                    ),
-                  ),
-                  Icon(
-                    Icons.arrow_forward_ios,
-                    size: 12.r,
-                    color: const Color.fromARGB(
-                      255,
-                      255,
-                      255,
-                      255,
-                    ).withOpacity(0.7),
-                  ),
+                  Text('ดูทั้งหมด', style: TextStyle(color: Colors.white, fontSize: 14.sp)),
+                  Icon(Icons.arrow_forward_ios, size: 12.r, color: Colors.white.withOpacity(0.7)),
                 ],
               ),
             ),
           ],
         ),
+        
       ),
       SizedBox(height: 10.h),
-      SizedBox(
-        height: 180.h,
-        child: ListView(
-          scrollDirection: Axis.horizontal,
-          padding: EdgeInsets.symmetric(horizontal: 15.w),
-          children: [
-            // กำหนดให้ promo1 กดแล้วไปหน้า /type_cards
-            _buildOfferItem(
-              'assets/images/promo1.png',
-              onTap: () => Get.toNamed('/type_cards'),
-            ),
-            // รูปอื่นๆ (ถ้ายังไม่มี action ให้ใส่ค่าว่างไว้ก่อน)
-            _buildOfferItem('assets/images/promo2.png', onTap: () {}),
-          ],
-        ),
-      ),
+      
+      // 🚩 แก้ไขตรงนี้: นำ WebView Slider มาใส่แทน ListView เดิม
+      const PromoSliderWebView(), 
+      
+      // หมายเหตุ: ไม่ต้องใช้ ListView(scrollDirection: Axis.horizontal) แล้ว 
+      // เพราะใน PWA (Vue) จะทำหน้าที่สไลด์ด้วยตัวมันเองครับ
     ],
   );
 }

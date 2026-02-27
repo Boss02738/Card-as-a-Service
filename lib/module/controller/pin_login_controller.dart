@@ -1,4 +1,5 @@
 import 'dart:convert';
+import 'dart:math';
 import 'package:dio/dio.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
@@ -33,6 +34,12 @@ class PinLoginController extends GetxController {
         enteredPin.value.length - 1,
       );
     }
+  }
+// random string generate เอาไว้ทำ nonce state
+  String _generateRandomString(int length) {
+    var random = Random.secure();
+    var values = List<int>.generate(length, (i) => random.nextInt(256));
+    return base64Url.encode(values).replaceAll('=', '');
   }
 
   // --- Dialog กรณีใส่รหัสผิดปกติ (ยังไม่ครบ 3 ครั้ง) ---
@@ -150,7 +157,7 @@ class PinLoginController extends GetxController {
           "mobileNumber": mobile,
           "deviceId": deviceId,
           "pin": enteredPin.value,
- },
+        },
       );
 
       if (response.statusCode == 200) {
@@ -161,6 +168,7 @@ class PinLoginController extends GetxController {
             key: 'refreshToken',
             value: responseData['refreshToken'],
           );
+          await storage.write(key: 'idToken', value: responseData['idToken']);
           Get.offAllNamed('/main');
         }
       }
@@ -184,7 +192,72 @@ class PinLoginController extends GetxController {
       isLoading.value = false;
     }
   }
+// Future<void> loginWithPin() async {
+//   if (isLoading.value) return;
+//   try {
+//     isLoading.value = true;
+    
+//     // 1. สร้างค่า nonce และ state ขึ้นมาใหม่ทุกครั้งที่กด Login
+//     String clientNonce = _generateRandomString(16);
+//     String clientState = _generateRandomString(16);
 
+//     String? mobile = await storage.read(key: 'userMobile');
+//     String? deviceId = await getDeviceId();
+
+//     // 2. ส่งแนบไปใน Request body
+//     final response = await _apiService.instance.post(
+//       ApiConstants.login,
+//       data: {
+//         "mobileNumber": mobile,
+//         "deviceId": deviceId,
+//         "pin": enteredPin.value,
+//         "nonce": clientNonce, 
+//         "state": clientState, 
+//       },
+//     );
+
+//     if (response.statusCode == 200) {
+//       final responseData = response.data;
+      
+//       // 3. ตรวจสอบ STATE ที่ Server ส่งกลับมา (ต้องตรงกับที่เราส่งไป)
+//       if (responseData['state'] != clientState) {
+//         throw Exception("Invalid state: ข้อมูลการตอบกลับไม่ถูกต้อง");
+//       }
+
+//       // 4. ตรวจสอบ NONCE ภายใน ID Token (ต้องใช้ Library jwt_decoder หรือคล้ายกัน)
+//       String idToken = responseData['idToken'];
+//       Map<String, dynamic> decodedToken = JwtDecoder.decode(idToken);
+      
+//       if (decodedToken['nonce'] != clientNonce) {
+//         throw Exception("Invalid nonce: Token นี้ไม่ได้สร้างมาสำหรับคำขอนี้");
+//       }
+
+//       // ถ้าผ่านหมดค่อยบันทึกค่า
+//       await storage.write(key: 'accessToken', value: responseData['token']);
+//       await storage.write(key: 'refreshToken', value: responseData['refreshToken']);
+//       Get.offAllNamed('/main');
+//     }
+//   } catch (e) {
+//       enteredPin.value = ''; // ล้างค่า PIN ทันทีเพื่อป้องกัน Loop
+
+//       if (e is DioException) {
+//         final responseData = e.response?.data;
+//         //  ตรวจสอบสถานะ Account Locked จาก Backend
+//         if (e.response?.statusCode == 401 &&
+//             responseData?['message'] ==
+//                 'บัญชีถูกระงับชั่วคราวเนื่องจากใส่รหัสผิดเกิน 3 ครั้ง กรุณากด \'ลืมรหัสผ่าน\' เพื่อตั้งค่าใหม่') {
+//           _showLockedDialog();
+//         } else {
+//           _showErrorDialog();
+//         }
+//       } else {
+//         Get.snackbar('Error', 'เกิดข้อผิดพลาดในการเชื่อมต่อ');
+//       }
+//     } finally {
+//       isLoading.value = false;
+//     }
+//   }
+ 
   // --- Helper Widgets สำหรับ Dialog ---
   Widget _buildIcon(String char, {Color color = const Color(0xFF2F6BFF)}) {
     return Container(

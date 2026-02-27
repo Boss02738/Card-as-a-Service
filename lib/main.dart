@@ -37,6 +37,7 @@ import 'package:my_app/views/pages/Create_cards/card_confirm_page.dart';
 import 'package:my_app/views/pages/profile.dart';
 import 'package:my_app/views/pages/setting_page.dart';
 import 'package:my_app/views/promotion.dart';
+import 'package:my_app/views/slidebar_promotion.dart';
 import 'package:my_app/views/widgets/custom_bottom_nav_bar.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
 
@@ -58,12 +59,12 @@ class NovaPayApp extends StatefulWidget {
 }
 
 class _NovaPayAppState extends State<NovaPayApp> {
-  final _flutterPreventScreenshot = FlutterPreventScreenshot.instance;
+  // final _flutterPreventScreenshot = FlutterPreventScreenshot.instance;
 
   @override
   void initState() {
     super.initState();
-    _flutterPreventScreenshot.screenshotOff();
+    // _flutterPreventScreenshot.screenshotOff();
   }
 
   @override
@@ -77,7 +78,7 @@ class _NovaPayAppState extends State<NovaPayApp> {
           defaultTransition: Transition.cupertino,
           transitionDuration: const Duration(milliseconds: 300),
           debugShowCheckedModeBanner: false,
-          initialRoute: '/',
+          initialRoute: '/', // เปลี่ยนเป็นหน้าแรกที่ต้องการ
           initialBinding: BindingsBuilder(() {
             // Get.lazyPut(() => PhonenumberController(), fenix: true);
             Get.lazyPut(() => HeaderTextController(), fenix: true);
@@ -102,10 +103,12 @@ class _NovaPayAppState extends State<NovaPayApp> {
             GetPage(name: "/home", page: () => const HomePage()),
             GetPage(name: "/account", page: () => const AccountPage()),
             GetPage(name: "/main", page: () => MainPage()),
-            GetPage(name: "/promotion", page: () => PromotionPage()),
+            //PWA
+            GetPage(name: "/promotion", page: () => const PromotionPage()),
+            GetPage(name: "/slide_promotion", page: () => const PromoSliderWebView()),
             //Card
             GetPage(name: "/my_cards", page: () => const MyCardPage()),
-            GetPage(name: "/my_card_detail", page: () => MyCardDetail()),
+            GetPage(name: "/my_card_detail", page: () => const MyCardDetail()),
             GetPage(
               name: "/change_limit_card",
               page: () => const ChangeLimitCard(),

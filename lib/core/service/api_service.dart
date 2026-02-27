@@ -1,28 +1,57 @@
 import 'dart:io';
-
+import 'package:crypto/crypto.dart';
 import 'package:dio/dio.dart';
 import 'package:dio/io.dart';
 import 'package:flutter_secure_storage/flutter_secure_storage.dart';
-import 'package:get/get.dart' as get_x; // ป้องกันชื่อซ้ำกับ dio
+import 'package:get/get.dart' as get_x;
 import 'package:my_app/core/service/api_constants.dart';
 
 class ApiService {
-  final Dio _dio = Dio();
+  late Dio _dio;
   final storage = const FlutterSecureStorage();
   bool _isRefreshing = false;
-
+ //pinning
+  //  1. ใส่ค่า SHA-256 Fingerprint ของ Server คุณที่นี่
+  final String _trustedFingerprint =
+      " 9A:1C:C2:76:08:E9:36:8D:EA:2C:C4:BB:9D:EC:46:22:89:6E:63:8C:EC:FB:12:FE:AC:AE:C5:2D:EA:B8:68:19";
+      // "45:4C:36:13:A7:03:3B:ED:E3:34:65:8F:91:7D:D6:90:9D:EB:28:AC:F1:B4:D3:1F:19:45:28:89:85:4D:32:8E";
   ApiService() {
-    _dio.options.baseUrl = ApiConstants.baseUrl;
-    _dio.options.connectTimeout = const Duration(seconds: 10);
-    _dio.options.receiveTimeout = const Duration(seconds: 10);
-    //ให้ dio ยอมรับ cer ssl ทุกตัว
-    (_dio.httpClientAdapter as IOHttpClientAdapter).createHttpClient = () {
+    _dio = _createDioInstance(); // สร้าง instance หลัก
+    _setupInterceptors(); // ตั้งค่า Interceptor
+  }
+
+  // ฟังก์ชันรวมศูนย์สำหรับสร้าง Dio พร้อม SSL Pinning
+  Dio _createDioInstance() {
+    final dio = Dio(
+      BaseOptions(
+        baseUrl: ApiConstants.baseUrl,
+        // connectTimeout: const Duration(seconds: 10),
+        // receiveTimeout: const Duration(seconds: 10),
+      ),
+    );
+
+    (dio.httpClientAdapter as IOHttpClientAdapter).createHttpClient = () {
       final client = HttpClient();
       client.badCertificateCallback =
-          (X509Certificate cert, String host, int port) => true;
+          (X509Certificate cert, String host, int port) {
+            // 1. นำ cert.der (ข้อมูลดิบของใบเซอร์) มาผ่านกระบวนการ SHA256 Hash
+            // 2. ดึงค่า .bytes ออกมา เพื่อส่งเข้าฟังก์ชัน _formatFingerprint
+            final serverFingerprint = _formatFingerprint(
+              sha256.convert(cert.der).bytes,
+            );
+
+            // print("SERVER FINGERPRINT: $serverFingerprint");
+
+            // ตรวจสอบกับค่าที่เชื่อถือได้
+            return serverFingerprint ==
+                _trustedFingerprint.toUpperCase().replaceAll(" ", "");
+          };
       return client;
     };
+    return dio;
+  }
 
+  void _setupInterceptors() {
     _dio.interceptors.add(
       InterceptorsWrapper(
         onRequest: (options, handler) async {
@@ -33,22 +62,20 @@ class ApiService {
           return handler.next(options);
         },
         onError: (DioException e, handler) async {
-          // 1. ถ้าเป็น 401 (Unauthorized / Locked)
           if (e.response?.statusCode == 401) {
-            // จุดที่ 1: ถ้าเกิด Error ที่หน้า Login ห้าม Interceptor จัดการเองเด็ดขาด
-            // ปล่อยให้ PinLoginController เป็นคนรับ Error ไปโชว์ Dialog หรือเช็ค Locked เอง
+            // กรณีเป็นหน้า Login ให้ Controller จัดการ Error เอง
             if (e.requestOptions.path.contains(ApiConstants.login)) {
               return handler.next(e);
             }
 
-            // 2. ถ้าไม่ใช่หน้า Login ให้พยายาม Refresh Token
             String? refreshToken = await storage.read(key: 'refreshToken');
+
             if (refreshToken != null && !_isRefreshing) {
               _isRefreshing = true;
               try {
-                final refreshDio = Dio(
-                  BaseOptions(baseUrl: ApiConstants.baseUrl),
-                );
+                // ใช้ฟังก์ชันสร้าง Dio ตัวใหม่ที่มี SSL Pinning เหมือนตัวหลัก
+                final refreshDio = _createDioInstance();
+
                 final response = await refreshDio.post(
                   ApiConstants.refreshToken,
                   data: {'refreshToken': refreshToken},
@@ -63,7 +90,7 @@ class ApiService {
 
                   _isRefreshing = false;
 
-                  // ยิง Request เดิมซ้ำ
+                  // ยิง Request เดิมซ้ำด้วย Token ใหม่
                   e.requestOptions.headers['Authorization'] =
                       'Bearer $newAccess';
                   final retryResponse = await _dio.fetch(e.requestOptions);
@@ -71,13 +98,11 @@ class ApiService {
                 }
               } catch (err) {
                 _isRefreshing = false;
-                // จุดที่ 2: ถ้า Refresh พังจริงๆ ถึงค่อยดีดออกไปหน้าแรก
                 await storage.deleteAll();
                 get_x.Get.offAllNamed('/login-pin');
                 return handler.next(e);
               }
             } else if (refreshToken == null) {
-              // ไม่มี Refresh Token และไม่ใช่หน้า Login ให้ดีดออก
               get_x.Get.offAllNamed('/login-pin');
             }
           }
@@ -85,6 +110,13 @@ class ApiService {
         },
       ),
     );
+  }
+
+  // Helper สำหรับแปลงพวง Bytes เป็น String Fingerprint
+  String _formatFingerprint(List<int> bytes) {
+    return bytes
+        .map((b) => b.toRadixString(16).padLeft(2, '0').toUpperCase())
+        .join(':');
   }
 
   Dio get instance => _dio;

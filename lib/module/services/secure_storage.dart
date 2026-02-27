@@ -8,6 +8,7 @@ AndroidOptions _getAndroidOptions() => const AndroidOptions(
     );
 
 final storage = FlutterSecureStorage(aOptions: _getAndroidOptions());
+
 Future<void> saveRegisterStatus(String mobile) async {
   // ต้องมี async ตรงนี้
   await storage.write(key: 'isRegistered', value: 'true');
