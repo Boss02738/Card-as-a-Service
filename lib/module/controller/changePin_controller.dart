@@ -67,9 +67,6 @@ class ChangePinController extends GetxController {
     try {
       isLoading.value = true;
       String? deviceId = await getDeviceId();
-
-      // เปลี่ยนมาใช้ _apiService.instance.post
-      // ไม่ต้องใส่ Header เองแล้ว เพราะ Interceptor จะจัดการให้
       final response = await _apiService.instance.post(
         ApiConstants.changePassword, 
         data: {

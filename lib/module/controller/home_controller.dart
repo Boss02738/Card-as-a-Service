@@ -29,13 +29,12 @@ class HomeController extends GetxController {
     try {
       isLoading.value = true;
 
-      // ✅ ไม่ต้องดึง token และใส่ Header เอง เพราะ ApiService จัดการให้แล้ว
       final response = await _apiService.instance.get(
         ApiConstants.account
       );
 
       if (response.statusCode == 200) {
-        // ✅ Dio แปลงข้อมูลเป็น Map ให้แล้ว ใช้งานได้เลย
+        // Dio แปลงข้อมูลเป็น Map ให้แล้ว ใช้งานได้เลย
         final data = response.data;
         
         fullNameTh.value = data['fullNameTh'] ?? '';
@@ -48,15 +47,13 @@ class HomeController extends GetxController {
         balance.value = (data['balance'] as num).toDouble();
 
         if (data['card_id'] != null) {
-          // ✅ ใช้ assignAll สำหรับการอัปเดต List
+          // ใช้ assignAll สำหรับการอัปเดต List
           myCards.assignAll(data['card_id']); 
         } else {
           myCards.clear();
         }
       }
     } on dio.DioException catch (e) {
-      // ✅ จัดการ Error เฉพาะทางของ Dio
-      print("Home Profile Error: ${e.message}");
       Get.snackbar('Error', 'ไม่สามารถดึงข้อมูลบัญชีได้');
     } catch (e) {
       Get.snackbar('Error', 'เกิดข้อผิดพลาดไม่คาดคิด');

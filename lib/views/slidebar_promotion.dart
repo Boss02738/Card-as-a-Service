@@ -29,7 +29,7 @@ class _PromoSliderWebViewState extends State<PromoSliderWebView> {
           onNavigationRequest: (NavigationRequest request) {
             final uri = Uri.parse(request.url);
 
-            // ✅ อนุญาตเฉพาะหน้า slider
+            // อนุญาตเฉพาะหน้า slider
             final isSliderHome =
                 uri.queryParameters['mode'] == 'webview';
 
@@ -42,7 +42,7 @@ class _PromoSliderWebViewState extends State<PromoSliderWebView> {
                 transition: Transition.rightToLeft,
               );
 
-              return NavigationDecision.prevent; // 🛑 ห้าม WebView โหลด
+              return NavigationDecision.prevent; //  ห้าม WebView โหลด
             }
 
             return NavigationDecision.navigate;
@@ -73,7 +73,7 @@ class _PromoSliderWebViewState extends State<PromoSliderWebView> {
   @override
   Widget build(BuildContext context) {
     return SizedBox(
-      height: 180.h,
+      height: 160.h,
       width: double.infinity,
       child: WebViewWidget(controller: _controller),
     );

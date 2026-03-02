@@ -56,7 +56,7 @@ class ResetPinController extends GetxController {
       );
 
       if (response.statusCode == 200) {
-        // ✅ สำเร็จ กลับไปหน้า Login เพื่อให้เข้าสู่ระบบใหม่ด้วยรหัสใหม่
+        //  สำเร็จ กลับไปหน้า Login เพื่อให้เข้าสู่ระบบใหม่ด้วยรหัสใหม่
         Get.offAllNamed('/pin_login');
         Get.snackbar('สำเร็จ', 'ตั้งรหัสผ่านใหม่เรียบร้อยแล้ว กรุณาเข้าสู่ระบบอีกครั้ง');
       } else {

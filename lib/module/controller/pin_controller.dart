@@ -87,7 +87,7 @@ class PinController extends GetxController {
         "newDeviceId": deviceId,
       };
 
-      print("Request Body: ${jsonEncode(body)}");
+      // print("Request Body: ${jsonEncode(body)}");
       final response = await _apiService.instance.post(
         ApiConstants.changedevice,
         data: body,

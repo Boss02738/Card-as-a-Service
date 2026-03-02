@@ -1,4 +1,8 @@
-import 'package:dio/dio.dart' as dio; // นำเข้า Dio และตั้งชื่อเล่นว่า dio เพื่อจัดการ Exception
+import 'dart:convert';
+import 'dart:math';
+
+import 'package:dio/dio.dart'
+    as dio; // นำเข้า Dio และตั้งชื่อเล่นว่า dio เพื่อจัดการ Exception
 import 'package:get/get.dart';
 import 'package:my_app/core/service/api_constants.dart';
 import 'package:my_app/core/service/api_service.dart';
@@ -58,7 +62,8 @@ class PinVerifyController extends GetxController {
         "expiry": originalArgs['input_data']['expiry'],
         "cvv": originalArgs['input_data']['cvv'],
         "newCardPin": newCardPin, // รหัส ATM 6 หลักที่ตั้งใหม่
-        "card_id": originalArgs['card']['card_id'], //  เพิ่มบรรทัดนี้เพื่อให้ API รู้ว่าเปิดใบไหน
+        "card_id":
+            originalArgs['card']['card_id'], //  เพิ่มบรรทัดนี้เพื่อให้ API รู้ว่าเปิดใบไหน
       };
 
       final response = await _apiService.instance.post(
@@ -67,7 +72,6 @@ class PinVerifyController extends GetxController {
       );
 
       if (response.statusCode == 200) {
-        // ✅ สำเร็จ! ไปหน้า Success
         Get.offAllNamed(
           '/success_page',
           arguments: {
@@ -97,11 +101,12 @@ class PinVerifyController extends GetxController {
       String? mobile = await storage.read(key: 'userMobile');
 
       final response = await _apiService.instance.post(
-        ApiConstants.login,
+        ApiConstants.verifyPin,
         data: {
-          "mobileNumber": mobile,
+          // "mobileNumber": mobile,
           "pin": enteredPin.value,
           "deviceId": deviceId,
+
         },
       );
 
@@ -225,7 +230,7 @@ class PinVerifyController extends GetxController {
       if (response.statusCode == 200) {
         // Dio แปลง json ให้แล้ว เรียกใช้ response.data ได้เลย
         final sensitiveData = response.data;
-        // ✅ ส่งข้อมูลที่ได้จาก API ไปแสดงที่หน้า SensitiveDataPage
+        //  ส่งข้อมูลที่ได้จาก API ไปแสดงที่หน้า SensitiveDataPage
         Get.offNamed(
           '/sensitive',
           arguments: {
@@ -245,12 +250,13 @@ class PinVerifyController extends GetxController {
     }
   }
 
+
+
   Future<void> processRequestPhysical(cardId) async {
     try {
       isLoading.value = true;
       String? deviceId = await getDeviceId();
 
-      // 📦 1. ดึงข้อมูลที่อยู่จาก arguments ที่ส่งมาจากหน้าก่อนหน้า
       Map<String, dynamic> addressInfo = args['addressData'];
       Map<String, dynamic> requestBody = {
         "address": addressInfo['address'],
@@ -260,10 +266,9 @@ class PinVerifyController extends GetxController {
         "zipcode": addressInfo['zipcode'],
         "pin": enteredPin.value, // PIN 6 หลักที่ User เพิ่งกรอก
         "deviceId": deviceId,
-        "card_id": args['card']['card_id'], // ✅ ใส่ card_id รวมเข้าไปในนี้
+        "card_id": args['card']['card_id']
       };
 
-      // 🚀 3. ยิง API โดยใช้ Body ที่รวมข้อมูลครบแล้ว
       final response = await _apiService.instance.post(
         ApiConstants.requestphysicalcard,
         data: requestBody,
@@ -279,7 +284,7 @@ class PinVerifyController extends GetxController {
         );
       }
     } on dio.DioException catch (e) {
-      String errorMessage = 'ไม่สามารถดำเนินการได้';
+      String errorMessage = 'ไม่สามารถดำเนินการได้ โปรดตรวจสอบรหัสผ่าน';
       if (e.response?.data != null && e.response?.data['message'] != null) {
         errorMessage = e.response?.data['message'];
       }

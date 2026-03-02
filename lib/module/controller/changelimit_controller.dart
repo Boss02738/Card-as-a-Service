@@ -13,7 +13,7 @@ class ChangelimitController extends GetxController {
     try {
       isLoading.value = true;
       
-      // ✅ แนะนำให้เลือกใช้อย่างใดอย่างหนึ่ง ระหว่างรับมาจาก Parameter 
+      // แนะนำให้เลือกใช้อย่างใดอย่างหนึ่ง ระหว่างรับมาจาก Parameter 
       // หรือดึงใหม่ข้างใน (ในที่นี้ขอใช้ค่าที่ดึงใหม่เพื่อให้มั่นใจว่าเป็น ID ล่าสุด)
       String? currentDeviceId = await getDeviceId();
 
@@ -39,10 +39,10 @@ class ChangelimitController extends GetxController {
         errorMessage = e.response?.data['message'];
       }
       Get.snackbar('ผิดพลาด', errorMessage);
-      return false; // ✅ คืนค่า false เมื่อเกิด Error
+      return false; // คืนค่า false เมื่อเกิด Error
     } catch (e) {
       Get.snackbar('Error', 'เกิดข้อผิดพลาดในการเชื่อมต่อ');
-      return false; // ✅ คืนค่า false เมื่อเกิด Error
+      return false; //  คืนค่า false เมื่อเกิด Error
     } finally {
       isLoading.value = false;
     }

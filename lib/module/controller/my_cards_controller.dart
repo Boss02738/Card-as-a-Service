@@ -31,13 +31,13 @@ class MyCardsController extends GetxController {
 
       if (response.statusCode == 200) {
         final List<dynamic> data = response.data;
-        print('Screen size category: $screenType');
+        // print('Screen size category: $screenType');
         myCards.assignAll(data);
       } else {
         myCards.clear();
       }
     } catch (e) {
-      print("Fetch Cards Error: $e");
+      // print("Fetch Cards Error: $e");
       myCards.clear();
     } finally {
       isLoading.value = false;
@@ -47,15 +47,5 @@ class MyCardsController extends GetxController {
   void fetchUserCards() async {
     await fetchMyCards();
   }
-  // ฟังก์ชันช่วยวิเคราะห์ขนาดหน้าจอ
-  // String _getDeviceSizeCategory() {
-  //   double width = Get.context!.width; 
-  //   if (width < 600) {
-  //     return 'image_small';
-  //   } else if (width < 1200) {
-  //     return 'image_medium';
-  //   } else {
-  //     return 'image_large';
-  //   }
-  // }
+
 }

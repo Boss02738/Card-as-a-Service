@@ -59,12 +59,12 @@ class NovaPayApp extends StatefulWidget {
 }
 
 class _NovaPayAppState extends State<NovaPayApp> {
-  // final _flutterPreventScreenshot = FlutterPreventScreenshot.instance;
+  final _flutterPreventScreenshot = FlutterPreventScreenshot.instance;
 
   @override
   void initState() {
     super.initState();
-    // _flutterPreventScreenshot.screenshotOff();
+    _flutterPreventScreenshot.screenshotOff();
   }
 
   @override

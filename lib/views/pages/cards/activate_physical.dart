@@ -54,6 +54,7 @@ class _ActivatePhysicalState extends State<ActivatePhysical> {
         'ownerName': args['ownerName'],
         'input_data': {
           'last_digits': inputLastFour,
+          // 'lastdigits': inputLastFour,
           'expiry': expiryCtrl.text,
           'cvv': cvvCtrl.text,
         },

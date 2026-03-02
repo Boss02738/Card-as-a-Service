@@ -35,7 +35,7 @@ class StatusCardController extends GetxController {
         Get.snackbar('สำเร็จ', 'ระงับบัตรเรียบร้อยแล้ว');
       }
     } on dio.DioException catch (e) {
-      print("Card freeze Error: ${e.message}");
+      // print("Card freeze Error: ${e.message}");
       Get.snackbar('Error', 'ไม่สามารถระงับบัตรได้');
     } catch (e) {
       Get.snackbar('Error', 'เกิดข้อผิดพลาดไม่คาดคิด');
@@ -59,11 +59,11 @@ class StatusCardController extends GetxController {
         Get.find<MyCardsController>().fetchMyCards();
         Get.find<CardDetailController>().fetchCardDetail(
           cardId,
-        ); // ✅ อัปเดตข้อมูลหน้า Detail
+        ); 
         Get.snackbar('สำเร็จ', 'เปิดใช้งานบัตรเรียบร้อยแล้ว');
       }
     } on dio.DioException catch (e) {
-      print("Card unfreeze Error: ${e.message}");
+      // print("Card unfreeze Error: ${e.message}");
       Get.snackbar('Error', 'ไม่สามารถเปิดใช้งานบัตรได้');
     } catch (e) {
       Get.snackbar('Error', 'เกิดข้อผิดพลาดไม่คาดคิด');

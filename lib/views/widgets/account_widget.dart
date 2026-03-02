@@ -12,7 +12,7 @@ class AccountWidget extends StatelessWidget {
 
     return Obx(
       () => AspectRatio(
-        aspectRatio: 19 / 9, 
+        aspectRatio: 19 / 10, 
         child: Container(
           padding: EdgeInsets.all(20.r),
           width: double.infinity,

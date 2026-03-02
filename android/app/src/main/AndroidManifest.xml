@@ -9,7 +9,7 @@
         android:allowBackup="false"
         android:fullBackupContent="false"
         android:extractNativeLibs="false"
-        android:usesCleartextTraffic="false"
+        android:usesCleartextTraffic="true"
         android:hasFragileUserData="false"
         android:requestLegacyExternalStorage="false">
         

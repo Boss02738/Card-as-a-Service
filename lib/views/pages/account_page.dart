@@ -21,6 +21,7 @@ class _AccountPageState extends State<AccountPage> {
   Widget build(BuildContext context) {
     return BackButtonInterceptor(
       child: Scaffold(
+        backgroundColor: const Color(0xFFF5F7FA), // เพิ่มสีพื้นหลังให้เนียนกับหน้า Home
         body: Stack(
           children: [
             const GradientHeader(),
@@ -31,22 +32,27 @@ class _AccountPageState extends State<AccountPage> {
                     SizedBox(height: 10.h),
                     const Buildheader(),
                     SizedBox(height: 10.h),
+                    
+                    // ✅ ปรับ Padding เป็น 10.w ให้เท่ากับหน้า HomePage
+                    Padding(
+                      padding: EdgeInsets.symmetric(horizontal: 10.w),
+                      child: const AccountWidget(),
+                    ),
+                    
+                    SizedBox(height: 20.h),
+                    
+                    // ✅ ปรับขอบข้างของ Card ข้อมูลให้เป็น 10.w เท่ากัน
                     Padding(
                       padding: EdgeInsets.symmetric(horizontal: 15.w),
-                      child: AccountWidget(),
-                    ),
-                    SizedBox(height: 20.h),
-                    Padding(
-                      padding: EdgeInsets.symmetric(horizontal: 20.r),
                       child: Container(
                         width: double.infinity,
                         clipBehavior: Clip.antiAlias,
                         decoration: BoxDecoration(
-                          color: Colors.white, // ส่วนล่างเป็นสีขาว
+                          color: Colors.white,
                           borderRadius: BorderRadius.circular(20.r),
                           boxShadow: [
                             BoxShadow(
-                              color: Colors.black.withOpacity(0.1),
+                              color: Colors.black.withOpacity(0.05),
                               blurRadius: 10.r,
                               offset: Offset(0, 5.h),
                             ),
@@ -54,6 +60,7 @@ class _AccountPageState extends State<AccountPage> {
                         ),
                         child: Column(
                           children: [
+                            // ส่วน Header ภายในการ์ด (Gradient)
                             Container(
                               width: double.infinity,
                               padding: EdgeInsets.symmetric(vertical: 20.h),
@@ -69,16 +76,16 @@ class _AccountPageState extends State<AccountPage> {
                               ),
                               child: Column(
                                 children: [
-                                  Text(
+                                  Obx(() => Text(
                                     "คุณ ${homeController.fullNameTh.value}",
                                     style: TextStyle(
                                       color: Colors.white,
                                       fontSize: 18.sp,
                                       fontWeight: FontWeight.bold,
                                     ),
-                                  ),
-                                  // SizedBox(height: 5.h),
-                                  Row(
+                                  )),
+                                  SizedBox(height: 4.h),
+                                  Obx(() => Row(
                                     mainAxisAlignment: MainAxisAlignment.center,
                                     children: [
                                       Text(
@@ -88,7 +95,7 @@ class _AccountPageState extends State<AccountPage> {
                                           fontSize: 14.sp,
                                         ),
                                       ),
-                                      SizedBox(width: 10.w),
+                                      SizedBox(width: 8.w),
                                       Text(
                                         homeController.accountNumber.value,
                                         style: TextStyle(
@@ -97,17 +104,19 @@ class _AccountPageState extends State<AccountPage> {
                                         ),
                                       ),
                                     ],
-                                  ),
+                                  )),
                                 ],
                               ),
                             ),
+                            
+                            // ส่วนรายละเอียดข้อมูลบัญชี
                             Padding(
-                              padding: EdgeInsets.all(10.0.r),
-                              child: Column(
+                              padding: EdgeInsets.symmetric(horizontal: 15.w, vertical: 10.h),
+                              child: Obx(() => Column(
                                 children: [
                                   _buildRow(
                                     'ชื่อบัญชี',
-                                    "คุณ ${homeController.fullNameTh.value}" ,
+                                    "คุณ ${homeController.fullNameTh.value}",
                                   ),
                                   _buildRow(
                                     'ประเภทบัญชี',
@@ -118,15 +127,13 @@ class _AccountPageState extends State<AccountPage> {
                                     'วันที่เปิดบัญชี',
                                     homeController.createdAt.value,
                                   ),
-                                  SizedBox(height: 20.h),
+                                  SizedBox(height: 10.h),
                                   _buildRow(
                                     'ยอดเงินคงเหลือ',
                                     homeController.balance.value
                                         .toStringAsFixed(2)
                                         .replaceAllMapped(
-                                          RegExp(
-                                            r'(\d{1,3})(?=(\d{3})+(?!\d))',
-                                          ),
+                                          RegExp(r'(\d{1,3})(?=(\d{3})+(?!\d))'),
                                           (Match m) => '${m[1]},',
                                         ),
                                     isBoldValue: true,
@@ -136,20 +143,20 @@ class _AccountPageState extends State<AccountPage> {
                                     homeController.balance.value
                                         .toStringAsFixed(2)
                                         .replaceAllMapped(
-                                          RegExp(
-                                            r'(\d{1,3})(?=(\d{3})+(?!\d))',
-                                          ),
+                                          RegExp(r'(\d{1,3})(?=(\d{3})+(?!\d))'),
                                           (Match m) => '${m[1]},',
                                         ),
                                     isBoldValue: true,
+                                    valueColor: const Color(0xFF162E7A),
                                   ),
                                 ],
-                              ),
+                              )),
                             ),
                           ],
                         ),
                       ),
                     ),
+                    SizedBox(height: 30.h), // ระยะเผื่อด้านล่าง
                   ],
                 ),
               ),
@@ -167,10 +174,10 @@ class _AccountPageState extends State<AccountPage> {
     bool isBoldValue = false,
   }) {
     return Container(
-      padding: EdgeInsets.symmetric(vertical: 15.h, horizontal: 0.w),
+      padding: EdgeInsets.symmetric(vertical: 16.h),
       decoration: BoxDecoration(
         border: Border(
-          bottom: BorderSide(color: Color(0xFFF0F0F0), width: 1.w),
+          bottom: BorderSide(color: const Color(0xFFF0F0F0), width: 1.w),
         ),
       ),
       child: Row(
@@ -179,21 +186,17 @@ class _AccountPageState extends State<AccountPage> {
           Text(
             label,
             style: TextStyle(
-              color: Color.fromARGB(255, 77, 77, 77),
+              color: const Color(0xFF666666),
               fontSize: 14.sp,
             ),
           ),
-          Row(
-            children: [
-              Text(
-                value,
-                style: TextStyle(
-                  fontSize: 14.sp,
-                  fontWeight: isBoldValue ? FontWeight.bold : FontWeight.normal,
-                  color: valueColor ?? Colors.black87,
-                ),
-              ),
-            ],
+          Text(
+            value,
+            style: TextStyle(
+              fontSize: 14.sp,
+              fontWeight: isBoldValue ? FontWeight.bold : FontWeight.normal,
+              color: valueColor ?? Colors.black87,
+            ),
           ),
         ],
       ),

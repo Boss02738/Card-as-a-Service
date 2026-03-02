@@ -17,8 +17,6 @@ class PhonenumberController extends GetxController {
     REF_CODE.value = '';
   }
 
-  // --------------------------------------------------------------------------------------------
-  //
   Future<bool> submitPhone() async {
     try {
       isLoading.value = true;

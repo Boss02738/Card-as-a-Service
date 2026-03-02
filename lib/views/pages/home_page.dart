@@ -48,7 +48,7 @@ class _HomePageState extends State<HomePage> {
                         padding: EdgeInsets.symmetric(horizontal: 10.w),
                         child: const AccountWidget(),
                       ),
-                      SizedBox(height: 10.h),
+                      SizedBox(height: 15.h),
                       _buildOffersSection(), // ส่วนข้อเสนอพิเศษ
                       // SizedBox(height: 10.h),
                       _buildMyCardsSection(
@@ -164,20 +164,7 @@ Widget _buildOffersSection() {
   );
 }
 
-Widget _buildOfferItem(String imagePath, {required VoidCallback onTap}) {
-  return InkWell(
-    onTap: onTap, //  รับค่า Action มาทำงาน
-    borderRadius: BorderRadius.circular(15.r),
-    child: Container(
-      width: 0.7.sw,
-      margin: EdgeInsets.only(right: 15.w),
-      decoration: BoxDecoration(
-        borderRadius: BorderRadius.circular(15.r),
-        image: DecorationImage(image: AssetImage(imagePath), fit: BoxFit.cover),
-      ),
-    ),
-  );
-}
+
 
 /////////////////////////////////////////////////////////////////////////////////////////
 // เพิ่ม Widget ส่วน 'บัตรของฉัน' โดยรับ controller เข้ามาตรวจสอบ
@@ -278,11 +265,10 @@ Widget _buildActiveCardItem(dynamic card, String ownerName) {
     },
     child: Padding(
       padding: EdgeInsets.only(right: 15.w),
-      // ✅ เปลี่ยนจาก Container เดิม มาใช้ BankCard Widget
       child: SizedBox(
-        width: 300.w, // กำหนดความกว้างให้เท่าเดิม
+        width: 280.w, // กำหนดความกว้างให้เท่าเดิม
         child: BankCard(
-          card: card, // ส่ง Object 'card' ทั้งก้อนที่มีฟิลด์ 'card_image'
+          card: card, 
           ownerName: ownerName, cardName: card['card_name'] ?? '',
           // cardName: card['fddf'] ?? '',
         ),

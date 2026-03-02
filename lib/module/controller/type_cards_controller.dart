@@ -34,14 +34,14 @@ class TypeCardsController extends GetxController {
         // ✅ Dio แปลง JSON ให้อัตโนมัติ เรียกใช้ response.data ได้เลย
         // ใช้ assignAll เพื่ออัปเดต RxList ให้ UI รับรู้การเปลี่ยนแปลง
         screentype = getDeviceSizeCategory();
-        print('Screen size category: $screentype');
+        // print('Screen size category: $screentype');
         if (response.data is List) {
           cardList.assignAll(response.data);
         }
       }
     } on dio.DioException catch (e) {
       // ดักจับ Error เฉพาะของ Dio
-      print("Fetch TypeCards Error: ${e.message}");
+      // print("Fetch TypeCards Error: ${e.message}");
       Get.snackbar('Error', 'ไม่สามารถโหลดข้อมูลประเภทบัตรได้');
     } catch (e) {
       // Error อื่นๆ ทั่วไป
