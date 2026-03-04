@@ -29,11 +29,13 @@ class PinVerifyController extends GetxController {
   void addNumber(int number) {
     if (enteredPin.value.length < 6) {
       enteredPin.value += number.toString();
+      print("Current PIN: ${enteredPin.value}"); // ✅ Check PIN ที่หน้าจอ Debug
     }
     if (enteredPin.value.length == 6) {
       // เพิ่มเงื่อนไขเช็ค action ขอบัตรแข็ง
       if (args['action'] == 'request_physical') {
-        processRequestPhysical({args['card']['card_id']});
+        // processRequestPhysical({args['card']['card_id']});
+        processRequestPhysical();
       } else if (args['action'] == 'view_sensitive') {
         processViewSensitiveData({});
       } else if (args['action'] == 'change_limit') {
@@ -106,10 +108,11 @@ class PinVerifyController extends GetxController {
           // "mobileNumber": mobile,
           "pin": enteredPin.value,
           "deviceId": deviceId,
-
         },
       );
-
+      print(
+        "Response from verifyPin API: ${response.data}",
+      ); // ✅ Check Response จาก API
       if (response.statusCode == 200) {
         Get.toNamed(
           '/set_card_pin',
@@ -165,12 +168,23 @@ class PinVerifyController extends GetxController {
         );
       }
     } on dio.DioException catch (e) {
-      String errorMessage = 'รหัสผ่านไม่ถูกต้อง';
-      if (e.response?.data != null && e.response?.data['message'] != null) {
-        errorMessage = e.response?.data['message'];
+      String errorMessage = 'เกิดข้อผิดพลาดในการสร้างบัตร';
+
+      if (e.response?.data != null) {
+        // 1. ดึง String จาก key 'error' ออกมาก่อน
+        String rawError = e.response?.data['error'].toString() ?? "";
+
+        // 2. ตรวจสอบว่าใน String นั้นมีคำว่า "message" อยู่ไหม
+        if (rawError.contains('"message":"')) {
+          // ดึงข้อความระหว่าง "message":" กับ " ออกมา
+          errorMessage = rawError.split('"message":"')[1].split('"')[0];
+        } else {
+          errorMessage = rawError;
+        }
       }
+
       Get.snackbar('ผิดพลาด', errorMessage);
-      enteredPin.value = ''; // ล้างรหัสให้กรอกใหม่
+      enteredPin.value = '';
     } catch (e) {
       Get.snackbar('Error', 'ไม่สามารถเชื่อมต่อเซิร์ฟเวอร์ได้');
       enteredPin.value = '';
@@ -250,24 +264,28 @@ class PinVerifyController extends GetxController {
     }
   }
 
-
-
-  Future<void> processRequestPhysical(cardId) async {
+  // ✅ แก้ไข: ลบ (cardId) ออก
+  Future<void> processRequestPhysical() async {
     try {
       isLoading.value = true;
       String? deviceId = await getDeviceId();
 
-      Map<String, dynamic> addressInfo = args['addressData'];
+      // ดึงที่อยู่จาก args ที่ส่งต่อมาจากหน้า Address
+      Map<String, dynamic> addressInfo = args['addressData'] ?? {};
+
+      // ✅ บังคับทุกค่าเป็น String ป้องกัน Error จากฝั่ง Server
       Map<String, dynamic> requestBody = {
-        "address": addressInfo['address'],
-        "subdistrict": addressInfo['subdistrict'],
-        "district": addressInfo['district'],
-        "province": addressInfo['province'],
-        "zipcode": addressInfo['zipcode'],
-        "pin": enteredPin.value, // PIN 6 หลักที่ User เพิ่งกรอก
-        "deviceId": deviceId,
-        "card_id": args['card']['card_id']
+        "address": "${addressInfo['address']}",
+        "subdistrict": "${addressInfo['subdistrict']}",
+        "district": "${addressInfo['district']}",
+        "province": "${addressInfo['province']}",
+        "zipcode": "${addressInfo['zipcode']}",
+        "pin": enteredPin.value.toString(), // ✅ ตรวจสอบว่าตรงกับรหัสเข้าแอป
+        "deviceId": deviceId?.toString() ?? "",
+        "card_id": args['card']['card_id'].toString(),
       };
+
+      print("🚀 Final Payload sending to Server: $requestBody");
 
       final response = await _apiService.instance.post(
         ApiConstants.requestphysicalcard,
@@ -284,15 +302,18 @@ class PinVerifyController extends GetxController {
         );
       }
     } on dio.DioException catch (e) {
-      String errorMessage = 'ไม่สามารถดำเนินการได้ โปรดตรวจสอบรหัสผ่าน';
+      // ✅ ถ้า Error ให้ล้าง PIN ทันทีเพื่อให้ User กรอกใหม่ได้ถูกต้อง
+      enteredPin.value = '';
+
+      String errorMessage = ' ${e.response?.data}';
+      print("❌ Server Error Response: ${e.response?.data}");
       if (e.response?.data != null && e.response?.data['message'] != null) {
         errorMessage = e.response?.data['message'];
       }
       Get.snackbar('ผิดพลาด', errorMessage);
-      enteredPin.value = '';
     } catch (e) {
-      Get.snackbar('Error', 'เกิดข้อผิดพลาดในการเชื่อมต่อ');
       enteredPin.value = '';
+      Get.snackbar('Error', 'เกิดข้อผิดพลาดในการเชื่อมต่อ');
     } finally {
       isLoading.value = false;
     }
