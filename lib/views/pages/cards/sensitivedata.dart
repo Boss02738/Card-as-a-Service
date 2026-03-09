@@ -1,4 +1,3 @@
-import 'dart:convert';
 import 'package:flutter/material.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:get/get.dart';
@@ -39,7 +38,7 @@ class SensitiveDataPage extends StatelessWidget {
             Padding(
               padding: EdgeInsets.only(left: 20.w, bottom: 10.h),
               child: Align(
-                alignment: Alignment.centerLeft,
+                alignment: Alignment.center,
                 child: Text(
                   "รายละเอียดบัตร",
                   style: TextStyle(fontWeight: FontWeight.bold, fontSize: 14.sp),
@@ -66,15 +65,15 @@ class SensitiveDataPage extends StatelessWidget {
     );
   }
 
-  // ✅ ฟังก์ชันวาดบัตรที่ใช้ Scale เดียวกับ MyCardDetail แต่โชว์เลขครบ
+  //  ฟังก์ชันวาดบัตรที่ใช้ Scale เดียวกับ MyCardDetail แต่โชว์เลขครบฝ
   Widget _buildSensitiveCard(dynamic card, dynamic sensitive, String name, String cardname) {
     return AspectRatio(
-      aspectRatio: 1.58, // ✅ สัดส่วนมาตรฐานเดียวกับ MyCardDetail
+      aspectRatio: 1.58, // สัดส่วนมาตรฐานเดียวกับ MyCardDetail
       child: Container(
         decoration: BoxDecoration(
           borderRadius: BorderRadius.circular(15.r),
           image: card['card_image'] != null
-              ? DecorationImage(
+              ? DecorationImage( 
                 image:NetworkImage(card['card_image']),
                   fit: BoxFit.cover,
                 )
@@ -96,7 +95,7 @@ class SensitiveDataPage extends StatelessWidget {
           children: [
             Text(cardname.toUpperCase(), style: TextStyle(color: Colors.white, fontSize: 16.sp)),
             
-            const Spacer(), // ✅ เว้นช่องไฟเหมือนใน MyCard
+            const Spacer(), //  เว้นช่องไฟเหมือนใน MyCard
 
             Column(
               crossAxisAlignment: CrossAxisAlignment.start,
@@ -106,7 +105,6 @@ class SensitiveDataPage extends StatelessWidget {
                   style: TextStyle(color: Colors.white, fontSize: 16.sp, fontWeight: FontWeight.w500)
                 ),
                 SizedBox(height: 5.h),
-                // ✅ แสดงเลขบัตรเต็ม 16 หลัก
                 Text(
                   _formatFullPan(sensitive['pan']),
                   style: TextStyle(
@@ -130,10 +128,6 @@ class SensitiveDataPage extends StatelessWidget {
                     SizedBox(width: 15.w),
                     Text("CVV: ${sensitive['cvv']}", style: TextStyle(color: Colors.white70, fontSize: 13.sp)),
                   ],
-                ),
-                Image.network(
-                  'https://upload.wikimedia.org/wikipedia/commons/thumb/2/2a/Mastercard-logo.svg/1280px-Mastercard-logo.svg.png',
-                  width: 35.w,
                 ),
               ],
             ),

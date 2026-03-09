@@ -36,7 +36,8 @@ class PinLoginController extends GetxController {
       );
     }
   }
-// random string generate เอาไว้ทำ nonce state
+
+  // random string generate เอาไว้ทำ nonce state
   String _generateRandomString(int length) {
     var random = Random.secure();
     var values = List<int>.generate(length, (i) => random.nextInt(256));
@@ -127,10 +128,12 @@ class PinLoginController extends GetxController {
                 ),
               ),
               const Divider(height: 1),
-              _buildDialogButton('ตั้งรหัสผ่านใหม่', () async {
-                await storage.deleteAll(); // ล้าง Token เก่า
-                Get.offAllNamed('/face_verify'); // พาไปเริ่ม Reset PIN
-              }),
+ _buildDialogButton('ตั้งรหัสผ่านใหม่', () async {
+  // ลบแค่ Token เพื่อป้องกันการสวมสิทธิ์ แต่เก็บเบอร์โทรไว้ใช้ Reset
+  await storage.delete(key: 'accessToken');
+  await storage.delete(key: 'refreshToken');
+  Get.offAllNamed('/face_verify'); 
+}),
             ],
           ),
         ),
@@ -139,75 +142,152 @@ class PinLoginController extends GetxController {
     );
   }
 
+  // Future<void> loginWithPin() async {
+  //   // 1. ตรวจสอบสถานะ: ถ้ากำลังโหลดอยู่ ให้หยุดทำงานทันที (ป้องกันการยิงซ้ำ)
+  //   if (isLoading.value) return;
+
+  //   try {
+  //     isLoading.value = true;
+  //     print("🚀 เริ่มกระบวนการ Login...");
+
+  //     // สร้างค่าสำหรับ Security (ที่คุณเขียนไว้ดีแล้ว)
+  //     String clientNonce = _generateRandomString(16);
+  //     String clientState = _generateRandomString(16);
+
+  //     String? mobile = await storage.read(key: 'userMobile');
+  //     String? deviceId = await getDeviceId();
+
+  //     // 2. ส่ง Request (ใช้ Dio Instance ที่มี Interceptor ของ Play Integrity)
+  //     final response = await _apiService.instance.post(
+  //       ApiConstants.login,
+  //       data: {
+  //         "mobileNumber": mobile,
+  //         "deviceId": deviceId,
+  //         "pin": enteredPin.value,
+  //         "nonce": clientNonce,
+  //         "state": clientState,
+  //       },
+  //     );
+
+  //     if (response.statusCode == 200) {
+  //       final responseData = response.data;
+
+  //       // 3. ตรวจสอบ STATE และ NONCE (ส่วนนี้ของคุณถูกต้องและปลอดภัยมาก)
+  //       if (responseData['state'] != clientState) {
+  //         throw Exception("Invalid state");
+  //       }
+
+  //       String idToken = responseData['idToken'];
+  //       Map<String, dynamic> decodedToken = JwtDecoder.decode(idToken);
+
+  //       if (decodedToken['nonce'] != clientNonce) {
+  //         throw Exception("Invalid nonce");
+  //       }
+
+  //       // บันทึก Token และไปหน้าหลัก
+  //       await storage.write(key: 'accessToken', value: responseData['token']);
+  //       await storage.write(
+  //         key: 'refreshToken',
+  //         value: responseData['refreshToken'],
+  //       );
+  //       Get.offAllNamed('/main');
+  //     }
+  //   } on DioException catch (e) {
+  //     // 🛑 เลิก print(e) เพราะมันจะพ่นขยะจาก Library มาเยอะ
+  //     // ✅ ให้ print แค่ Response Body จาก Server
+  //     print("📦 Server Response Data: ${e.response?.data}"); 
+  //     print("🔢 Status Code: ${e.response?.statusCode}");
+
+  //     String serverMessage = "รหัสไม่ถูกต้อง";
+      
+  //     if (e.response?.data != null) {
+  //       // แกะข้อความที่ Server ของคุณส่งมาจริงๆ
+  //       serverMessage = e.response?.data['message'] ?? e.response?.data['error'] ?? "Error 401";
+  //     }
+
+  //     enteredPin.value = ''; 
+  //     _showErrorDialog(message: serverMessage);
+
+  //   } catch (e) {
+  //     print("❌ Local System Error: $e");
+  //   } finally {
+  //     // 4. สำคัญมาก: ปลดล็อค isLoading ในตอนท้ายเสมอ
+  //     isLoading.value = false;
+  //   }
+  // }
 Future<void> loginWithPin() async {
-  if (isLoading.value) return;
-  try {
-    isLoading.value = true;
-    
-    // 1. สร้างค่า nonce และ state ขึ้นมาใหม่ทุกครั้งที่กด Login
-    String clientNonce = _generateRandomString(16);
-    String clientState = _generateRandomString(16);
+    if (isLoading.value) return;
 
-    String? mobile = await storage.read(key: 'userMobile');
-    String? deviceId = await getDeviceId();
+    try {
+      isLoading.value = true;
+      print("🚀 เริ่มกระบวนการ Login...");
 
-    // 2. ส่งแนบไปใน Request body
-    final response = await _apiService.instance.post(
-      ApiConstants.login,
-      data: {
-        "mobileNumber": mobile,
-        "deviceId": deviceId,
-        "pin": enteredPin.value,
-        "nonce": clientNonce, 
-        "state": clientState, 
-      },
-    );
+      String clientNonce = _generateRandomString(16);
+      String clientState = _generateRandomString(16);
 
-    if (response.statusCode == 200) {
-      final responseData = response.data;
-      
-      // 3. ตรวจสอบ STATE ที่ Server ส่งกลับมา (ต้องตรงกับที่เราส่งไป)
-      if (responseData['state'] != clientState) {
-        throw Exception("Invalid state: ข้อมูลการตอบกลับไม่ถูกต้อง");
-      }
+      String? mobile = await storage.read(key: 'userMobile');
+      String? deviceId = await getDeviceId();
 
-      // 4. ตรวจสอบ NONCE ภายใน ID Token (ต้องใช้ Library jwt_decoder หรือคล้ายกัน)
-      String idToken = responseData['idToken'];
-      Map<String, dynamic> decodedToken = JwtDecoder.decode(idToken);
-      
-      if (decodedToken['nonce'] != clientNonce) {
-        throw Exception("Invalid nonce: Token นี้ไม่ได้สร้างมาสำหรับคำขอนี้");
-      }
-      print("nonce ที่ส่งไป: $clientNonce");
-      print("nonce: ${decodedToken['nonce']}");
-      print("state $clientState");
-      
-      // ถ้าผ่านหมดค่อยบันทึกค่า
-      await storage.write(key: 'accessToken', value: responseData['token']);
-      await storage.write(key: 'refreshToken', value: responseData['refreshToken']);
-      Get.offAllNamed('/main');
-    }
-  } catch (e) {
-      enteredPin.value = ''; // ล้างค่า PIN ทันทีเพื่อป้องกัน Loop
+      final response = await _apiService.instance.post(
+        ApiConstants.login,
+        data: {
+          "mobileNumber": mobile,
+          "deviceId": deviceId,
+          "pin": enteredPin.value,
+          "nonce": clientNonce,
+          "state": clientState,
+        },
+      );
 
-      if (e is DioException) {
-        final responseData = e.response?.data;
-        //  ตรวจสอบสถานะ Account Locked จาก Backend
-        if (e.response?.statusCode == 401 &&
-            responseData?['message'] ==
-                'บัญชีถูกระงับชั่วคราวเนื่องจากใส่รหัสผิดเกิน 3 ครั้ง กรุณากด \'ลืมรหัสผ่าน\' เพื่อตั้งค่าใหม่') {
-          _showLockedDialog();
-        } else {
-          _showErrorDialog();
+      if (response.statusCode == 200) {
+        final responseData = response.data;
+
+        if (responseData['state'] != clientState) {
+          throw Exception("Invalid state");
         }
-      } else {
-        Get.snackbar('Error', 'เกิดข้อผิดพลาดในการเชื่อมต่อ');
+
+        String idToken = responseData['idToken'];
+        Map<String, dynamic> decodedToken = JwtDecoder.decode(idToken);
+
+        if (decodedToken['nonce'] != clientNonce) {
+          throw Exception("Invalid nonce");
+        }
+
+        await storage.write(key: 'accessToken', value: responseData['token']);
+        await storage.write(
+          key: 'refreshToken',
+          value: responseData['refreshToken'],
+        );
+        Get.offAllNamed('/main');
       }
+    } on DioException catch (e) {
+      // ✅ 1. ดึง Error จริงมา Print ลง Console เพื่อให้ Dev ตรวจสอบได้ง่าย
+      final responseData = e.response?.data;
+      final statusCode = e.response?.statusCode;
+      final serverMsg = responseData?['message']?.toString() ?? "";
+      
+      print("📦 Server Response Data: $responseData");
+      print("🔢 Status Code: $statusCode");
+
+      // เคลียร์ PIN ทันที
+      enteredPin.value = '';
+
+      // ✅ 2. ใช้ Logic ตัดสินใจเลือกเปิด Dialog ที่คุณมีอยู่แล้ว
+      // ถ้า statusCode เป็น 401 และมีคำว่า 'ระงับ' หรือ 'ล็อก' ให้เปิด LockedDialog
+      if (statusCode == 401 && (serverMsg.contains('ระงับ') || serverMsg.contains('ล็อก'))) {
+        _showLockedDialog();
+      } else {
+        // กรณีอื่นๆ เช่น ใส่ผิดครั้งที่ 1 หรือ 2 ให้เปิด ErrorDialog ปกติ
+        _showErrorDialog();
+      }
+
+    } catch (e) {
+      print("❌ Local System Error: $e");
+      enteredPin.value = '';
     } finally {
       isLoading.value = false;
     }
   }
- 
   // --- Helper Widgets สำหรับ Dialog ---
   Widget _buildIcon(String char, {Color color = const Color(0xFF2F6BFF)}) {
     return Container(

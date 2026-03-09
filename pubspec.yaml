@@ -45,6 +45,7 @@ dependencies:
   crypto: ^3.0.7
   flutter_launcher_icons: ^0.14.4
   jwt_decoder: ^2.0.1
+  app_device_integrity: ^1.1.0
 dev_dependencies:
   flutter_test:
     sdk: flutter

@@ -1,4 +1,5 @@
 import 'dart:convert';
+import 'package:dio/dio.dart';
 import 'package:get/get.dart';
 import 'package:my_app/core/service/api_service.dart';
 import 'package:my_app/module/controller/info_controller.dart';
@@ -73,12 +74,12 @@ class PinController extends GetxController {
       String? deviceId = await getDeviceId();
       final dynamic args = Get.arguments;
 
-      // ดึงเบอร์โทรศัพท์ที่ส่งมาจากหน้า ChangeDevicePage หรือ FaceVerify
       String mobile = args['mobileNumber'] ?? "";
       if (mobile.isEmpty) {
         Get.snackbar('ผิดพลาด', 'ไม่พบข้อมูลเบอร์โทรศัพท์');
         return;
       }
+
       Map<String, dynamic> body = {
         "citizenId": args['citizenId'],
         "accountNumber": args['accountNumber'],
@@ -87,31 +88,40 @@ class PinController extends GetxController {
         "newDeviceId": deviceId,
       };
 
-      // print("Request Body: ${jsonEncode(body)}");
       final response = await _apiService.instance.post(
         ApiConstants.changedevice,
         data: body,
       );
 
+      // กรณี Success
       if (response.statusCode == 200) {
         await storage.write(key: 'userMobile', value: mobile);
         await storage.write(key: 'isRegistered', value: 'true');
         await storage.write(key: 'deviceId', value: deviceId ?? "");
 
         Get.snackbar('สำเร็จ', 'ยืนยันตัวตนสำเร็จ กรุณาเข้าสู่ระบบ');
-
         await Future.delayed(const Duration(milliseconds: 500));
         Get.offAllNamed('/success');
-      } else {
-        Get.snackbar(
-          'ผิดพลาด',
-          response.data['message'] ??
-              'ข้อมูลไม่ถูกต้อง กรุณาตรวจสอบข้อมูลอีกครั้ง',
-        );
-        enteredPin.value = '';
       }
+    } on DioException catch (e) {
+      // --- นี่คือจุดที่ดึง Error จริงจาก Server ---
+      String serverMessage = "ข้อมูลไม่ถูกต้อง กรุณาตรวจสอบข้อมูลอีกครั้ง";
+
+      if (e.response != null && e.response?.data != null) {
+        // แกะ JSON ตาม Format ที่ Backend ส่งมา (เช่น {'message': '...'} หรือ {'error': '...'})
+        serverMessage =
+            e.response?.data['message'] ??
+            e.response?.data['error'] ??
+            "เกิดข้อผิดพลาด (${e.response?.statusCode})";
+      } else {
+        serverMessage = "ไม่สามารถเชื่อมต่อเซิร์ฟเวอร์ได้: ${e.type}";
+      }
+
+      Get.snackbar('ผิดพลาด', serverMessage);
+      enteredPin.value = ''; // เคลียร์ PIN เพื่อให้กดใหม่
     } catch (e) {
-      Get.snackbar('Error', 'เกิดข้อผิดพลาดในการเชื่อมต่อ: $e');
+      // Error อื่นๆ ที่ไม่ใช่เรื่อง Network/API
+      Get.snackbar('Error', 'เกิดข้อผิดพลาด: $e');
     } finally {
       isLoading.value = false;
     }
@@ -173,14 +183,61 @@ class PinController extends GetxController {
     firstPin.value = '';
   }
 
+  // Future<void> registerUser() async {
+  //   final infoCtrl = Get.find<InfoController>();
+  //   final phoneCtrl = Get.find<PhonenumberController>();
+  //   try {
+  //     isLoading.value = true;
+  //     String? deviceId = await getDeviceId();
+  //     String mobile = phoneCtrl.phoneNumber.value;
+
+  //     // ส่ง API โดยใช้ lockedMobile
+  //     Map<String, dynamic> finalData = {
+  //       "mobileNumber": mobile,
+  //       ...infoCtrl.toJson(),
+  //       "pin": firstPin.value,
+  //       "deviceId": deviceId,
+  //     };
+
+  //     final response = await _apiService.instance.post(
+  //       ApiConstants.register,
+  //       data: finalData,
+  //     );
+
+  //     if (response.statusCode == 200) {
+  //       // ใช้ lockedMobile ในการบันทึกลงเครื่อง
+  //       // await storage.write(key: 'userMobile', value: lockedMobile);
+
+  //       await storage.write(key: 'deviceId', value: deviceId ?? "");
+  //       await storage.write(key: 'isRegistered', value: 'true');
+  //       await storage.write(
+  //         key: 'userMobile',
+  //         value: Get.arguments['verifiedMobile'],
+  //       );
+  //       Get.snackbar('สำเร็จ', 'สมัครสมาชิกเรียบร้อยแล้ว');
+  //       await Future.delayed(const Duration(milliseconds: 500));
+  //       Get.offAllNamed('/success');
+  //     } else {
+  //       Get.snackbar(
+  //         'ผิดพลาด',
+  //         'การลงทะเบียนไม่สำเร็จ: ${response.data['error'] ?? 'โปรดลองอีกครั้ง'}',
+  //       );
+  //     }
+  //   } catch (e) {
+  //     Get.snackbar('Error', 'ไม่สามารถเชื่อมต่อเซิร์ฟเวอร์ได้: $e');
+  //   } finally {
+  //     isLoading.value = false;
+  //   }
+  // }
   Future<void> registerUser() async {
     final infoCtrl = Get.find<InfoController>();
     final phoneCtrl = Get.find<PhonenumberController>();
+
     try {
       isLoading.value = true;
       String? deviceId = await getDeviceId();
       String mobile = phoneCtrl.phoneNumber.value;
-      // ส่ง API โดยใช้ lockedMobile
+
       Map<String, dynamic> finalData = {
         "mobileNumber": mobile,
         ...infoCtrl.toJson(),
@@ -194,26 +251,39 @@ class PinController extends GetxController {
       );
 
       if (response.statusCode == 200) {
-        // ใช้ lockedMobile ในการบันทึกลงเครื่อง
-        // await storage.write(key: 'userMobile', value: lockedMobile);
-
         await storage.write(key: 'deviceId', value: deviceId ?? "");
         await storage.write(key: 'isRegistered', value: 'true');
         await storage.write(
           key: 'userMobile',
-          value: Get.arguments['verifiedMobile'],
+          value: Get.arguments['verifiedMobile'] ?? mobile,
         );
+
         Get.snackbar('สำเร็จ', 'สมัครสมาชิกเรียบร้อยแล้ว');
         await Future.delayed(const Duration(milliseconds: 500));
         Get.offAllNamed('/success');
-      } else {
-        Get.snackbar(
-          'ผิดพลาด',
-          'การลงทะเบียนไม่สำเร็จ: ${response.data['message'] ?? 'โปรดลองอีกครั้ง'}',
-        );
       }
+    } on DioException catch (e) {
+      // ✅ 1. ดักจับ Error ที่ส่งมาจาก Server จริงๆ
+      String serverMessage = "การลงทะเบียนไม่สำเร็จ";
+
+      if (e.response != null && e.response?.data != null) {
+        // แกะ JSON ตาม Format ที่ Backend ส่งมา (เช่น {'message': '...'} หรือ {'error': '...'})
+        final responseData = e.response?.data;
+        serverMessage =
+            responseData['message'] ??
+            responseData['error'] ??
+            "เกิดข้อผิดพลาด (${e.response?.statusCode})";
+
+        print("❌ Server Response Error: $responseData");
+      } else {
+        serverMessage = "ไม่สามารถเชื่อมต่อเซิร์ฟเวอร์ได้ (${e.type})";
+      }
+
+      Get.snackbar('ผิดพลาด', serverMessage);
     } catch (e) {
-      Get.snackbar('Error', 'ไม่สามารถเชื่อมต่อเซิร์ฟเวอร์ได้: $e');
+      // ✅ 2. Error อื่นๆ ที่ไม่ใช่เรื่อง Network
+      print("❌ Local Error: $e");
+      Get.snackbar('Error', 'เกิดข้อผิดพลาดที่ไม่คาดคิด');
     } finally {
       isLoading.value = false;
     }

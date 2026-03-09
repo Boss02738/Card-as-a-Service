@@ -1,20 +1,23 @@
 import 'dart:io';
+import 'dart:math'; // เพิ่มสำหรับสุ่ม Nonce
 import 'package:crypto/crypto.dart';
 import 'package:dio/dio.dart';
 import 'package:dio/io.dart';
 import 'package:flutter_secure_storage/flutter_secure_storage.dart';
 import 'package:get/get.dart' as get_x;
 import 'package:my_app/core/service/api_constants.dart';
+import 'package:my_app/core/service/integrity_service.dart'; // Import service ที่คุณสร้างไว้
 
 class ApiService {
   late Dio _dio;
   final storage = const FlutterSecureStorage();
   bool _isRefreshing = false;
- //pinning
-  //  1. ใส่ค่า SHA-256 Fingerprint ของ Server คุณที่นี่
+
+  // pinning
+  // 1. ใส่ค่า SHA-256 Fingerprint ของ Server คุณที่นี่
   final String _trustedFingerprint =
-      " 9A:1C:C2:76:08:E9:36:8D:EA:2C:C4:BB:9D:EC:46:22:89:6E:63:8C:EC:FB:12:FE:AC:AE:C5:2D:EA:B8:68:19";
-      // "45:4C:36:13:A7:03:3B:ED:E3:34:65:8F:91:7D:D6:90:9D:EB:28:AC:F1:B4:D3:1F:19:45:28:89:85:4D:32:8E";
+      "9A:1C:C2:76:08:E9:36:8D:EA:2C:C4:BB:9D:EC:46:22:89:6E:63:8C:EC:FB:12:FE:AC:AE:C5:2D:EA:B8:68:19";
+
   ApiService() {
     _dio = _createDioInstance(); // สร้าง instance หลัก
     _setupInterceptors(); // ตั้งค่า Interceptor
@@ -22,27 +25,15 @@ class ApiService {
 
   // ฟังก์ชันรวมศูนย์สำหรับสร้าง Dio พร้อม SSL Pinning
   Dio _createDioInstance() {
-    final dio = Dio(
-      BaseOptions(
-        baseUrl: ApiConstants.baseUrl,
-        // connectTimeout: const Duration(seconds: 10),
-        // receiveTimeout: const Duration(seconds: 10),
-      ),
-    );
+    final dio = Dio(BaseOptions(baseUrl: ApiConstants.baseUrl));
 
     (dio.httpClientAdapter as IOHttpClientAdapter).createHttpClient = () {
       final client = HttpClient();
       client.badCertificateCallback =
           (X509Certificate cert, String host, int port) {
-            // 1. นำ cert.der (ข้อมูลดิบของใบเซอร์) มาผ่านกระบวนการ SHA256 Hash
-            // 2. ดึงค่า .bytes ออกมา เพื่อส่งเข้าฟังก์ชัน _formatFingerprint
             final serverFingerprint = _formatFingerprint(
               sha256.convert(cert.der).bytes,
             );
-
-            // print("SERVER FINGERPRINT: $serverFingerprint");
-
-            // ตรวจสอบกับค่าที่เชื่อถือได้
             return serverFingerprint ==
                 _trustedFingerprint.toUpperCase().replaceAll(" ", "");
           };
@@ -55,15 +46,64 @@ class ApiService {
     _dio.interceptors.add(
       InterceptorsWrapper(
         onRequest: (options, handler) async {
+          // --- ส่วนเดิม: จัดการ Access Token ---
           String? token = await storage.read(key: 'accessToken');
           if (token != null) {
             options.headers['Authorization'] = 'Bearer $token';
+          }
+
+          final integrityPaths = [
+            ApiConstants.login,
+            ApiConstants.refCode,
+            ApiConstants.register,
+            ApiConstants.changedevice,
+            ApiConstants.forgetPassword,
+          ];
+
+          bool needsIntegrity = integrityPaths.any(
+            (path) => options.path.contains(path),
+          );
+
+          // ภายใน onRequest ของ ApiService
+          // ใน ApiService.dart ส่วน onRequest
+          if (needsIntegrity) {
+            try {
+              // กำหนดค่าเริ่มต้นเป็นค่าว่างตามที่ BE แนะนำ
+              String finalToken = "";
+              String finalNonce = _generateRandomString(16);
+
+              // พยายามขอ Token จริง (ถ้าได้ก็เอามาใช้ ถ้าไม่ได้หรือ Error ก็จะใช้ค่าว่างด้านบน)
+              try {
+                String? integrityToken =
+                    await IntegrityService.requestToken(finalNonce).timeout(
+                      const Duration(seconds: 20),
+                    ); // ลด timeout ลงเพื่อไม่ให้หน้าจอรอนาน
+
+                if (integrityToken != null) {
+                  finalToken = integrityToken;
+                  print("🔑 [Integrity] ได้ Token จริงมาใช้งาน");
+                }
+              } catch (e) {
+                print(
+                  "⚠️ [Integrity] ขอ Token จริงไม่สำเร็จ (ใช้ค่าว่างแทนตามที่ BE ยอมรับ): $e",
+                );
+              }
+
+              // ✅ บังคับแนบ Header เสมอ (ถึงแม้ finalToken จะเป็นค่าว่าง "")
+              options.headers['Novapay-App-Integrity-Token'] = finalToken;
+              options.headers['Novapay-App-Nonce'] = finalNonce;
+
+              print(
+                " [Integrity Header] Attached: Token='$finalToken', Nonce='$finalNonce'",
+              );
+            } catch (e) {
+              print(" Integrity Interceptor Error: $e");
+            }
           }
           return handler.next(options);
         },
         onError: (DioException e, handler) async {
           if (e.response?.statusCode == 401) {
-            // กรณีเป็นหน้า Login ให้ Controller จัดการ Error เอง
             if (e.requestOptions.path.contains(ApiConstants.login)) {
               return handler.next(e);
             }
@@ -73,7 +113,6 @@ class ApiService {
             if (refreshToken != null && !_isRefreshing) {
               _isRefreshing = true;
               try {
-                // ใช้ฟังก์ชันสร้าง Dio ตัวใหม่ที่มี SSL Pinning เหมือนตัวหลัก
                 final refreshDio = _createDioInstance();
 
                 final response = await refreshDio.post(
@@ -90,7 +129,6 @@ class ApiService {
 
                   _isRefreshing = false;
 
-                  // ยิง Request เดิมซ้ำด้วย Token ใหม่
                   e.requestOptions.headers['Authorization'] =
                       'Bearer $newAccess';
                   final retryResponse = await _dio.fetch(e.requestOptions);
@@ -98,7 +136,8 @@ class ApiService {
                 }
               } catch (err) {
                 _isRefreshing = false;
-                await storage.deleteAll();
+                await storage.delete(key: 'accessToken');
+                await storage.delete(key: 'refreshToken');
                 get_x.Get.offAllNamed('/login-pin');
                 return handler.next(e);
               }
@@ -108,6 +147,17 @@ class ApiService {
           }
           return handler.next(e);
         },
+      ),
+    );
+  }
+
+  // Helper สำหรับสร้าง Nonce
+  String _generateRandomString(int length) {
+    const chars = 'abcdefghijklmnopqrstuvwxyz0123456789';
+    return String.fromCharCodes(
+      Iterable.generate(
+        length,
+        (_) => chars.codeUnitAt(Random().nextInt(chars.length)),
       ),
     );
   }
