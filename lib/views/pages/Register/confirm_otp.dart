@@ -206,7 +206,7 @@ Widget _buildOtpHeader() {
               ? null
               : () {
                   phonenumberController.submitPhone();
-                  _startCooldown(); // เริ่มนับถอยหลัง
+                  // _startCooldown();
                 },
           child: Row(
             children: [

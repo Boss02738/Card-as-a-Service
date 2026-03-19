@@ -1,8 +1,8 @@
 import 'package:get/get.dart';
 import 'package:my_app/core/service/api_constants.dart';
-import 'package:my_app/core/service/api_service.dart'; // นำเข้า ApiService
+import 'package:my_app/core/service/api_service.dart';
 import 'package:my_app/module/services/device_id.dart';
-import 'package:dio/dio.dart' as dio; // นำเข้าเพื่อใช้จัดการ DioException
+import 'package:dio/dio.dart' as dio; 
 
 enum ChangePinStep { current, newPin, confirm }
 
@@ -83,7 +83,6 @@ class ChangePinController extends GetxController {
         });
       }
     } on dio.DioException catch (e) {
-      // จัดการ Error ผ่าน DioException เช่น รหัสเดิมไม่ถูกต้อง (400/401)
       String responseMessage = e.response?.data?['message'] ?? '';
         responseMessage = e.response?.data['error'];
       

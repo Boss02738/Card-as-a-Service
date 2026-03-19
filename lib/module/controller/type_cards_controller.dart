@@ -31,7 +31,7 @@ class TypeCardsController extends GetxController {
       );
 
       if (response.statusCode == 200) {
-        // ✅ Dio แปลง JSON ให้อัตโนมัติ เรียกใช้ response.data ได้เลย
+        //  Dio แปลง JSON ให้อัตโนมัติ เรียกใช้ response.data ได้เลย
         // ใช้ assignAll เพื่ออัปเดต RxList ให้ UI รับรู้การเปลี่ยนแปลง
         screentype = getDeviceSizeCategory();
         // print('Screen size category: $screentype');

@@ -16,24 +16,22 @@ class RequestPhysical extends StatefulWidget {
 }
 
 class _RequestPhysicaState extends State<RequestPhysical> {
-  // รับข้อมูลจาก arguments
   final dynamic args = Get.arguments;
   final ValueNotifier<bool> isButtonEnabled = ValueNotifier(false);
 
   @override
   Widget build(BuildContext context) {
-    final dynamic card = args['card']; // ข้อมูลบัตรปัจจุบันจากหน้า MyCardDetail
-
-    // ดึง Controller มาใช้งาน (ใช้ find เพราะควรถูกสร้างมาจากหน้า List ประเภทบัตรแล้ว)
+    // 1. ดึงข้อมูลเบื้องต้น
+    final dynamic card = args['card'];
+    final String? base64String = card['card_image'];
+    
     final TypeCardsController typeController = Get.put(TypeCardsController());
+
     return Scaffold(
       backgroundColor: Colors.white,
       appBar: AppBar(
         backgroundColor: const Color(0xFF264FAD),
-        title: const Text(
-          'รายละเอียดบัตรแข็ง',
-          style: TextStyle(color: Colors.white),
-        ),
+        title: const Text('รายละเอียดบัตรแข็ง', style: TextStyle(color: Colors.white)),
         leading: IconButton(
           icon: const Icon(Icons.arrow_back_ios, color: Colors.white, size: 20),
           onPressed: () => Get.back(),
@@ -41,24 +39,30 @@ class _RequestPhysicaState extends State<RequestPhysical> {
         centerTitle: true,
         elevation: 0,
       ),
-      //  ใช้ Obx ครอบคลุมเนื้อหาทั้งหมดที่ต้องใช้ข้อมูลจาก cardList
       body: Obx(() {
-        //  ค้นหาข้อมูลภายใน Obx เพื่อให้ UI วาดใหม่เมื่อ cardList เปลี่ยนแปลง
+        if (typeController.isLoading.value) {
+          return const Center(child: CircularProgressIndicator());
+        }
+
         final dynamic cardTypeDetail = typeController.cardList.firstWhere(
           (t) => t['type_debit_id'] == card['type_debit_id'],
           orElse: () => null,
         );
 
-        // แสดง Loading หากข้อมูลยังโหลดไม่เสร็จ
-        if (typeController.isLoading.value) {
-          return const Center(child: CircularProgressIndicator());
+        // ✅ 2. Decode Base64 เตรียมไว้ที่นี่ (ก่อนเข้า Widget Tree)
+        Uint8List? imageBytes;
+        if (base64String != null && base64String.isNotEmpty) {
+          try {
+            imageBytes = base64Decode(base64String);
+          } catch (e) {
+            debugPrint("Error decoding base64: $e");
+          }
         }
 
         return SingleChildScrollView(
           child: Column(
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
-              // ส่วน Header รายละเอียดบัตร
               Container(
                 width: double.infinity,
                 padding: const EdgeInsets.all(16),
@@ -73,28 +77,30 @@ class _RequestPhysicaState extends State<RequestPhysical> {
                 ),
               ),
 
-              // ส่วนแสดงภาพบัตร (ใช้ imageBytes ที่ Decode มาจริง)
+              // ✅ 3. ส่วนแสดงภาพบัตรที่แก้ไขแล้ว
               Container(
                 width: double.infinity,
-                padding: EdgeInsets.symmetric(
-                  vertical: 30.h,
-                  horizontal: 40.w,
-                ),
+                padding: EdgeInsets.symmetric(vertical: 30.h, horizontal: 40.w),
                 color: Colors.grey[50],
                 child: Column(
                   children: [
-                    if (cardTypeDetail?['type_debit_image'] != null)
+                    if (imageBytes != null)
                       ClipRRect(
-                        borderRadius: BorderRadius.circular(15),
-                        child: Image.network(cardTypeDetail['type_debit_image'], fit: BoxFit.contain),
+                        borderRadius: BorderRadius.circular(15.r),
+                        child: Image.memory(
+                          imageBytes, 
+                          fit: BoxFit.contain,
+                          // ปรับความกว้างให้พอดีหน้าจอ
+                          width: double.infinity,
+                        ),
                       )
                     else
-                       Icon(
+                      Icon(
                         Icons.credit_card,
                         size: 150.r,
                         color: Colors.grey,
                       ),
-                     SizedBox(height: 15.h),
+                    SizedBox(height: 15.h),
                     Text(
                       cardTypeDetail?['type_debit_name'] ?? 'บัตรเดบิต NovaPay',
                       style: TextStyle(
@@ -111,15 +117,11 @@ class _RequestPhysicaState extends State<RequestPhysical> {
                 child: Column(
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
-                     Text(
+                    Text(
                       'ค่าธรรมเนียม',
-                      style: TextStyle(
-                        fontWeight: FontWeight.bold,
-                        fontSize: 16.sp,
-                      ),
+                      style: TextStyle(fontWeight: FontWeight.bold, fontSize: 16.sp),
                     ),
-                     SizedBox(height: 10.h),
-                    //  แสดงค่าธรรมเนียมที่ดึงมาจาก cardTypeDetail
+                    SizedBox(height: 10.h),
                     _buildFeeRow(
                       'ค่าธรรมเนียมออกบัตรใหม่',
                       '${cardTypeDetail?['entrance_fee'] ?? '0.00'} บาท',
@@ -128,25 +130,17 @@ class _RequestPhysicaState extends State<RequestPhysical> {
                       'ค่าธรรมเนียมรายปี',
                       '${cardTypeDetail?['annual_fee'] ?? '0.00'} บาท',
                     ),
-
-                     Divider(height: 40.h),
-                     Text(
+                    Divider(height: 40.h),
+                    Text(
                       'รายละเอียด',
-                      style: TextStyle(
-                        fontWeight: FontWeight.bold,
-                        fontSize: 16.sp,
-                      ),
+                      style: TextStyle(fontWeight: FontWeight.bold, fontSize: 16.sp),
                     ),
-                     SizedBox(height: 10.h),
-                    // ✅ แสดงรายละเอียดจริงจาก API
+                    SizedBox(height: 10.h),
                     Text(
                       cardTypeDetail?['type_debit_description'] ?? '-',
-                      style:  TextStyle(
-                        color: Colors.black87,
-                        height: 1.5.h,
-                      ),
+                      style: TextStyle(color: Colors.black87, height: 1.5.h),
                     ),
-                     SizedBox(height: 30.h),
+                    SizedBox(height: 30.h),
                     TermsCheckbox(
                       onChanged: (val) => isButtonEnabled.value = val,
                     ),

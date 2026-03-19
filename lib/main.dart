@@ -61,7 +61,7 @@ class NovaPayApp extends StatefulWidget {
 class _NovaPayAppState extends State<NovaPayApp> {
   final _flutterPreventScreenshot = FlutterPreventScreenshot.instance;
 
-  @override
+  @override 
   void initState() {
     super.initState();
     _flutterPreventScreenshot.screenshotOff();
@@ -153,7 +153,7 @@ class _NovaPayAppState extends State<NovaPayApp> {
             ),
             GetPage(name: '/idcard_verify', page: () => const IdcardVerify()),
           ],
-        );
+        );  
       },
     );
   }
@@ -161,9 +161,7 @@ class _NovaPayAppState extends State<NovaPayApp> {
 
 class MainPage extends StatelessWidget {
   MainPage({super.key});
-
   final controller = Get.find<MainTabController>();
-
   final pages = [HomePage(), AccountPage(), MyCardPage(), SettingTabPage()];
   
   @override

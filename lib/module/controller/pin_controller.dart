@@ -1,11 +1,10 @@
-import 'dart:convert';
 import 'package:dio/dio.dart';
 import 'package:get/get.dart';
 import 'package:my_app/core/service/api_service.dart';
 import 'package:my_app/module/controller/info_controller.dart';
 import 'package:my_app/module/controller/phonenumber_controller.dart';
 import 'package:my_app/core/service/api_constants.dart';
-import 'package:my_app/module/services/device_id.dart'; // import ไฟล์ที่เก็บฟังก์ชัน getDeviceId
+import 'package:my_app/module/services/device_id.dart'; 
 import 'package:my_app/module/services/secure_storage.dart';
 
 class PinController extends GetxController {
@@ -183,52 +182,7 @@ class PinController extends GetxController {
     firstPin.value = '';
   }
 
-  // Future<void> registerUser() async {
-  //   final infoCtrl = Get.find<InfoController>();
-  //   final phoneCtrl = Get.find<PhonenumberController>();
-  //   try {
-  //     isLoading.value = true;
-  //     String? deviceId = await getDeviceId();
-  //     String mobile = phoneCtrl.phoneNumber.value;
 
-  //     // ส่ง API โดยใช้ lockedMobile
-  //     Map<String, dynamic> finalData = {
-  //       "mobileNumber": mobile,
-  //       ...infoCtrl.toJson(),
-  //       "pin": firstPin.value,
-  //       "deviceId": deviceId,
-  //     };
-
-  //     final response = await _apiService.instance.post(
-  //       ApiConstants.register,
-  //       data: finalData,
-  //     );
-
-  //     if (response.statusCode == 200) {
-  //       // ใช้ lockedMobile ในการบันทึกลงเครื่อง
-  //       // await storage.write(key: 'userMobile', value: lockedMobile);
-
-  //       await storage.write(key: 'deviceId', value: deviceId ?? "");
-  //       await storage.write(key: 'isRegistered', value: 'true');
-  //       await storage.write(
-  //         key: 'userMobile',
-  //         value: Get.arguments['verifiedMobile'],
-  //       );
-  //       Get.snackbar('สำเร็จ', 'สมัครสมาชิกเรียบร้อยแล้ว');
-  //       await Future.delayed(const Duration(milliseconds: 500));
-  //       Get.offAllNamed('/success');
-  //     } else {
-  //       Get.snackbar(
-  //         'ผิดพลาด',
-  //         'การลงทะเบียนไม่สำเร็จ: ${response.data['error'] ?? 'โปรดลองอีกครั้ง'}',
-  //       );
-  //     }
-  //   } catch (e) {
-  //     Get.snackbar('Error', 'ไม่สามารถเชื่อมต่อเซิร์ฟเวอร์ได้: $e');
-  //   } finally {
-  //     isLoading.value = false;
-  //   }
-  // }
   Future<void> registerUser() async {
     final infoCtrl = Get.find<InfoController>();
     final phoneCtrl = Get.find<PhonenumberController>();
@@ -263,7 +217,6 @@ class PinController extends GetxController {
         Get.offAllNamed('/success');
       }
     } on DioException catch (e) {
-      // ✅ 1. ดักจับ Error ที่ส่งมาจาก Server จริงๆ
       String serverMessage = "การลงทะเบียนไม่สำเร็จ";
 
       if (e.response != null && e.response?.data != null) {
@@ -281,7 +234,6 @@ class PinController extends GetxController {
 
       Get.snackbar('ผิดพลาด', serverMessage);
     } catch (e) {
-      // ✅ 2. Error อื่นๆ ที่ไม่ใช่เรื่อง Network
       print("❌ Local Error: $e");
       Get.snackbar('Error', 'เกิดข้อผิดพลาดที่ไม่คาดคิด');
     } finally {

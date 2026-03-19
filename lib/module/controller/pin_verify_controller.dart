@@ -29,7 +29,7 @@ class PinVerifyController extends GetxController {
   void addNumber(int number) {
     if (enteredPin.value.length < 6) {
       enteredPin.value += number.toString();
-      print("Current PIN: ${enteredPin.value}"); // ✅ Check PIN ที่หน้าจอ Debug
+      print("Current PIN: ${enteredPin.value}"); // Check PIN ที่หน้าจอ Debug
     }
     if (enteredPin.value.length == 6) {
       // เพิ่มเงื่อนไขเช็ค action ขอบัตรแข็ง
@@ -119,12 +119,29 @@ class PinVerifyController extends GetxController {
           arguments: {...args, 'app_pin': enteredPin.value},
         );
       }
-    } on dio.DioException catch (_) {
-      // กรณี Login ไม่ผ่าน (401) หรือรหัสผิด
-      Get.snackbar('ผิดพลาด', 'รหัสผ่านไม่ถูกต้อง');
+    } on dio.DioException catch (e) {
+      // ✅ ตรงนี้ e จะมี Property response แน่นอน
       enteredPin.value = '';
+      
+      String errorMessage = "รหัสผ่านไม่ถูกต้อง";
+      
+      if (e.response != null) {
+        // กรณี Server ตอบกลับมา (เช่น 401, 400)
+        final data = e.response?.data;
+        // ดึงข้อความจากโครงสร้าง JSON ของเพื่อน (message หรือ error)
+        errorMessage = data?['message'] ?? data?['error'] ?? "ข้อมูลไม่ถูกต้อง";
+        print("❌ Server Response: $data");
+      } else {
+        // กรณีเชื่อมต่อไม่ได้เลย (Timeout/No Internet)
+        errorMessage = "ไม่สามารถเชื่อมต่อเซิร์ฟเวอร์ได้ (${e.type})";
+      }
+
+      Get.snackbar('ผิดพลาด', errorMessage);
+      
     } catch (e) {
-      Get.snackbar('Error', 'เชื่อมต่อเซิร์ฟเวอร์ไม่ได้');
+      // ✅ สำหรับ Error อื่นๆ ที่ไม่ใช่ Network (เช่น Logic พัง)
+      print("❌ Local Error: $e");
+      Get.snackbar('Error', 'เกิดข้อผิดพลาดภายในแอป');
       enteredPin.value = '';
     } finally {
       isLoading.value = false;

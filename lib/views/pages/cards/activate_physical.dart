@@ -1,9 +1,10 @@
 import 'dart:convert';
+import 'dart:typed_data';
 import 'package:flutter/material.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:get/get.dart';
 import 'package:my_app/views/widgets/arrow_fab.dart';
-import 'package:flutter/services.dart'; // ✅ สำคัญสำหรับการใช้ TextInputFormatter
+import 'package:flutter/services.dart'; 
 
 class ActivatePhysical extends StatefulWidget {
   const ActivatePhysical({super.key});
@@ -37,7 +38,7 @@ class _ActivatePhysicalState extends State<ActivatePhysical> {
 
   void _validateForm() {
     String lastFour = digitCtrls.map((e) => e.text).join();
-    // ✅ เช็คความยาว MM/YY (รวม / เป็น 5 ตัว)
+    // เช็คความยาว MM/YY (รวม / เป็น 5 ตัว) และ CVV 3 ตัว
     isFormValid.value =
         lastFour.length == 4 &&
         expiryCtrl.text.length == 5 &&
@@ -54,7 +55,6 @@ class _ActivatePhysicalState extends State<ActivatePhysical> {
         'ownerName': args['ownerName'],
         'input_data': {
           'last_digits': inputLastFour,
-          // 'lastdigits': inputLastFour,
           'expiry': expiryCtrl.text,
           'cvv': cvvCtrl.text,
         },
@@ -100,7 +100,7 @@ class _ActivatePhysicalState extends State<ActivatePhysical> {
                     ),
                   ),
                   SizedBox(height: 25.h),
-                  _buildFigmaInputRow(card['last_digits'] ?? "****"),
+                  _buildFigmaInputRow(),
                   SizedBox(height: 35.h),
                   Row(
                     children: [
@@ -134,6 +134,18 @@ class _ActivatePhysicalState extends State<ActivatePhysical> {
   }
 
   Widget _buildResponsiveHeader(dynamic card, String ownerName) {
+    // ✅ แก้ไข: โหลดรูปภาพจาก Base64
+    final String? base64String = card['card_image'] ?? card['type_debit_image'];
+    Uint8List? imageBytes;
+
+    if (base64String != null && base64String.isNotEmpty) {
+      try {
+        imageBytes = base64Decode(base64String);
+      } catch (e) {
+        debugPrint("Error decoding base64: $e");
+      }
+    }
+
     return Container(
       width: double.infinity,
       padding: EdgeInsets.symmetric(vertical: 25.h, horizontal: 40.w),
@@ -151,14 +163,18 @@ class _ActivatePhysicalState extends State<ActivatePhysical> {
             child: Container(
               decoration: BoxDecoration(
                 borderRadius: BorderRadius.circular(12.r),
-                image: card['card_image'] != null
+                // ✅ แก้ไข: ใช้ MemoryImage แทน NetworkImage
+                image: imageBytes != null
                     ? DecorationImage(
-                        image: NetworkImage(card['card_image']),
+                        image: MemoryImage(imageBytes),
                         fit: BoxFit.cover,
                       )
                     : null,
                 color: Colors.white12,
               ),
+              child: imageBytes == null 
+                ? Icon(Icons.credit_card, size: 50.r, color: Colors.white24)
+                : null,
             ),
           ),
           SizedBox(height: 15.h),
@@ -171,7 +187,7 @@ class _ActivatePhysicalState extends State<ActivatePhysical> {
             ),
           ),
           Text(
-            "หมายเลข: **** **** **** '****",
+            "หมายเลข: **** **** **** ${card['last_digits'] ?? '****'}",
             style: TextStyle(color: Colors.white70, fontSize: 14.sp),
           ),
         ],
@@ -179,7 +195,7 @@ class _ActivatePhysicalState extends State<ActivatePhysical> {
     );
   }
 
-  Widget _buildFigmaInputRow(String lastFour) {
+  Widget _buildFigmaInputRow() {
     return Container(
       padding: EdgeInsets.symmetric(vertical: 18.h, horizontal: 12.w),
       decoration: BoxDecoration(
@@ -221,6 +237,7 @@ class _ActivatePhysicalState extends State<ActivatePhysical> {
                     focusNode: focusNodes[index],
                     textAlign: TextAlign.center,
                     keyboardType: TextInputType.number,
+                    inputFormatters: [FilteringTextInputFormatter.digitsOnly],
                     maxLength: 1,
                     style: TextStyle(
                       fontSize: 18.sp,
@@ -231,10 +248,12 @@ class _ActivatePhysicalState extends State<ActivatePhysical> {
                       border: InputBorder.none,
                     ),
                     onChanged: (val) {
-                      if (val.isNotEmpty && index < 3)
+                      if (val.isNotEmpty && index < 3) {
                         focusNodes[index + 1].requestFocus();
-                      if (val.isEmpty && index > 0)
+                      }
+                      if (val.isEmpty && index > 0) {
                         focusNodes[index - 1].requestFocus();
+                      }
                     },
                   ),
                 ),
@@ -268,7 +287,6 @@ class _ActivatePhysicalState extends State<ActivatePhysical> {
           controller: ctrl,
           keyboardType: TextInputType.number,
           maxLength: max,
-          // ✅ เพิ่ม Formatters ตรงนี้
           inputFormatters: [
             FilteringTextInputFormatter.digitsOnly,
             if (label == "วันหมดอายุ") CardExpirationFormatter(),
@@ -313,9 +331,7 @@ class _ActivatePhysicalState extends State<ActivatePhysical> {
                   "ถัดไป",
                   style: TextStyle(
                     fontSize: 18.sp,
-                    color: isValid
-                        ? const Color.fromARGB(255, 0, 0, 0)
-                        : Colors.grey,
+                    color: isValid ? Colors.black : Colors.grey,
                   ),
                 ),
                 SizedBox(width: 10.w),
@@ -333,12 +349,8 @@ class _ActivatePhysicalState extends State<ActivatePhysical> {
 
   @override
   void dispose() {
-    for (var c in digitCtrls) {
-      c.dispose();
-    }
-    for (var f in focusNodes) {
-      f.dispose();
-    }
+    for (var c in digitCtrls) { c.dispose(); }
+    for (var f in focusNodes) { f.dispose(); }
     expiryCtrl.dispose();
     cvvCtrl.dispose();
     isFormValid.dispose();
@@ -353,30 +365,17 @@ class CardExpirationFormatter extends TextInputFormatter {
     TextEditingValue newValue,
   ) {
     final newValueString = newValue.text;
-
-    // 1. ถ้าเป็นการลบ ให้ลบปกติ
     if (newValueString.length < oldValue.text.length) {
       return newValue;
     }
-
-    // 2. ล้างเอาสิ่งที่ไม่ใช่ตัวเลขออกก่อน (กันเหนียว)
     String cleaned = newValueString.replaceAll(RegExp(r'[^0-9]'), '');
-
-    // 3. จัดรูปแบบใหม่
     String formatted = "";
     for (int i = 0; i < cleaned.length; i++) {
       formatted += cleaned[i];
-      // ถ้าพิมพ์ถึงหลักที่ 2 และยังมีตัวเลขต่อ ให้เติม /
-      if (i == 1 && cleaned.length > 2) {
-        formatted += "/";
-      }
-      // ถ้าพิมพ์แค่ 2 ตัว (กำลังจะพิมพ์ตัวที่ 3) ให้เติม / ต่อท้าย
-      else if (i == 1 && cleaned.length == 2) {
+      if (i == 1 && cleaned.length >= 2) {
         formatted += "/";
       }
     }
-
-    // 4. คืนค่ากลับไปพร้อมตำแหน่ง Cursor ที่ถูกต้อง
     return TextEditingValue(
       text: formatted,
       selection: TextSelection.collapsed(offset: formatted.length),

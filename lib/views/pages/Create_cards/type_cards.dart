@@ -15,7 +15,10 @@ class Type_Cards extends StatelessWidget {
       backgroundColor: Colors.white,
       appBar: AppBar(
         backgroundColor: const Color(0xFF264FAD),
-        title: const Text('สมัครบัตรเดบิต', style: TextStyle(color: Colors.white)),
+        title: const Text(
+          'สมัครบัตรเดบิต',
+          style: TextStyle(color: Colors.white),
+        ),
         leading: IconButton(
           icon: const Icon(Icons.arrow_back_ios, color: Colors.white),
           onPressed: () => Get.back(),
@@ -33,10 +36,13 @@ class Type_Cards extends StatelessWidget {
             color: Colors.grey[200],
             child: const Text(
               'เลือกประเภทบัตรที่คุณต้องการ',
-              style: TextStyle(fontWeight: FontWeight.bold, color: Colors.black54),
+              style: TextStyle(
+                fontWeight: FontWeight.bold,
+                color: Colors.black54,
+              ),
             ),
           ),
-          
+
           // รายการบัตร
           Expanded(
             child: Obx(() {
@@ -60,9 +66,21 @@ class Type_Cards extends StatelessWidget {
   }
 
 Widget _buildCardItem(dynamic card) {
-    // ✅ ไม่ต้องใช้ Uint8List หรือ base64Decode แล้ว เพราะ API ส่งเป็น URL มาให้
-    // final String? imageUrl = card['type_debit_image'];
-    final String? imageUrl = card['type_debit_image'];
+    // 1. ดึง String base64 จาก key 'type_debit_image' ตามใน API
+    final String? base64String = card['type_debit_image'];
+    Uint8List? imageBytes;
+    
+
+    // 2. แปลง String base64 เป็น Uint8List
+    if (base64String != null && base64String.isNotEmpty) {
+      try {
+        // บางครั้ง Base64 จาก API อาจจะมี Header ติดมา เช่น "data:image/png;base64," 
+        // ถ้ามีให้ทำการ split ออกก่อน แต่จากรูปที่คุณส่งมาน่าจะเป็น Pure Base64 เลย
+        imageBytes = base64Decode(base64String);
+      } catch (e) {
+        debugPrint("Error decoding base64: $e");
+      }
+    }
 
     return InkWell(
       onTap: () {
@@ -81,7 +99,7 @@ Widget _buildCardItem(dynamic card) {
             Row(
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
-                // ✅ รูปหน้าบัตร (โหลดผ่าน Network)
+                // ✅ รูปหน้าบัตร (เปลี่ยนจาก Network เป็น Memory)
                 Container(
                   width: 120,
                   height: 75,
@@ -96,22 +114,14 @@ Widget _buildCardItem(dynamic card) {
                       ),
                     ],
                   ),
-                  child: imageUrl != null
+                  child: imageBytes != null
                       ? ClipRRect(
                           borderRadius: BorderRadius.circular(8),
-                          child: Image.network(
-                            imageUrl, // 🌐 ใช้ URL จาก API โดยตรง
+                          child: Image.memory(
+                            imageBytes, // 🖼️ ใช้ Image.memory สำหรับรูปที่เป็น Byte
                             fit: BoxFit.cover,
-                            // ✅ เพิ่ม Loading Placeholder ขณะโหลดรูป
-                            loadingBuilder: (context, child, loadingProgress) {
-                              if (loadingProgress == null) return child;
-                              return const Center(
-                                child: CircularProgressIndicator(strokeWidth: 2),
-                              );
-                            },
-                            // ✅ เพิ่ม Error Placeholder กรณีโหลดรูปไม่สำเร็จ
                             errorBuilder: (context, error, stackTrace) =>
-                                const Icon(Icons.credit_card, size: 40),
+                                const Icon(Icons.broken_image, size: 40),
                           ),
                         )
                       : const Icon(Icons.credit_card, size: 40),

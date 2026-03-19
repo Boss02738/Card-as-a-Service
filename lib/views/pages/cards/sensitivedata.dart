@@ -1,3 +1,5 @@
+import 'dart:convert'; // ✅ เพิ่มสำหรับ base64Decode
+import 'dart:typed_data'; // ✅ เพิ่มสำหรับ Uint8List
 import 'package:flutter/material.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:get/get.dart';
@@ -29,7 +31,7 @@ class SensitiveDataPage extends StatelessWidget {
       body: SingleChildScrollView(
         child: Column(
           children: [
-            // ✅ ส่วนรูปบัตร: ปรับ Scale ให้เท่ากับ MyCardDetail ทุกประการ
+            // ส่วนรูปบัตร
             Container(
               padding: EdgeInsets.symmetric(vertical: 20.h, horizontal: 20.w),
               child: _buildSensitiveCard(card, sensitive, ownerName, cardName),
@@ -55,8 +57,8 @@ class SensitiveDataPage extends StatelessWidget {
                 valueColor: card['status'] == 'active' ? Colors.green : Colors.red
               ),
               _buildRow("ผูกกับบัญชี", Get.find<HomeController>().accountNumber.value),
-              _buildRow("วันหมดอายุ (EXP)", sensitive['expiry']),
-              _buildRow("CVV / CVC", sensitive['cvv']),
+              _buildRow("วันหมดอายุ (EXP)", sensitive['expiry'] ?? "-"),
+              _buildRow("CVV / CVC", sensitive['cvv'] ?? "-"),
             ]),
             SizedBox(height: 30.h),
           ],
@@ -65,20 +67,33 @@ class SensitiveDataPage extends StatelessWidget {
     );
   }
 
-  //  ฟังก์ชันวาดบัตรที่ใช้ Scale เดียวกับ MyCardDetail แต่โชว์เลขครบฝ
   Widget _buildSensitiveCard(dynamic card, dynamic sensitive, String name, String cardname) {
+    // ✅ 1. ตรวจสอบและ Decode รูปภาพ Base64
+    // หมายเหตุ: เช็คคีย์ให้ตรงกับที่ API ส่งมา (เช่น 'card_image' หรือ 'type_debit_image')
+    final String? base64String = card['card_image'] ;
+    Uint8List? imageBytes;
+
+    if (base64String != null && base64String.isNotEmpty) {
+      try {
+        imageBytes = base64Decode(base64String);
+      } catch (e) {
+        debugPrint("Error decoding base64: $e");
+      }
+    }
+
     return AspectRatio(
-      aspectRatio: 1.58, // สัดส่วนมาตรฐานเดียวกับ MyCardDetail
+      aspectRatio: 1.58,
       child: Container(
         decoration: BoxDecoration(
           borderRadius: BorderRadius.circular(15.r),
-          image: card['card_image'] != null
+          // ✅ 2. เปลี่ยนจาก NetworkImage เป็น MemoryImage
+          image: imageBytes != null
               ? DecorationImage( 
-                image:NetworkImage(card['card_image']),
+                  image: MemoryImage(imageBytes),
                   fit: BoxFit.cover,
                 )
               : null,
-          gradient: card['card_image'] == null
+          gradient: imageBytes == null
               ? const LinearGradient(
                   colors: [Color(0xFF3B5BDB), Color(0xFF162E7A)],
                   begin: Alignment.topLeft,
@@ -93,9 +108,9 @@ class SensitiveDataPage extends StatelessWidget {
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
-            Text(cardname.toUpperCase(), style: TextStyle(color: Colors.white, fontSize: 16.sp)),
+            Text(cardname.toUpperCase(), style: TextStyle(color: Colors.white, fontSize: 16.sp, fontWeight: FontWeight.bold)),
             
-            const Spacer(), //  เว้นช่องไฟเหมือนใน MyCard
+            const Spacer(),
 
             Column(
               crossAxisAlignment: CrossAxisAlignment.start,
@@ -110,7 +125,7 @@ class SensitiveDataPage extends StatelessWidget {
                   style: TextStyle(
                     color: Colors.white, 
                     fontSize: 18.sp, 
-                    letterSpacing: 1.2.w, // ลดลงนิดหน่อยเพื่อให้ 16 ตัวไม่ล้น
+                    letterSpacing: 1.2.w,
                     fontWeight: FontWeight.bold
                   ),
                 ),
@@ -124,11 +139,12 @@ class SensitiveDataPage extends StatelessWidget {
               children: [
                 Row(
                   children: [
-                    Text("EXP: ${sensitive['expiry']}", style: TextStyle(color: Colors.white70, fontSize: 13.sp)),
+                    Text("EXP: ${sensitive['expiry'] ?? '--/--'}", style: TextStyle(color: Colors.white, fontSize: 13.sp)),
                     SizedBox(width: 15.w),
-                    Text("CVV: ${sensitive['cvv']}", style: TextStyle(color: Colors.white70, fontSize: 13.sp)),
+                    Text("CVV: ${sensitive['cvv'] ?? '***'}", style: TextStyle(color: Colors.white, fontSize: 13.sp)),
                   ],
                 ),
+                // สามารถเพิ่ม Logo Visa/Mastercard ตรงนี้ได้ถ้าต้องการ
               ],
             ),
           ],
@@ -138,10 +154,11 @@ class SensitiveDataPage extends StatelessWidget {
   }
 
   String _formatFullPan(String? pan) {
-    if (pan == null || pan.length < 16) return pan ?? "";
+    if (pan == null || pan.length < 16) return pan ?? "**** **** **** ****";
     return "${pan.substring(0, 4)}  ${pan.substring(4, 8)}  ${pan.substring(8, 12)}  ${pan.substring(12, 16)}";
   }
 
+  // ส่วนของ _buildDetailSection และ _buildRow คงเดิม...
   Widget _buildDetailSection(List<Widget> children) {
     return Container(
       margin: EdgeInsets.symmetric(horizontal: 15.w),

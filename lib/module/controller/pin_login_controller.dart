@@ -142,79 +142,7 @@ class PinLoginController extends GetxController {
     );
   }
 
-  // Future<void> loginWithPin() async {
-  //   // 1. ตรวจสอบสถานะ: ถ้ากำลังโหลดอยู่ ให้หยุดทำงานทันที (ป้องกันการยิงซ้ำ)
-  //   if (isLoading.value) return;
 
-  //   try {
-  //     isLoading.value = true;
-  //     print("🚀 เริ่มกระบวนการ Login...");
-
-  //     // สร้างค่าสำหรับ Security (ที่คุณเขียนไว้ดีแล้ว)
-  //     String clientNonce = _generateRandomString(16);
-  //     String clientState = _generateRandomString(16);
-
-  //     String? mobile = await storage.read(key: 'userMobile');
-  //     String? deviceId = await getDeviceId();
-
-  //     // 2. ส่ง Request (ใช้ Dio Instance ที่มี Interceptor ของ Play Integrity)
-  //     final response = await _apiService.instance.post(
-  //       ApiConstants.login,
-  //       data: {
-  //         "mobileNumber": mobile,
-  //         "deviceId": deviceId,
-  //         "pin": enteredPin.value,
-  //         "nonce": clientNonce,
-  //         "state": clientState,
-  //       },
-  //     );
-
-  //     if (response.statusCode == 200) {
-  //       final responseData = response.data;
-
-  //       // 3. ตรวจสอบ STATE และ NONCE (ส่วนนี้ของคุณถูกต้องและปลอดภัยมาก)
-  //       if (responseData['state'] != clientState) {
-  //         throw Exception("Invalid state");
-  //       }
-
-  //       String idToken = responseData['idToken'];
-  //       Map<String, dynamic> decodedToken = JwtDecoder.decode(idToken);
-
-  //       if (decodedToken['nonce'] != clientNonce) {
-  //         throw Exception("Invalid nonce");
-  //       }
-
-  //       // บันทึก Token และไปหน้าหลัก
-  //       await storage.write(key: 'accessToken', value: responseData['token']);
-  //       await storage.write(
-  //         key: 'refreshToken',
-  //         value: responseData['refreshToken'],
-  //       );
-  //       Get.offAllNamed('/main');
-  //     }
-  //   } on DioException catch (e) {
-  //     // 🛑 เลิก print(e) เพราะมันจะพ่นขยะจาก Library มาเยอะ
-  //     // ✅ ให้ print แค่ Response Body จาก Server
-  //     print("📦 Server Response Data: ${e.response?.data}"); 
-  //     print("🔢 Status Code: ${e.response?.statusCode}");
-
-  //     String serverMessage = "รหัสไม่ถูกต้อง";
-      
-  //     if (e.response?.data != null) {
-  //       // แกะข้อความที่ Server ของคุณส่งมาจริงๆ
-  //       serverMessage = e.response?.data['message'] ?? e.response?.data['error'] ?? "Error 401";
-  //     }
-
-  //     enteredPin.value = ''; 
-  //     _showErrorDialog(message: serverMessage);
-
-  //   } catch (e) {
-  //     print("❌ Local System Error: $e");
-  //   } finally {
-  //     // 4. สำคัญมาก: ปลดล็อค isLoading ในตอนท้ายเสมอ
-  //     isLoading.value = false;
-  //   }
-  // }
 Future<void> loginWithPin() async {
     if (isLoading.value) return;
 
@@ -261,7 +189,7 @@ Future<void> loginWithPin() async {
         Get.offAllNamed('/main');
       }
     } on DioException catch (e) {
-      // ✅ 1. ดึง Error จริงมา Print ลง Console เพื่อให้ Dev ตรวจสอบได้ง่าย
+      //  1. ดึง Error จริงมา Print ลง Console เพื่อให้ Dev ตรวจสอบได้ง่าย
       final responseData = e.response?.data;
       final statusCode = e.response?.statusCode;
       final serverMsg = responseData?['message']?.toString() ?? "";
@@ -272,7 +200,7 @@ Future<void> loginWithPin() async {
       // เคลียร์ PIN ทันที
       enteredPin.value = '';
 
-      // ✅ 2. ใช้ Logic ตัดสินใจเลือกเปิด Dialog ที่คุณมีอยู่แล้ว
+      //  2. ใช้ Logic ตัดสินใจเลือกเปิด Dialog ที่คุณมีอยู่แล้ว
       // ถ้า statusCode เป็น 401 และมีคำว่า 'ระงับ' หรือ 'ล็อก' ให้เปิด LockedDialog
       if (statusCode == 401 && (serverMsg.contains('ระงับ') || serverMsg.contains('ล็อก'))) {
         _showLockedDialog();

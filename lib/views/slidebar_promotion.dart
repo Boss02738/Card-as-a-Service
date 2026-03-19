@@ -4,6 +4,8 @@ import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:get/get.dart';
 import 'package:webview_flutter/webview_flutter.dart';
 import 'package:my_app/views/promotion.dart';
+import 'package:flutter/foundation.dart';
+import 'package:flutter/gestures.dart';
 
 class PromoSliderWebView extends StatefulWidget {
   const PromoSliderWebView({super.key});
@@ -68,14 +70,22 @@ class _PromoSliderWebViewState extends State<PromoSliderWebView> {
         },
       )
       ..loadRequest(Uri.parse(pwaUrl));
-  }
+  } 
 
-  @override
-  Widget build(BuildContext context) {
-    return SizedBox(
-      height: 160.h,
-      width: double.infinity,
-      child: WebViewWidget(controller: _controller),
-    );
-  }
+@override
+Widget build(BuildContext context) {
+  return SizedBox(
+    height: 160.h,
+    width: double.infinity,
+    child: WebViewWidget(
+      controller: _controller,
+      // เพิ่มบรรทัดด้านล่างนี้ครับ
+      gestureRecognizers: {
+        Factory<OneSequenceGestureRecognizer>(
+          () => EagerGestureRecognizer(),
+        ),
+      },
+    ),
+  );
+}    
 }

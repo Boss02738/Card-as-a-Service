@@ -1,6 +1,8 @@
+import 'dart:convert'; // ✅ ต้อง import เพื่อใช้ base64Decode
+import 'dart:typed_data';
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
-import 'package:my_app/views/widgets/arrow_fab.dart'; // ตรวจสอบ path ของคุณ
+import 'package:my_app/views/widgets/arrow_fab.dart';
 
 class Card_Detail extends StatefulWidget {
   const Card_Detail({super.key});
@@ -15,7 +17,19 @@ class _Card_DetailState extends State<Card_Detail> {
 
   @override
   Widget build(BuildContext context) {
-    // Decode รูปภาพครั้งเดียวใน build
+    // 1. ดึงข้อมูล Base64 String
+    final String? base64String = cardData['type_debit_image'];
+    Uint8List? imageBytes;
+
+    // 2. แปลง Base64 เป็น Bytes
+    if (base64String != null && base64String.isNotEmpty) {
+      try {
+        imageBytes = base64Decode(base64String);
+      } catch (e) {
+        debugPrint("Error decoding base64: $e");
+      }
+    }
+
     return Scaffold(
       backgroundColor: Colors.white,
       appBar: AppBar(
@@ -48,41 +62,31 @@ class _Card_DetailState extends State<Card_Detail> {
               ),
             ),
 
-            // ส่วนแสดงบัตร (จะไม่กระพริบแล้วเพราะเราแยก State ของ Checkbox)
-            // ✅ ส่วนแสดงบัตรที่ถูกต้องใน Card_Detail
-Container(
-  width: double.infinity,
-  padding: const EdgeInsets.symmetric(vertical: 30, horizontal: 50),
-  color: Colors.grey[50],
-  child: Column(
-    children: [
-      if (cardData['type_debit_image'] != null)
-        ClipRRect(
-          borderRadius: BorderRadius.circular(15),
-          child: Image.network(
-            // ใช้ .toString().trim() เพื่อความปลอดภัยจากช่องว่าง
-            cardData['type_debit_image'].toString().trim(),
-            fit: BoxFit.contain,
-            errorBuilder: (context, error, stackTrace) {
-              return const Icon(
-                Icons.credit_card,
-                size: 150,
-                color: Colors.grey,
-              );
-            },
-          ),
-        )
-      else
-        const Icon(Icons.credit_card, size: 150, color: Colors.grey),
-      
-      const SizedBox(height: 15),
-      Text(
-        cardData['card_name'] ?? '-',
-        style: const TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
-      ),
-    ],
-  ),
-),
+            // ✅ ส่วนแสดงบัตรที่แก้ไขแล้ว
+            Container(
+              width: double.infinity,
+              padding: const EdgeInsets.symmetric(vertical: 30, horizontal: 50),
+              color: Colors.grey[50],
+              child: Column(
+                children: [
+                  imageBytes != null
+                      ? ClipRRect(
+                          borderRadius: BorderRadius.circular(15),
+                          child: Image.memory(
+                            imageBytes,
+                            fit: BoxFit.cover,
+                            width: double.infinity, // ปรับขนาดให้เต็ม Container
+                          ),
+                        )
+                      : const Icon(Icons.credit_card, size: 150, color: Colors.grey),
+                  const SizedBox(height: 15),
+                  Text(
+                    cardData['type_debit_name'] ?? '-', // ใช้คีย์ให้ตรงกับ API
+                    style: const TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
+                  ),
+                ],
+              ),
+            ),
 
             Padding(
               padding: const EdgeInsets.all(20.0),
@@ -113,8 +117,6 @@ Container(
                     style: const TextStyle(color: Colors.black87, height: 1.5),
                   ),
                   const SizedBox(height: 40),
-
-                  // 3. เรียกใช้ TermsCheckbox ที่แยก State มาแล้ว
                   TermsCheckbox(
                     onChanged: (val) {
                       isButtonEnabled.value = val;
@@ -126,14 +128,12 @@ Container(
           ],
         ),
       ),
-
       bottomNavigationBar: SafeArea(
         child: Padding(
           padding: const EdgeInsets.symmetric(horizontal: 25, vertical: 20),
           child: Row(
             mainAxisAlignment: MainAxisAlignment.spaceBetween,
             children: [
-              // ฝั่งซ้าย: ยกเลิก
               GestureDetector(
                 onTap: () => Get.back(),
                 child: Row(
@@ -144,25 +144,16 @@ Container(
                         color: Colors.red,
                         shape: BoxShape.circle,
                       ),
-                      child: const Icon(
-                        Icons.close,
-                        color: Colors.white,
-                        size: 20,
-                      ),
+                      child: const Icon(Icons.close, color: Colors.white, size: 20),
                     ),
                     const SizedBox(width: 10),
                     const Text(
                       'ยกเลิก',
-                      style: TextStyle(
-                        color: Colors.grey,
-                        fontSize: 18,
-                        fontWeight: FontWeight.w500,
-                      ),
+                      style: TextStyle(color: Colors.grey, fontSize: 18, fontWeight: FontWeight.w500),
                     ),
                   ],
                 ),
               ),
-
               ValueListenableBuilder<bool>(
                 valueListenable: isButtonEnabled,
                 builder: (context, enabled, child) {
@@ -172,15 +163,10 @@ Container(
                         'ต่อไป',
                         style: TextStyle(
                           fontSize: 18,
-
-                          // fontWeight: FontWeight.bold,
-                          color: enabled
-                              ? const Color.fromARGB(255, 45, 75, 10)
-                              : Colors.grey[400],
+                          color: enabled ? const Color(0xFF2D4B0A) : Colors.grey[400],
                         ),
                       ),
                       const SizedBox(width: 12),
-                      // ตัวปุ่ม ArrowFab จะเปลี่ยนสีเองตาม Logic ภายในที่เราแก้ไว้ด้านบน
                       ArrowFab(
                         enabled: enabled,
                         onPressed: () {
@@ -211,6 +197,9 @@ Container(
     );
   }
 }
+
+// ... คงส่วน TermsCheckbox ไว้เหมือนเดิม ...
+
 
 class TermsCheckbox extends StatefulWidget {
   final Function(bool) onChanged;

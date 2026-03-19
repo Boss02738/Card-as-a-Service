@@ -1,4 +1,4 @@
-import 'dart:convert';
+import 'dart:convert'; // ✅ เพิ่มเพื่อใช้ base64Decode
 import 'dart:typed_data';
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
@@ -14,6 +14,18 @@ class Card_Confirm_Page extends StatelessWidget {
     final dynamic cardData = Get.arguments;
     // ดึงข้อมูลโปรไฟล์จาก HomeController
     final HomeController homeCtrl = Get.find<HomeController>();
+
+    // ✅ 1. เตรียมข้อมูลรูปภาพ Base64
+    final String? base64String = cardData['type_debit_image'];
+    Uint8List? imageBytes;
+
+    if (base64String != null && base64String.isNotEmpty) {
+      try {
+        imageBytes = base64Decode(base64String);
+      } catch (e) {
+        debugPrint("Error decoding base64: $e");
+      }
+    }
 
     return Scaffold(
       backgroundColor: Colors.white,
@@ -49,11 +61,20 @@ class Card_Confirm_Page extends StatelessWidget {
               color: Colors.grey[50],
               child: Column(
                 children: [
-                  if (cardData['type_debit_image'] != null)
+                  // ✅ 2. เปลี่ยนมาใช้ Image.memory แสดงรูปจาก Base64
+                  if (imageBytes != null)
                     ClipRRect(
                       borderRadius: BorderRadius.circular(15),
-                      child: Image.network(cardData['type_debit_image'], fit: BoxFit.contain),
-                    ),
+                      child: Image.memory(
+                        imageBytes, 
+                        fit: BoxFit.contain,
+                        errorBuilder: (context, error, stackTrace) => 
+                          const Icon(Icons.broken_image, size: 100, color: Colors.grey),
+                      ),
+                    )
+                  else
+                    const Icon(Icons.credit_card, size: 100, color: Colors.grey),
+                    
                   const SizedBox(height: 15),
                   Text(
                     cardData['type_debit_name'] ?? 'บัตรเดบิต NovaPay',
@@ -87,7 +108,10 @@ class Card_Confirm_Page extends StatelessWidget {
                   const Divider(height: 30),
                   _buildSummaryRow(
                     'รวม', 
-                    '${(double.parse(cardData['entrance_fee'].toString()) + double.parse(cardData['annual_fee'].toString())).toStringAsFixed(2)} บาท',
+                    // ป้องกัน Error กรณีค่าที่ส่งมาเป็น null หรือไม่ใช่ตัวเลข
+                    '${(double.tryParse(cardData['entrance_fee']?.toString() ?? '0')! + 
+                        double.tryParse(cardData['annual_fee']?.toString() ?? '0')!)
+                        .toStringAsFixed(2)} บาท',
                     isTotal: true
                   ),
                   const SizedBox(height: 30),

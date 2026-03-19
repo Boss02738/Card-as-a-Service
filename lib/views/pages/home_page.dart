@@ -19,10 +19,24 @@ class HomePage extends StatefulWidget {
 }
 
 class _HomePageState extends State<HomePage> {
+  // ประกาศ Controller ไว้ระดับคลาสเพื่อให้เรียกใช้ใน _onRefresh ได้สะดวก
+  final HomeController homeController = Get.put(HomeController());
+  final MyCardsController cardController = Get.put(MyCardsController());
+
+  // ✅ ฟังก์ชันสำหรับดึงข้อมูลใหม่เมื่อ Pull-to-Refresh
+  Future<void> _onRefresh() async {
+    try {
+      // สั่งให้ทั้ง 2 Controller โหลดข้อมูลใหม่พร้อมกัน
+      await Future.wait([
+        homeController.fetchHomeProfile(), 
+        cardController.fetchMyCards(),    
+      ]);
+    } catch (e) {
+      debugPrint("Refresh Error: $e");
+    }
+  }
   @override
   Widget build(BuildContext context) {
-    final HomeController homeController = Get.put(HomeController());
-    final MyCardsController cardController = Get.put(MyCardsController());
     return BackButtonInterceptor(
       child: Scaffold(
         backgroundColor: const Color(0xFFF5F7FA),
@@ -37,25 +51,36 @@ class _HomePageState extends State<HomePage> {
                   );
                 }
 
-                return SingleChildScrollView(
-                  child: Column(
-                    crossAxisAlignment: CrossAxisAlignment.start,
-                    children: [
-                      SizedBox(height: 10.h),
-                      const Buildheader(),
-                      SizedBox(height: 10.h),
-                      Padding(
-                        padding: EdgeInsets.symmetric(horizontal: 10.w),
-                        child: const AccountWidget(),
-                      ),
-                      SizedBox(height: 15.h),
-                      _buildOffersSection(), // ส่วนข้อเสนอพิเศษ
-                      // SizedBox(height: 10.h),
-                      _buildMyCardsSection(
-                        cardController,
-                        homeController, // ส่วนบัตรของฉัน0.
-                      ),
-                    ],
+                // ✅ เพิ่ม RefreshIndicator ครอบ SingleChildScrollView
+                return RefreshIndicator(
+                  color: const Color(0xFF264FAD),
+                  backgroundColor: Colors.white,
+                  onRefresh: _onRefresh,
+                  child: SingleChildScrollView(
+                    // ✅ ใส่ physics เพื่อให้ดึงรีเฟรชได้เสมอแม้เนื้อหาไม่เต็มจอ
+                    physics: const AlwaysScrollableScrollPhysics(
+                      parent: BouncingScrollPhysics(),
+                    ),
+                    child: Column(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: [
+                        SizedBox(height: 10.h),
+                        const Buildheader(),
+                        SizedBox(height: 10.h),
+                        Padding(
+                          padding: EdgeInsets.symmetric(horizontal: 10.w),
+                          child: const AccountWidget(),
+                        ),
+                        SizedBox(height: 15.h),
+                        _buildOffersSection(), 
+                        _buildMyCardsSection(
+                          cardController,
+                          homeController,
+                        ),
+                        // เพิ่มพื้นที่ด้านล่างเล็กน้อยให้ดึงง่ายขึ้น
+                        SizedBox(height: 40.h),
+                      ],
+                    ),
                   ),
                 );
               }),
@@ -67,7 +92,8 @@ class _HomePageState extends State<HomePage> {
   }
 }
 
-// กล่องแสดงผลเมื่อยังไม่มีบัตร (Empty State)
+// --- Widget ส่วนเสริมด้านล่างคงเดิม ---
+
 Widget _buildEmptyCardSlot() {
   return Container(
     width: double.infinity,
@@ -151,23 +177,13 @@ Widget _buildOffersSection() {
             ),
           ],
         ),
-        
       ),
       SizedBox(height: 10.h),
-      
-      // 🚩 แก้ไขตรงนี้: นำ WebView Slider มาใส่แทน ListView เดิม
       const PromoSliderWebView(), 
-      
-      // หมายเหตุ: ไม่ต้องใช้ ListView(scrollDirection: Axis.horizontal) แล้ว 
-      // เพราะใน PWA (Vue) จะทำหน้าที่สไลด์ด้วยตัวมันเองครับ
     ],
   );
 }
 
-
-
-/////////////////////////////////////////////////////////////////////////////////////////
-// เพิ่ม Widget ส่วน 'บัตรของฉัน' โดยรับ controller เข้ามาตรวจสอบ
 Widget _buildMyCardsSection(
   MyCardsController cardController,
   HomeController homeController,
@@ -193,12 +209,7 @@ Widget _buildMyCardsSection(
                 Get.find<MainTabController>().changeTab(2);
               },
               style: ElevatedButton.styleFrom(
-                backgroundColor: const Color.fromARGB(
-                  255,
-                  169,
-                  169,
-                  169,
-                ).withOpacity(0.1),
+                backgroundColor: Colors.white.withOpacity(0.1),
                 shape: RoundedRectangleBorder(
                   borderRadius: BorderRadius.circular(20),
                 ),
@@ -209,19 +220,14 @@ Widget _buildMyCardsSection(
                   Text(
                     'ดูทั้งหมด',
                     style: TextStyle(
-                      color: const Color.fromARGB(255, 255, 255, 255),
+                      color: Colors.white,
                       fontSize: 14.sp,
                     ),
                   ),
                   Icon(
                     Icons.arrow_forward_ios,
                     size: 12.r,
-                    color: const Color.fromARGB(
-                      255,
-                      255,
-                      255,
-                      255,
-                    ).withOpacity(0.7),
+                    color: Colors.white.withOpacity(0.7),
                   ),
                 ],
               ),
@@ -241,10 +247,9 @@ Widget _buildMyCardsSection(
               padding: EdgeInsets.symmetric(horizontal: 15.w),
               itemCount: cardController.myCards.length,
               itemBuilder: (context, index) {
-                // ส่งชื่อภาษาอังกฤษจาก homeController ไปแสดงบนหน้าบัตร
                 return _buildActiveCardItem(
                   cardController.myCards[index],
-                  homeController.fullNameEn.value, // ดึงชื่อภาษาอังกฤษ
+                  homeController.fullNameEn.value,
                 );
               },
             ),
@@ -266,11 +271,11 @@ Widget _buildActiveCardItem(dynamic card, String ownerName) {
     child: Padding(
       padding: EdgeInsets.only(right: 15.w),
       child: SizedBox(
-        width: 280.w, // กำหนดความกว้างให้เท่าเดิม
+        width: 280.w,
         child: BankCard(
           card: card, 
-          ownerName: ownerName, cardName: card['card_name'] ?? '',
-          // cardName: card['fddf'] ?? '',
+          ownerName: ownerName, 
+          cardName: card['card_name'] ?? '',
         ),
       ),
     ),
